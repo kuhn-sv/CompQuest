@@ -1,0 +1,98 @@
+// ==========================================================================
+// MAIN STYLESHEET
+// ==========================================================================
+// This file serves as the main entry point for all styles in the application.
+// Import this file in your main.tsx or wherever you need global styles.
+
+// 1. Variables (should be imported first)
+@use './variables' as *;
+
+// 2. Base/Reset styles
+// Add any global resets, normalize.css, or base styles here if needed
+
+// 3. Component styles (optional - or import individually in components)
+// @import '../shared/components/numberInput.component.scss';
+// @import '../tasks/dataPackage/datapackage.page.scss';
+// etc.
+
+// ==========================================================================
+// UTILITY CLASSES
+// ==========================================================================
+// Common utility classes that can be used throughout the application
+
+.u-text-center {
+  text-align: center;
+}
+
+.u-text-left {
+  text-align: left;
+}
+
+.u-text-right {
+  text-align: right;
+}
+
+// Margin utilities
+.u-margin-none { margin: 0; }
+.u-margin-xs { margin: $spacing-xs; }
+.u-margin-sm { margin: $spacing-sm; }
+.u-margin-md { margin: $spacing-md; }
+.u-margin-lg { margin: $spacing-lg; }
+.u-margin-xl { margin: $spacing-xl; }
+
+.u-margin-top-sm { margin-top: $spacing-sm; }
+.u-margin-top-md { margin-top: $spacing-md; }
+.u-margin-top-lg { margin-top: $spacing-lg; }
+
+.u-margin-bottom-sm { margin-bottom: $spacing-sm; }
+.u-margin-bottom-md { margin-bottom: $spacing-md; }
+.u-margin-bottom-lg { margin-bottom: $spacing-lg; }
+
+// Padding utilities
+.u-padding-none { padding: 0; }
+.u-padding-xs { padding: $spacing-xs; }
+.u-padding-sm { padding: $spacing-sm; }
+.u-padding-md { padding: $spacing-md; }
+.u-padding-lg { padding: $spacing-lg; }
+.u-padding-xl { padding: $spacing-xl; }
+
+// Display utilities
+.u-hidden { display: none; }
+.u-block { display: block; }
+.u-inline { display: inline; }
+.u-inline-block { display: inline-block; }
+.u-flex { display: flex; }
+
+// Flexbox utilities
+.u-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.u-flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.u-flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// Color utilities
+.u-color-primary { color: $primary-blue; }
+.u-color-success { color: $success-green; }
+.u-color-muted { color: $medium-gray; }
+.u-color-dark { color: $dark-gray; }
+
+// Background utilities
+.u-bg-light { background-color: $light-gray; }
+.u-bg-success { background-color: $success-green-bg; }
+
+// Font weight utilities
+.u-font-normal { font-weight: $font-weight-normal; }
+.u-font-medium { font-weight: $font-weight-medium; }
+.u-font-semibold { font-weight: $font-weight-semibold; }
+.u-font-bold { font-weight: $font-weight-bold; }

@@ -1,21 +1,23 @@
+@use './styles/variables' as *;
+
 #root {
-  max-width: 1280px;
+  max-width: $container-lg;
   margin: 0 auto;
-  padding: 2rem;
+  padding: $spacing-3xl;
   text-align: center;
 }
 
 .logo {
-  height: 6em;
-  padding: 1.5em;
+  height: $logo-size;
+  padding: $logo-padding;
   will-change: filter;
-  transition: filter 300ms;
+  transition: $transition-filter;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: $shadow-blue;
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: $shadow-react;
 }
 
 @keyframes logo-spin {
@@ -29,14 +31,14 @@
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
+    animation: $animation-spin;
   }
 }
 
 .card {
-  padding: 2em;
+  padding: $spacing-3xl;
 }
 
 .read-the-docs {
-  color: #888;
+  color: $medium-gray;
 }

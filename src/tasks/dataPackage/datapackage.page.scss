@@ -1,0 +1,61 @@
+@use '../../styles/variables' as *;
+
+.datapackage-container {
+  padding: $spacing-xl;
+  max-width: $container-md;
+  margin: 0 auto;
+}
+
+.number-display-section {
+  margin-bottom: $spacing-3xl;
+  
+  label {
+    display: block;
+    margin-bottom: $spacing-sm;
+    font-weight: $font-weight-semibold;
+    color: $dark-gray;
+  }
+}
+
+.number-input-section {
+  display: flex;
+  align-items: center;
+  gap: $spacing-lg;
+  
+  .generated-number-input {
+    padding: $spacing-sm $spacing-md;
+    border: $border-width-thick solid $medium-gray-3;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-base;
+    font-weight: $font-weight-bold;
+    width: $input-width-sm;
+    text-align: center;
+    background-color: $light-gray;
+    color: $dark-gray;
+    
+    &:disabled {
+      opacity: 0.8;
+      cursor: not-allowed;
+    }
+  }
+  
+  .generate-button {
+    padding: $spacing-sm $spacing-lg;
+    background-color: $primary-blue-light;
+    color: $white;
+    border: none;
+    border-radius: $border-radius-sm;
+    font-size: $font-size-sm;
+    font-weight: $font-weight-medium;
+    cursor: pointer;
+    transition: background-color $transition-fast;
+    
+    &:hover {
+      background-color: #005999;
+    }
+    
+    &:active {
+      background-color: #004477;
+    }
+  }
+}

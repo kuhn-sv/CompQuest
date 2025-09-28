@@ -1,0 +1,135 @@
+// ==========================================================================
+// DESIGN SYSTEM VARIABLES
+// ==========================================================================
+
+// Colors
+// --------------------------------------------------------------------------
+// Primary Colors
+$primary-blue: #646cff;
+$primary-blue-hover: #535bf2;
+$primary-blue-light: #007acc;
+
+$react-blue: #61dafb;
+
+// Neutral Colors
+$white: #ffffff;
+$near-white: rgba(255, 255, 255, 0.87);
+$light-gray: #f9f9f9;
+$light-gray-2: #f5f5f5;
+$medium-gray: #888;
+$medium-gray-2: #ccc;
+$medium-gray-3: #ddd;
+$dark-gray: #333;
+$darker-gray: #1a1a1a;
+$darkest-gray: #242424;
+
+// State Colors
+$success-green: #28a745;
+$success-green-bg: #d4edda;
+$success-green-text: #155724;
+
+$warning-yellow: #ffd700;
+$warning-yellow-hover: #ffed4a;
+
+// Button Colors
+$primary-button-color: #ffd700;
+$primary-button-hover-color: #ffed4a;
+$disabled-button-color: #ccc;
+
+// Spacing
+// --------------------------------------------------------------------------
+// Base spacing unit
+$spacing-base: 8px;
+
+// Spacing scale (based on 8px grid)
+$spacing-xs: $spacing-base * 0.5;     // 4px
+$spacing-sm: $spacing-base;           // 8px
+$spacing-md: $spacing-base * 1.5;     // 12px
+$spacing-lg: $spacing-base * 2;       // 16px
+$spacing-xl: $spacing-base * 2.5;     // 20px
+$spacing-2xl: $spacing-base * 3;      // 24px
+$spacing-3xl: $spacing-base * 3.75;   // 30px
+
+// Typography
+// --------------------------------------------------------------------------
+// Font Families
+$font-family-base: system-ui, Avenir, Helvetica, Arial, sans-serif;
+
+// Font Sizes
+$font-size-sm: 14px;
+$font-size-base: 16px;
+$font-size-lg: 1.2em;
+$font-size-xl: 3.2em;
+
+// Font Weights
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: bold;
+
+// Line Heights
+$line-height-base: 1.5;
+$line-height-tight: 1.1;
+
+// Border & Border Radius
+// --------------------------------------------------------------------------
+$border-width-base: 1px;
+$border-width-thick: 2px;
+
+$border-radius-sm: 4px;
+$border-radius-md: 8px;
+
+$border-color-default: $medium-gray-2;
+$border-color-focus: $primary-blue;
+
+// Shadows & Effects
+// --------------------------------------------------------------------------
+$shadow-blue: drop-shadow(0 0 2em #646cffaa);
+$shadow-react: drop-shadow(0 0 2em #61dafbaa);
+
+// Transitions
+// --------------------------------------------------------------------------
+$transition-fast: 0.2s ease;
+$transition-medium: 0.25s;
+$transition-slow: 0.3s ease;
+$transition-filter: filter 300ms;
+
+// Layout
+// --------------------------------------------------------------------------
+// Container widths
+$container-sm: 320px;
+$container-md: 800px;
+$container-lg: 1280px;
+
+// Component specific
+$input-width-sm: 80px;
+$input-width-md: 100px;
+
+$logo-size: 6em;
+$logo-padding: 1.5em;
+
+// Z-index
+// --------------------------------------------------------------------------
+$z-index-dropdown: 1000;
+$z-index-modal: 1050;
+$z-index-tooltip: 1070;
+
+// Animation
+// --------------------------------------------------------------------------
+$animation-spin: logo-spin infinite 20s linear;
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+// Breakpoints (for future responsive design)
+// --------------------------------------------------------------------------
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
