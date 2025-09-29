@@ -1,0 +1,91 @@
+@use '../../../styles/_variables' as *;
+
+// Hide arrows/spinners from number input
+input[type="number"] {
+  /* Chrome, Safari, Edge, Opera */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  /* Firefox */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.number-input-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: $spacing-sm;
+
+  input[type="number"] {
+    padding: $spacing-sm $spacing-md;
+    border: $border-width-base solid $border-color-default;
+    border-radius: $border-radius-sm;
+    text-align: center;
+    font-size: $font-size-base;
+    width: $input-width-sm;
+  }
+
+  .arrow-button {
+    background: transparent;
+    border: none;
+    width: 40px;
+    height: 30px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all $transition-fast;
+    position: relative;
+
+    &.up::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 20px solid $primary-button-color; // Yellow triangle pointing up
+    }
+
+    &.down::before {
+      content: '';
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-top: 20px solid $primary-button-color; // Yellow triangle pointing down
+    }
+
+    &:hover {
+      transform: scale(1.1);
+      
+      &.up::before {
+        border-bottom-color: $primary-button-hover-color;
+      }
+      
+      &.down::before {
+        border-top-color: $primary-button-hover-color;
+      }
+    }
+
+    &:active {
+      transform: scale(0.9);
+    }
+
+    &:disabled {
+      cursor: not-allowed;
+      transform: none;
+      
+      &.up::before {
+        border-bottom-color: $disabled-button-color;
+      }
+      
+      &.down::before {
+        border-top-color: $disabled-button-color;
+      }
+    }
+  }
+}
