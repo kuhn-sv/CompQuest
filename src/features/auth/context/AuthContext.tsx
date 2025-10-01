@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState, ReactNode, useRef } from 'react';
-import { authService, userProfileService, supabase } from '../../services/supabase';
-import { User, UserProfile, AuthContextType } from '../interfaces/auth.interface';
+import { authService, userProfileService, supabase } from '../../../services/supabase';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
+import { User, UserProfile, AuthContextType } from '../interfaces/auth.interface.ts';
 
 // --- Lightweight local cache for user profile to speed up hydration (module scope) ---
 const PROFILE_CACHE_KEY = (uid: string) => `cq_profile:${uid}:v1`;
@@ -119,7 +120,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     }, 3000);
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
+  const { data: sub } = supabase.auth.onAuthStateChange(async (_event: AuthChangeEvent, session: Session | null) => {
       try {
         if (!mounted) return;
         clearError();

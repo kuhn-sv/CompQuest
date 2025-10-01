@@ -2,13 +2,13 @@
 export { AuthProvider, AuthContext } from './context/AuthContext';
 
 // Authentication Hooks
-export { useAuth } from './hooks/useAuth';
+export { useAuth } from './hooks/useAuth.ts';
 
 // Authentication Components
 export { AuthModal, LoginForm, RegisterForm, ForgotPasswordModal } from './components';
 
 // Route Guards
-export { default as ProtectedRoute } from './guards/ProtectedRoute';
+export { default as ProtectedRoute } from './guards/ProtectedRoute.tsx';
 
 // Re-export types for convenience
 export type { 

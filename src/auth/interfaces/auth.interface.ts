@@ -59,7 +59,8 @@ export interface Achievement {
 export interface AuthContextType {
   user: User | null;
   userProfile: UserProfile | null;
-  loading: boolean;
+  loading: boolean; // action-level loading (sign in/out, resend, etc.)
+  initialized: boolean; // true after first auth session check completes
   error: string | null;
   emailVerificationRequired: string | null;
   signIn: (email: string, password: string) => Promise<void>;

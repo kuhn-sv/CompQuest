@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { LoginCredentials } from '../../../types/auth.types';
+import { LoginCredentials } from '../../interfaces/auth.interface';
 import EmailVerificationModal from '../EmailVerificationModal/EmailVerificationModal.component';
 import './LoginForm.component.scss';
 

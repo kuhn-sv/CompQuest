@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { LoginForm, RegisterForm, ForgotPasswordModal } from '../../auth/components';
+import { LoginForm, RegisterForm, ForgotPasswordModal } from './components';
 import './auth.page.scss';
 
 type AuthMode = 'login' | 'register';

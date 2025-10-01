@@ -19,11 +19,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requireAuth = true 
 }) => {
-  const { user, loading } = useAuth();
+  const { user, initialized } = useAuth();
   const location = useLocation();
 
   // Während der Authentication lädt, zeige Loading-Screen
-  if (loading) {
+  if (!initialized) {
     return (
       <div className="auth-loading">
         <div className="auth-loading__spinner">

@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider, ProtectedRoute } from './auth';
+import { AuthProvider, ProtectedRoute } from './features/auth';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
 import DataPackagePage from './features/tasks/dataPackage/datapackage.page';

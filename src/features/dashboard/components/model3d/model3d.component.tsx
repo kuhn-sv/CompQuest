@@ -7,7 +7,6 @@ import {
   createRenderer,
   setupLighting,
   isCPUComponent,
-  createPlaceholder,
   loadGLTFModel,
   calculateMousePosition,
   getIntersectedObject,
@@ -60,19 +59,15 @@ const Model3D: React.FC<Model3DProps> = ({
   const cpuMeshRef = useRef<THREE.Mesh | null>(null);
   
   const currentModelRef = useRef<THREE.Object3D | null>(null);
+  const firstFrameShownRef = useRef<boolean>(false);
 
   useEffect(() => {
-    console.log('Model3D useEffect triggered, mountRef:', mountRef.current);
     if (!mountRef.current) {
-      console.log('No mountRef.current, returning early');
+      console.warn('No mountRef.current, returning early');
       return;
     }
 
     const currentMount = mountRef.current;
-    console.log('Starting 3D scene setup, dimensions:', {
-      width: currentMount.clientWidth,
-      height: currentMount.clientHeight
-    });
 
     // Scene setup
     const scene = createScene();
@@ -86,54 +81,41 @@ const Model3D: React.FC<Model3DProps> = ({
     const renderer = createRenderer(currentMount.clientWidth, currentMount.clientHeight);
     rendererRef.current = renderer;
     currentMount.appendChild(renderer.domElement);
-    console.log('Renderer created and canvas appended:', {
-      canvas: renderer.domElement,
-      size: { width: renderer.domElement.width, height: renderer.domElement.height }
-    });
 
     // Lighting
     setupLighting(scene);
 
-    // Load the GLTF file
-    let placeholderGroup: THREE.Group | null = null;
-    
-    // Create and add placeholder
-    placeholderGroup = createPlaceholder();
-    scene.add(placeholderGroup);
-    currentModelRef.current = placeholderGroup;
-
-    // Try to load the actual GLTF file
+    // Load the GLTF file (no placeholder)
     loadGLTFModel(
       modelPath,
       scene,
-      placeholderGroup,
+      null,
       (modelGroup) => {
         currentModelRef.current = modelGroup;
         // Find and apply CPU pulse animation
         setupCPUPulseAnimation(modelGroup);
-        setIsLoading(false);
-      },
-      (progress) => {
-        console.log('Loading progress:', (progress.loaded / progress.total) * 100 + '%');
+        // Precompile shaders/materials to reduce first-frame hitch
+        try {
+          renderer.compile(scene, camera);
+        } catch {
+          // noop
+        }
       },
       (error) => {
-        console.warn('Could not load GLTF file, using placeholder:', error);
-        // Apply pulse animation to placeholder CPU as well
-        setupCPUPulseAnimation(placeholderGroup);
+        // Some loaders emit ProgressEvent in error callback during streaming; ignore those
+        if (!(error instanceof ProgressEvent)) {
+          console.warn('Could not load GLTF file:', error);
+        }
         setIsLoading(false);
       }
     );
 
     // Setup CPU pulse animation
     const setupCPUPulseAnimation = (model: THREE.Object3D) => {
-      console.log('Setting up CPU pulse animation for model:', model);
       let cpuFound = false;
       
       model.traverse((child) => {
-        console.log('Checking child:', child.name, 'Type:', child.type);
-        
         if (child instanceof THREE.Mesh && isCPUComponent(child.name)) {
-          console.log('CPU component found:', child.name);
           cpuFound = true;
           
           // Apply pulse material
@@ -146,9 +128,6 @@ const Model3D: React.FC<Model3DProps> = ({
       
       if (!cpuFound) {
         console.warn('No CPU component found in model. Available children:');
-        model.traverse((child) => {
-          console.log('- ', child.name, child.type);
-        });
       }
     };
 
@@ -172,7 +151,6 @@ const Model3D: React.FC<Model3DProps> = ({
           const partName = intersectedObject.name;
           
           if (isCPUComponent(partName)) {
-            console.log('CPU clicked! Calling callback...');
             onCpuClick?.();
             
             // Brief highlight effect
@@ -283,6 +261,15 @@ const Model3D: React.FC<Model3DProps> = ({
       }
 
       renderer.render(scene, camera);
+
+      // After the first meaningful frame is rendered, hide the loader once
+      if (!firstFrameShownRef.current && currentModelRef.current) {
+        const calls = renderer.info.render.calls;
+        if (calls > 0) {
+          firstFrameShownRef.current = true;
+          setIsLoading(false);
+        }
+      }
     };
 
     animate();
@@ -322,8 +309,9 @@ const Model3D: React.FC<Model3DProps> = ({
     <div className={`model3d ${className}`} style={style}>
       <div className="model3d__viewer" ref={mountRef}>
         {isLoading && (
-          <div className="model3d__loading">
-            Lade 3D-Modell...
+          <div className="model3d__loading" role="status" aria-live="polite">
+            <span className="spinner" />
+            <span className="label">Lade 3D-Modell…</span>
           </div>
         )}
       </div>

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
-import { RegisterData } from '../../../types/auth.types';
+import { RegisterData } from '../../interfaces/auth.interface';
 import './RegisterForm.component.scss';
 
 interface RegisterFormProps {
@@ -9,8 +9,7 @@ interface RegisterFormProps {
 }
 
 const RegisterForm: React.FC<RegisterFormProps> = ({ 
-  onSwitchToLogin, 
-  onSuccess 
+  onSwitchToLogin
 }) => {
   const { signUp, loading, error } = useAuth();
   const [formData, setFormData] = useState<RegisterData>({

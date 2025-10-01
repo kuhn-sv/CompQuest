@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useAuth, AuthModal } from '../../../auth';
+import { useAuth, AuthModal } from '../../../features/auth';
 
 const AuthDebug: React.FC = () => {
   const { user, loading, error, signOut } = useAuth();

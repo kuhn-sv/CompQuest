@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../auth';
+import { useAuth } from '../auth';
 import './dashboard.page.scss';
 import Model3D from './components/model3d/model3d.component';
 

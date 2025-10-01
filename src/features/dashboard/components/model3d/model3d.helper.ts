@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+// Enable caching of fetched assets to speed up subsequent loads
+THREE.Cache.enabled = true;
 
 // Re-export interfaces for convenience
 export type { MouseState, SceneRefs } from '../../interfaces';
@@ -23,7 +25,7 @@ export const createRenderer = (width: number, height: number): THREE.WebGLRender
     alpha: true
   });
   renderer.setSize(width, height);
-  renderer.setPixelRatio(window.devicePixelRatio);
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
   renderer.shadowMap.enabled = false;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 2.0;
@@ -91,55 +93,53 @@ export const createPlaceholder = (): THREE.Group => {
 export const loadGLTFModel = (
   modelPath: string,
   scene: THREE.Scene,
-  placeholderGroup: THREE.Group,
-  onLoaded: (model: THREE.Group) => void,
+  placeholderGroup?: THREE.Group | null,
+  onLoaded?: (model: THREE.Group) => void,
   onProgress?: (progress: ProgressEvent) => void,
   onError?: (error: unknown) => void
 ): void => {
   const loader = new GLTFLoader();
-  
+
   loader.load(
     modelPath,
     (gltf) => {
-      console.log('GLTF file loaded successfully', gltf);
-      
+
       if (placeholderGroup) {
         scene.remove(placeholderGroup);
       }
-      
+
       const object = gltf.scene;
-      
+
       object.traverse((child) => {
         if (child instanceof THREE.Mesh) {
           child.castShadow = false;
           child.receiveShadow = false;
-          
+
           if (!child.name || child.name === '') {
             child.name = `mesh-${Math.random().toString(36).substr(2, 9)}`;
           }
-          
-          if (child.material) {
-            if (Array.isArray(child.material)) {
-              child.material.forEach((mat) => {
-                mat.needsUpdate = true;
+
+          const material = (child as THREE.Mesh).material as THREE.Material | THREE.Material[] | undefined;
+          if (material) {
+            if (Array.isArray(material)) {
+              (material as THREE.Material[]).forEach((m) => {
+                m.needsUpdate = true;
               });
             } else {
-              child.material.needsUpdate = true;
+              (material as THREE.Material).needsUpdate = true;
             }
           }
         }
       });
-      
+
       const modelGroup = scaleAndCenterModel(object);
       scene.add(modelGroup);
-      onLoaded(modelGroup);
+      onLoaded?.(modelGroup);
     },
     (progress) => {
-      console.log('Loading progress:', (progress.loaded / progress.total) * 100 + '%');
       onProgress?.(progress);
     },
     (error) => {
-      console.warn('Could not load GLTF file, using placeholder:', error);
       onError?.(error);
     }
   );
@@ -209,7 +209,7 @@ export const updateCPUPulse = (material: THREE.MeshBasicMaterial, time: number):
   const pulseIntensity = (Math.sin(time * 0.003) + 1) * 0.5; // 0 to 1
   const minOpacity = 0.3;
   const maxOpacity = 1.0;
-  
+
   material.opacity = minOpacity + (maxOpacity - minOpacity) * pulseIntensity;
   material.needsUpdate = true;
 };

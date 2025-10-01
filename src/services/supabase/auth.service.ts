@@ -1,5 +1,5 @@
 import supabase from './client';
-import { UserProfile, UserPreferences, UserProgress } from '../../types/auth.types';
+import { UserProfile, UserPreferences, UserProgress } from '../../features/auth/interfaces/auth.interface';
 
 type ErrorWithCode = Error & { code?: string };
 
