@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../auth';
 import './dashboard.page.scss';
 import Model3D from './components/model3d/model3d.component';
 
 const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
+  const { user, signOut } = useAuth();
 
   const exercises = [
     {
@@ -25,8 +27,30 @@ const DashboardPage: React.FC = () => {
     setShowExercises(true);
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return (
     <div className="dashboard">
+      {/* User Info & Logout */}
+      <div className="dashboard__header">
+        <div className="dashboard__user-info">
+          <span className="dashboard__welcome">Willkommen, {user?.displayName || user?.email}</span>
+          <button 
+            className="dashboard__logout-btn" 
+            onClick={handleSignOut}
+            title="Abmelden"
+          >
+            Abmelden
+          </button>
+        </div>
+      </div>
+
       {/* 3D Viewer Container */}
       <div className="dashboard__3d-container">
         <Model3D 

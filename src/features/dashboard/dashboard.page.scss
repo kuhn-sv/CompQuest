@@ -2,22 +2,70 @@
 
 .dashboard {
   min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  height: 100vh;
+  width: 100vw;
   position: relative;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  overflow: hidden;
+
+  // Header with user info
+  &__header {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 10;
+    padding: 1rem;
+  }
+
+  &__user-info {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  &__welcome {
+    color: white;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  &__logout-btn {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.25rem 0.75rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-1px);
+    }
+  }
 
   // 3D Viewer Container
   &__3d-container {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100vw;
     height: 100vh;
-    position: relative;
+    min-width: 400px;
+    min-height: 300px;
+    z-index: 1;
   }
 
   &__3d-viewer {
     width: 100%;
     height: 100%;
+    display: block;
   }
 
   &__loading {

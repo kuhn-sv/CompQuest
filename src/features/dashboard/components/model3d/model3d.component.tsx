@@ -62,9 +62,17 @@ const Model3D: React.FC<Model3DProps> = ({
   const currentModelRef = useRef<THREE.Object3D | null>(null);
 
   useEffect(() => {
-    if (!mountRef.current) return;
+    console.log('Model3D useEffect triggered, mountRef:', mountRef.current);
+    if (!mountRef.current) {
+      console.log('No mountRef.current, returning early');
+      return;
+    }
 
     const currentMount = mountRef.current;
+    console.log('Starting 3D scene setup, dimensions:', {
+      width: currentMount.clientWidth,
+      height: currentMount.clientHeight
+    });
 
     // Scene setup
     const scene = createScene();
@@ -78,6 +86,10 @@ const Model3D: React.FC<Model3DProps> = ({
     const renderer = createRenderer(currentMount.clientWidth, currentMount.clientHeight);
     rendererRef.current = renderer;
     currentMount.appendChild(renderer.domElement);
+    console.log('Renderer created and canvas appended:', {
+      canvas: renderer.domElement,
+      size: { width: renderer.domElement.width, height: renderer.domElement.height }
+    });
 
     // Lighting
     setupLighting(scene);

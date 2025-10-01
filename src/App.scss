@@ -1,10 +1,35 @@
 @use './styles/_variables' as *;
 
 #root {
-  max-width: $container-lg;
-  margin: 0 auto;
-  padding: $spacing-3xl;
-  text-align: center;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  width: 100vw;
+}
+
+// Original root styling for specific pages
+.app {
+  // Default container styles for most pages
+  &--dashboard {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  // Auth page gets full screen
+  &--auth {
+    max-width: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  // Regular pages (if needed later)
+  &--regular {
+    max-width: $container-lg;
+    margin: 0 auto;
+    padding: $spacing-3xl;
+    text-align: center;
+  }
 }
 
 .logo {
