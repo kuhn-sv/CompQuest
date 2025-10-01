@@ -1,9 +1,7 @@
-import { User as FirebaseUser } from 'firebase/auth';
-
-export interface User extends FirebaseUser {
-  displayName: string | null;
-  email: string | null;
+export interface User {
   uid: string;
+  email: string | null;
+  displayName: string | null;
 }
 
 export interface UserProfile {
@@ -11,6 +9,8 @@ export interface UserProfile {
   email: string;
   displayName: string;
   matrikelnummer: string;
+  // 'student' | 'admin'
+  role?: 'student' | 'admin';
   createdAt: string;
   lastLoginAt: string;
   preferences: UserPreferences;
@@ -28,18 +28,24 @@ export interface UserPreferences {
 }
 
 export interface UserProgress {
-  completedTasks: string[];
-  currentTask?: string;
+  // High-level stats (can be derived but kept for fast UI)
   totalPoints: number;
-  level: number;
+  level: number; // current component index or derived level
   achievements: Achievement[];
+  // Detailed progress tracking keys
+  completedTasks: string[]; // task ids completed at least once
+  currentTask?: string;
   statistics: {
     tasksCompleted: number;
-    timeSpent: number; // in minutes
-    avgTaskTime: number; // in minutes
+    timeSpent: number; // minutes
+    avgTaskTime: number; // minutes
     lastActivity: string;
   };
 }
+
+// Game content interfaces (for UI typing)
+// Level/quest/task-related interfaces moved to
+// src/features/dashboard/interfaces/levels.interfaces.ts
 
 export interface Achievement {
   id: string;

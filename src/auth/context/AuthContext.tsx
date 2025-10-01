@@ -1,6 +1,5 @@
-import React, { createContext, useEffect, useState, ReactNode, useRef } from 'react';
-import { onAuthStateChanged, User as FirebaseUser } from 'firebase/auth';
-import { auth, authService, userProfileService } from '../../services/firebase';
+import React, { createContext, useEffect, useState, ReactNode } from 'react';
+import { authService, userProfileService, supabase } from '../../services/supabase';
 import { User, UserProfile, AuthContextType } from '../../types/auth.types';
 
 // Create the Authentication Context
@@ -18,55 +17,57 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [emailVerificationRequired, setEmailVerificationRequired] = useState<string | null>(null);
-  // Guard to suppress auto sign-out while registration flow is creating Firestore profile
-  const isRegisteringRef = useRef<boolean>(false);
+  // Note: with Supabase confirm-email requirement, we don't need a registration guard
 
   // Clear error function
   const clearError = () => setError(null);
 
-  // Handle authentication state changes
+  // Handle authentication state changes (Supabase)
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser: FirebaseUser | null) => {
+    setLoading(true);
+    // Initial fetch of current session
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      try {
+        clearError();
+        const sUser = session?.user ?? null;
+        if (sUser) {
+          const appUser: User = {
+            uid: sUser.id,
+            email: sUser.email ?? null,
+            displayName: (sUser.user_metadata?.displayName as string) || null,
+          };
+          setUser(appUser);
+          const profile = await userProfileService.getUserProfile(sUser.id);
+          setUserProfile(profile);
+          setEmailVerificationRequired(null);
+        } else {
+          setUser(null);
+          setUserProfile(null);
+        }
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, session) => {
       try {
         setLoading(true);
         clearError();
-
-        if (firebaseUser) {
-          // Check if email is verified
-          if (!firebaseUser.emailVerified) {
-            // If email is not verified, store the email for verification modal
-            console.log('Email not verified for user:', firebaseUser.email);
-            setEmailVerificationRequired(firebaseUser.email || '');
-            // During registration we need to keep the session briefly so the profile can be written
-            if (!isRegisteringRef.current) {
-              await authService.signOut();
-              setUser(null);
-              setUserProfile(null);
-            }
-            return;
-          }
-
-          // Clear email verification requirement if user is now verified
-          setEmailVerificationRequired(null);
-
-          // User is signed in and email is verified
-          const user: User = {
-            ...firebaseUser,
-            displayName: firebaseUser.displayName,
-            email: firebaseUser.email,
-            uid: firebaseUser.uid
+        const sUser = session?.user ?? null;
+        if (sUser) {
+          // If project requires email confirmation, unconfirmed users won't have a session here
+          const appUser: User = {
+            uid: sUser.id,
+            email: sUser.email ?? null,
+            displayName: (sUser.user_metadata?.displayName as string) || null,
           };
-          
-          setUser(user);
-
-          // Fetch user profile from Firestore
-          const profile = await userProfileService.getUserProfile(firebaseUser.uid);
+          setUser(appUser);
+          const profile = await userProfileService.getUserProfile(sUser.id);
           setUserProfile(profile);
+          setEmailVerificationRequired(null);
         } else {
-          // User is signed out
           setUser(null);
           setUserProfile(null);
-          // Keep emailVerificationRequired if user was just signed out due to unverified email
         }
       } catch (err) {
         console.error('Auth state change error:', err);
@@ -76,7 +77,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       }
     });
 
-    return unsubscribe;
+    return () => {
+      sub.subscription.unsubscribe();
+    };
   }, []);
 
   // Sign in function
@@ -100,15 +103,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       setLoading(true);
       clearError();
-      // Mark that we're in the registration flow to avoid premature sign-out in the listener
-      isRegisteringRef.current = true;
+      // Registration triggers an email; no session until confirmed (depending on project settings)
       await authService.signUp(email, password, displayName, matrikelnummer);
+      // Inform UI to show verification modal
+      setEmailVerificationRequired(email);
     } catch (err: unknown) {
       console.error('Sign up error:', err);
       setError(getErrorMessage(err));
       throw err;
     } finally {
-      isRegisteringRef.current = false;
       setLoading(false);
     }
   };
@@ -206,24 +209,27 @@ export { AuthContext };
 // Helper function to get user-friendly error messages
 const getErrorMessage = (error: unknown): string => {
   if (error && typeof error === 'object' && 'code' in error) {
-    const firebaseError = error as { code: string; message: string };
-    switch (firebaseError.code) {
-      case 'auth/user-not-found':
+    const e = error as { code: string; message: string };
+    switch (e.code) {
+      case 'invalid_credentials':
+      case 'auth/invalid-credentials':
+        return 'E-Mail oder Passwort ist falsch.';
+      case 'user_not_found':
         return 'Kein Benutzer mit dieser E-Mail-Adresse gefunden.';
-      case 'auth/wrong-password':
-        return 'Falsches Passwort.';
+      case 'email_exists':
       case 'auth/email-already-in-use':
         return 'Diese E-Mail-Adresse wird bereits verwendet.';
+      case 'weak_password':
       case 'auth/weak-password':
         return 'Das Passwort ist zu schwach.';
+      case 'invalid_email':
       case 'auth/invalid-email':
         return 'Ungültige E-Mail-Adresse.';
+      case 'too_many_requests':
       case 'auth/too-many-requests':
         return 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.';
-      case 'auth/network-request-failed':
-        return 'Netzwerkfehler. Bitte überprüfen Sie Ihre Internetverbindung.';
       default:
-        return `Authentifizierungsfehler: ${firebaseError.message}`;
+        return `Authentifizierungsfehler: ${e.message}`;
     }
   }
   if (error && typeof error === 'object' && 'message' in error) {

@@ -6,6 +6,7 @@ import DashboardPage from './features/dashboard/dashboard.page';
 import DataPackagePage from './features/tasks/dataPackage/datapackage.page';
 import TwosComplementPage from './features/tasks/twosComplement/twoscomplement.page';
 import AuthPage from './features/auth/auth.page';
+import ResetPasswordPage from './features/auth/reset.page';
 
 const App: React.FC = () => {
   return (
@@ -26,6 +27,16 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute requireAuth={false}>
                 <AuthPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Password reset landing route */}
+          <Route 
+            path="/auth/reset" 
+            element={
+              <ProtectedRoute requireAuth={false}>
+                <ResetPasswordPage />
               </ProtectedRoute>
             } 
           />
