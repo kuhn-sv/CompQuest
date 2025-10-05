@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, ProtectedRoute } from './features/auth';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
-import DataPackagePage from './features/tasks/dataPackage/datapackage.page';
 import TwosComplementPage from './features/tasks/twosComplement/twoscomplement.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
+import NumberSystemPage from './features/tasks/number-system/NumberSystem.page';
+import DataPackagePage from './features/tasks/dataPackage/DataPackage.page';
 
 const App: React.FC = () => {
   return (
@@ -65,6 +66,15 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <TwosComplementPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/tasks/number-system" 
+            element={
+              <ProtectedRoute>
+                <NumberSystemPage />
               </ProtectedRoute>
             } 
           />

@@ -16,6 +16,12 @@ const DashboardPage: React.FC = () => {
       path: '/tasks/data-package'
     },
     {
+      id: 'number-system',
+      title: 'Zahlensysteme (1.1)',
+      description: 'Konvertiere Zahlen zwischen Binär, Dezimal, Oktal und Hexadezimal',
+      path: '/tasks/number-system'
+    },
+    {
       id: 'twos-complement',
       title: 'Zweierkomplement',
       description: 'Übungsaufgabe zum Thema Zweierkomplement und negative Zahlen',

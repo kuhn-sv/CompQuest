@@ -1,0 +1,279 @@
+@use '../../../styles/_variables' as *;
+
+// Local fallbacks
+$danger-red: #dc3545;
+$ns-box-width: 120px;
+$ns-row-height: 64px; // Fixed row height for perfect alignment
+$ns-field-height: 40px; // Fixed field height
+
+.number-system-container {
+	padding: $spacing-lg;
+}
+
+.ns-header {
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+	margin-bottom: $spacing-lg;
+
+	.back-to-dashboard {
+		text-decoration: none;
+		color: $dark-gray;
+		opacity: 0.8;
+		&:hover { opacity: 1; }
+	}
+}
+
+.ns-controls {
+	display: flex;
+	align-items: center;
+	gap: $spacing-lg;
+	flex-wrap: wrap;
+	margin-bottom: $spacing-lg;
+
+	.actions button {
+		margin-right: $spacing-sm;
+	}
+}
+
+.ns-content {
+	display: flex;
+	position: relative;
+	width: 100%;
+	align-items: flex-start;
+}
+
+.connection-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 10;
+}
+
+.equations-and-results {
+	display: flex;
+	width: 100%;
+	gap: 3rem;
+	align-items: flex-start;
+}
+
+.equations-section {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+}
+
+.results-section {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+	min-width: 150px;
+	// Remove padding-top since we use fixed row heights now
+}
+
+.equation-row {
+	display: flex;
+	align-items: center;
+	height: $ns-row-height; // Fixed height for consistent alignment
+	transition: background $transition-slow;
+	position: relative;
+
+	&.active { 
+		background: rgba(0,0,0,0.03); 
+		border-radius: $border-radius-sm;
+	}
+
+	&.correct {
+		background: rgba(34, 197, 94, 0.1);
+		border: 2px solid #22c55e;
+		border-radius: $border-radius-sm;
+	}
+
+	&.wrong {
+		background: rgba(239, 68, 68, 0.1);
+		border: 2px solid #ef4444;
+		border-radius: $border-radius-sm;
+	}
+
+	&.drag-over {
+		background: rgba(59, 130, 246, 0.15);
+		border: 2px dashed #3b82f6;
+		border-radius: $border-radius-sm;
+		transform: scale(1.02);
+		transition: all 0.2s ease;
+	}
+
+	.connector-line {
+		width: 120px; // Verdoppelt von 40px auf 80px
+		height: 3px;
+		background: linear-gradient(90deg, #3b82f6, #6366f1);
+		border-radius: 1.5px;
+	}
+
+	.equals-sign {
+		background: white;
+		border: 2px solid #3b82f6;
+		border-radius: 50%;
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		color: #3b82f6;
+		font-size: 16px;
+	}
+
+	.result-placeholder {
+		min-width: $ns-box-width;
+		height: $ns-field-height; // Fixed height to match input fields
+		display: flex;
+		align-items: center;
+		justify-content: flex-start; // Align content to the left
+	}
+}
+
+	.lead-line {
+		height: 3px;
+		background: linear-gradient(90deg, #3b82f6, #6366f1);
+		border-radius: 1.5px;
+		
+		&--leading {
+			width: 60px;
+			flex-shrink: 0;
+		}
+		
+		&--left {
+			width: 60px;
+			flex-shrink: 0;
+		}
+		
+		&--right {
+			flex: 1;
+			min-width: 80px;
+		}
+		
+		&--trailing {
+			flex: 1;
+			min-width: 80px;
+		}
+	}
+
+.input-field {
+	height: $ns-field-height; // Fixed height for consistency
+	padding: $spacing-sm;
+	width: $ns-box-width;
+	border-radius: $border-radius-sm;
+	background: $white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid $border-color-default;
+	transition: all 0.3s ease;
+	color: #000000; // Ensure black text color
+	
+	&.source-field {
+		background: #f8fafc;
+		border-color: #e2e8f0;
+		color: #000000; // Ensure black text color
+	}
+	
+	&.result-field {
+		cursor: pointer;
+		color: #000000; // Ensure black text color
+		
+		&:hover:not(.used):not(.assigned) {
+			background: $light-gray;
+			border-color: $primary-blue;
+		}
+		
+		&.used {
+			opacity: 0.3;
+			cursor: not-allowed;
+		}
+		
+		&.assigned {
+			background: rgba(59, 130, 246, 0.1);
+			border-color: $primary-blue;
+			animation: slideInResult 0.4s ease-out;
+			color: #000000; // Ensure black text color even when assigned
+		}
+
+		&.dragging {
+			opacity: 0.5;
+			transform: rotate(3deg);
+			cursor: grabbing;
+		}
+	}
+}
+
+.result-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: $ns-row-height; // Match equation-row height exactly
+	transition: opacity 0.3s ease;
+	
+	.connection-line {
+		position: absolute;
+		left: 100%;
+		top: 0;
+		width: 100px;
+		height: 100%;
+		pointer-events: none;
+		z-index: 1;
+	}
+}
+
+@keyframes slideInResult {
+	from {
+		opacity: 0;
+		transform: translateX(100px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+// Dim non-selected answers slightly when a row is active
+.ns-content.has-active .input-field.result-field:not(.used):not(.assigned) {
+	opacity: 0.9;
+}
+
+// Drag and Drop visual enhancements
+.input-field.result-field {
+	cursor: grab;
+	user-select: none; // Prevent text selection during drag
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	
+	&:hover {
+		cursor: grab;
+	}
+	
+	&:active {
+		cursor: grabbing;
+	}
+	
+	// Ensure all child elements don't interfere with drag
+	* {
+		pointer-events: none !important;
+		user-select: none !important;
+		-webkit-user-select: none !important;
+		-moz-user-select: none !important;
+		-ms-user-select: none !important;
+	}
+}
+
+// Improve drop zone visibility
+.equation-row.drag-over .result-placeholder {
+	background: rgba(59, 130, 246, 0.1);
+	border: 2px dashed #3b82f6;
+	border-radius: $border-radius-sm;
+}
