@@ -2,7 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router-dom";
 import BinaryInputRow from "./components/binaryInputRow.component";
 import { createDataPackageHelper } from "./datapackage.helper";
-import "./datapackage.page.scss";
+import "./data-package.page.scss";
 
 const DataPackagePage: React.FC = () => {
   const [generatedNumber, setGeneratedNumber] = useState<number>(0);

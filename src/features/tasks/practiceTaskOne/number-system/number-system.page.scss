@@ -1,0 +1,489 @@
+@use '../../../../styles/_variables' as *;
+
+// Local fallbacks
+$ns-box-width: 120px;
+$ns-row-height: 64px; // Fixed row height for perfect alignment
+$ns-field-height: 40px; // Fixed field height
+
+.number-system-container {
+	padding: $spacing-lg;
+}
+
+.ns-header {
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+	margin-bottom: $spacing-lg;
+
+	.back-to-dashboard {
+		text-decoration: none;
+		color: $dark-gray;
+		opacity: 0.8;
+		&:hover { opacity: 1; }
+	}
+}
+
+.ns-timer-section {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-lg;
+	flex-wrap: wrap;
+
+	// Left titles block
+	.ns-titles {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		flex: 1 1 320px;
+		min-width: 260px;
+
+		.ns-title {
+			font-size: 1.15rem;
+			font-weight: 700;
+			color: $black;
+			letter-spacing: 0.2px;
+		}
+
+		.ns-subtitle {
+			font-size: 0.95rem;
+			color: $medium-gray-slate;
+			line-height: 1.35;
+			max-width: 820px;
+		}
+	}
+	
+	.task-progress-info {
+		display: flex;
+		flex-direction: column;
+		gap: $spacing-sm;
+		align-items: flex-end;
+		
+		.progress-text {
+			font-size: 0.875rem;
+			color: $medium-gray-slate;
+			font-weight: 500;
+			white-space: nowrap;
+		}
+		
+		.progress-bar {
+			width: 120px;
+			height: 6px;
+			background: $light-gray-border;
+			border-radius: 3px;
+			overflow: hidden;
+
+			.progress-fill {
+				height: 100%;
+				background: $gradient-primary;
+				border-radius: 3px;
+				transition: width 0.3s ease;
+			}
+		}
+	}
+	
+	.ns-timer {
+		// Custom styling for the number system timer
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+		flex: 0 0 auto;
+	}
+}
+
+
+.ns-controls {
+	position: absolute;
+	bottom: $spacing-lg;
+	right: $spacing-lg;
+	display: flex;
+	align-items: center;
+	gap: $spacing-md;
+	z-index: 50;
+
+	.actions button {
+		margin-right: $spacing-sm;
+	}
+}
+
+.ns-content {
+	display: flex;
+	position: relative;
+	width: 100%;
+	align-items: flex-start;
+	// Reserve space so bottom-right controls don’t overlap content
+	padding-bottom: 88px;
+}
+
+.connection-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 10;
+}
+
+.equations-and-results {
+	display: flex;
+	width: 100%;
+	gap: 3rem;
+	align-items: flex-start;
+}
+
+.equations-section {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+}
+
+.results-section {
+	display: flex;
+	flex-direction: column;
+	gap: $spacing-lg;
+	min-width: 150px;
+	// Remove padding-top since we use fixed row heights now
+}
+
+.equation-row {
+	display: flex;
+	align-items: center;
+	height: $ns-row-height; // Fixed height for consistent alignment
+	transition: background $transition-slow;
+	position: relative;
+
+	&.active { 
+		background: rgba(0,0,0,0.03); 
+		border-radius: $border-radius-sm;
+	}
+
+	&.correct {
+		border: 2px solid $success-green-vivid;
+		animation: correctPulse 0.6s ease-out;
+	}
+
+	&.incorrect {
+		border: 2px solid $danger-red-vivid;
+		animation: incorrectShake 0.5s ease-in-out;
+	}
+
+	&.drag-over {
+		border: 2px dashed $primary-blue-vivid;
+		background-color: $primary-blue-overlay-5;
+	}	.connector-line {
+		width: 120px; // Verdoppelt von 40px auf 80px
+		height: 3px;
+		background: $gradient-primary;
+		border-radius: 1.5px;
+	}
+
+	.equals-sign {
+		background: white;
+		border: 2px solid $primary-blue-vivid;
+		border-radius: 50%;
+		width: 36px;
+		height: 36px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		color: $primary-blue-vivid;
+		font-size: 16px;
+	}
+
+	.result-placeholder {
+		min-width: $ns-box-width;
+		height: $ns-field-height; // Fixed height to match input fields
+		display: flex;
+		align-items: center;
+		justify-content: flex-start; // Align content to the left
+	}
+}
+
+	.lead-line {
+		height: 3px;
+		background: $gradient-primary;
+		border-radius: 1.5px;
+		
+		&--leading {
+			width: 60px;
+			flex-shrink: 0;
+		}
+		
+		&--left {
+			width: 60px;
+			flex-shrink: 0;
+		}
+		
+		&--right {
+			flex: 1;
+			min-width: 80px;
+		}
+		
+		&--trailing {
+			flex: 1;
+			min-width: 80px;
+		}
+	}
+
+.input-field {
+	height: $ns-field-height; // Fixed height for consistency
+	padding: $spacing-sm;
+	width: $ns-box-width;
+	border-radius: $border-radius-sm;
+	background: $white;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border: 2px solid $border-color-default;
+	transition: all 0.3s ease;
+	color: $black; // Ensure black text color
+	
+	&.source-field {
+		background: $light-gray-bg-alt;
+		border-color: $light-gray-border;
+		color: $black; // Ensure black text color
+	}
+	
+	&.result-field {
+		cursor: pointer;
+		color: $black; // Ensure black text color
+		
+		&:hover:not(.used):not(.assigned) {
+			background: $light-gray;
+			border-color: $primary-blue;
+		}
+		
+		&.used {
+			opacity: 0.3;
+			cursor: not-allowed;
+		}
+		
+		&.assigned {
+			background: $primary-blue-overlay;
+			border-color: $primary-blue;
+			animation: slideInResult 0.4s ease-out;
+			color: $black; // Ensure black text color even when assigned
+		}
+
+		&.dragging {
+			opacity: 0.5;
+			transform: rotate(3deg);
+			cursor: grabbing;
+		}
+	}
+}
+
+.result-row {
+	position: relative;
+	display: flex;
+	align-items: center;
+	height: $ns-row-height; // Match equation-row height exactly
+	transition: opacity 0.3s ease;
+	
+	.connection-line {
+		position: absolute;
+		left: 100%;
+		top: 0;
+		width: 100px;
+		height: 100%;
+		pointer-events: none;
+		z-index: 1;
+	}
+}
+
+@keyframes slideInResult {
+	from {
+		opacity: 0;
+		transform: translateX(100px);
+	}
+	to {
+		opacity: 1;
+		transform: translateX(0);
+	}
+}
+
+// Feedback animations
+@keyframes correctPulse {
+	0% { box-shadow: 0 0 0 0 rgba($success-green-vivid, 0.5); }
+	70% { box-shadow: 0 0 0 8px rgba($success-green-vivid, 0); }
+	100% { box-shadow: 0 0 0 0 rgba($success-green-vivid, 0); }
+}
+
+@keyframes incorrectShake {
+	10%, 90% { transform: translateX(-2px); }
+	20%, 80% { transform: translateX(4px); }
+	30%, 50%, 70% { transform: translateX(-6px); }
+	40%, 60% { transform: translateX(6px); }
+}
+
+// Dim non-selected answers slightly when a row is active
+.ns-content.has-active .input-field.result-field:not(.used):not(.assigned) {
+	opacity: 0.9;
+}
+
+// Drag and Drop visual enhancements
+.input-field.result-field {
+	cursor: grab;
+	user-select: none; // Prevent text selection during drag
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	
+	&:hover {
+		cursor: grab;
+	}
+	
+	&:active {
+		cursor: grabbing;
+	}
+	
+	// Ensure child elements don't interfere with click but allow drag
+	* {
+		user-select: none !important;
+		-webkit-user-select: none !important;
+		-moz-user-select: none !important;
+		-ms-user-select: none !important;
+	}
+}
+
+// Improve drop zone visibility
+.equation-row.drag-over .result-placeholder {
+	background: $primary-blue-overlay;
+	border: 2px dashed $primary-blue-vivid;
+	border-radius: $border-radius-sm;
+}
+
+// Responsive design for timer section
+@media (max-width: 768px) {
+	.ns-timer-section {
+		flex-direction: column;
+		gap: $spacing-md;
+		align-items: stretch;
+
+		.ns-titles {
+			text-align: center;
+			align-items: center;
+			flex: 1 1 auto;
+			min-width: 0;
+		}
+		
+		.task-progress-info {
+			align-items: center;
+			.progress-bar {
+				width: 150px; // Slightly wider on mobile
+			}
+		}
+	}
+
+	.ns-controls {
+		position: absolute;
+		bottom: $spacing-md;
+		right: $spacing-md;
+	}
+
+	// Reduce reserved space on smaller screens
+	.ns-content {
+		padding-bottom: 72px;
+	}
+}
+
+@media (max-width: 480px) {
+	.ns-timer-section {
+		gap: $spacing-sm;
+
+		.ns-titles {
+			.ns-title { font-size: 1rem; }
+			.ns-subtitle { font-size: 0.85rem; }
+		}
+		
+		.task-progress-info {
+			.progress-text {
+				font-size: 0.8rem;
+			}
+			
+			.progress-bar {
+				width: 120px;
+				height: 4px;
+			}
+		}
+	}
+
+	.ns-controls {
+		gap: $spacing-sm;
+	}
+}
+
+// Start overlay styles
+.ns-start-overlay {
+	position: relative;
+	min-height: 50vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	margin: $spacing-3xl 0;
+}
+
+.ns-start-button {
+	width: 180px;
+	height: 180px;
+	border-radius: 50%;
+	background: $gradient-primary;
+	color: $white;
+	font-size: 1.5rem;
+	font-weight: 800;
+	border: none;
+	cursor: pointer;
+	box-shadow: 0 12px 24px rgba(0,0,0,0.15);
+	transition: transform 0.15s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+
+	&:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 16px 32px rgba(0,0,0,0.18); }
+	&:active { transform: translateY(0) scale(0.98); }
+}
+
+// Summary overlay styles
+.ns-summary-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0,0,0,0.4);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 100;
+}
+
+.ns-summary-card {
+	background: $white;
+	border-radius: $border-radius-md;
+	box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+	padding: $spacing-lg $spacing-xl;
+	min-width: 320px;
+	max-width: 520px;
+}
+
+.ns-summary-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: $spacing-xl;
+	margin: $spacing-sm 0;
+}
+
+.ns-summary-stages {
+	margin: $spacing-md 0;
+}
+
+.ns-summary-total {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	font-weight: 800;
+	margin-top: $spacing-sm;
+}
+
+.ns-summary-actions {
+	margin-top: $spacing-lg;
+	display: flex;
+	justify-content: flex-end;
+}

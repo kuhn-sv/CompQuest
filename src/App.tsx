@@ -3,10 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, ProtectedRoute } from './features/auth';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
-import DataPackagePage from './features/tasks/dataPackage/datapackage.page';
 import TwosComplementPage from './features/tasks/twosComplement/twoscomplement.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
+import DataPackagePage from './features/tasks/dataPackage/DataPackage.page';
+import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 
 const App: React.FC = () => {
   return (
@@ -68,6 +69,37 @@ const App: React.FC = () => {
               </ProtectedRoute>
             } 
           />
+
+          <Route 
+            path="/practice-task-one" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Direct links into specific Practice Task One subtasks */}
+          <Route 
+            path="/task/number-system" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage initialSubTask="number-system" />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/task/positive-arithmetic" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage initialSubTask="positive-arithmetic" />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Compatibility redirects for pluralized paths */}
+          <Route path="/tasks/number-system" element={<Navigate to="/task/number-system" replace />} />
 
           {/* Root Route - Redirect basierend auf Auth Status */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
