@@ -1,13 +1,15 @@
 import React, { useMemo, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import '../number-system/number-system.page.scss';
-import { ConnectionOverlay, Timer } from '../../../../shared/components';
-import { useTimer } from '../../../../shared/hooks';
+import { ConnectionOverlay } from '../../../../shared/components';
+import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
+import { EquationRow } from './EquationRow';
+import { ResultsSection } from './ResultsSection';
+import { generateAdditionSet, AdditionTask } from './addition.helper';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 
-// Temporary interfaces to mirror the staged flow and evaluation pattern.
-// You can extend this later with actual arithmetic tasks and logic.
 interface PAStageScore {
-  stage: number;
+  difficulty: Difficulty;
   correct: number;
   total: number;
   points: number;
@@ -24,70 +26,153 @@ interface PAResultSummary {
 }
 
 const PositiveArithmeticComponent: React.FC = () => {
-  // 3-stage flow to mirror NumberSystem UX
-  const stages = [0, 1, 2];
-  const [stageIndex, setStageIndex] = useState(0);
-  const [hasStarted, setHasStarted] = useState(false);
-  const [evaluated, setEvaluated] = useState(false);
+  // 3-stage flow: Easy, Medium, Hard
+  const stages: Difficulty[] = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard];
+  const [stageIndex, setStageIndex] = useState<number>(0);
+  const [tasks, setTasks] = useState<AdditionTask[]>([]);
+  const [answerPool, setAnswerPool] = useState<{ value: string; base: number }[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, { value: string; base: number } | null>>({});
+  const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
+  const [evaluated, setEvaluated] = useState<boolean>(false);
+  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [stageScores, setStageScores] = useState<PAStageScore[]>([]);
   const [finalResult, setFinalResult] = useState<PAResultSummary | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   // Config: 3 minutes threshold = 180000 ms, 1 point bonus
-  const timeBonusThresholdMs = useMemo(() => 3 * 60 * 1000, []);
-  const timeBonusPoints = 1;
+  const evalConfig = useMemo(() => ({ timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1 }), []);
+  const { start, stop, reset, formatTime, getElapsed } = useTimer();
 
-  const { time, isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
+  // Drag and Drop logic
+  const {
+    draggedItem: draggedAnswer,
+    dragOverTargetId: dragOverTaskId,
+    handleDragStart,
+    handleDragOver,
+    handleDragEnter,
+    handleDragLeave,
+    handleDrop,
+    handleDragEnd,
+    resetDragState
+  } = useDragAndDrop<{ value: string; base: number }>(DRAG_DROP_PRESETS.NUMBER_SYSTEM);
 
-  // Placeholder task state per stage; replace with actual arithmetic generation later.
-  // For now, we simulate 4 pairs per stage and allow immediate evaluation.
-  const totalPerStage = 4;
-  const [correctSimulated, setCorrectSimulated] = useState(0);
+  // Connection lines calculation
+  const getTaskIdCb = useCallback((task: AdditionTask) => task.id, []);
+  const compareAnswersCb = useCallback((assignment: { value: string; base: number }, poolAnswer: { value: string; base: number }) => (
+    assignment.value === poolAnswer.value && assignment.base === poolAnswer.base
+  ), []);
 
-  const startStage = useCallback((_idx: number, opts?: { resetTimer?: boolean }) => {
-    const { resetTimer: shouldResetTimer = true } = opts ?? {};
+  const connectionLines = useConnectionLines({
+    tasks,
+    assignments,
+    answerPool,
+    containerRef,
+    getTaskId: getTaskIdCb,
+    compareAnswers: compareAnswersCb,
+    ...CONNECTION_LINE_PRESETS.NUMBER_SYSTEM,
+    debug: false
+  });
+
+  const startSetForStage = (idx: number, options?: { resetTimer?: boolean }) => {
+    const { resetTimer: shouldResetTimer = true } = options ?? {};
+    const difficulty = stages[idx];
+    const { tasks, answerPool } = generateAdditionSet(difficulty);
+    setTasks(tasks);
+    setAnswerPool(answerPool);
+    setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
     setEvaluated(false);
-    setCorrectSimulated(0);
+    setActiveTaskId(null);
     if (shouldResetTimer) {
       reset();
     }
     start();
-  }, [reset, start]);
+  };
 
+  // Initial start handler
   const handleInitialStart = () => {
     setHasStarted(true);
     setStageIndex(0);
-    startStage(0, { resetTimer: true });
+    startSetForStage(0, { resetTimer: true });
   };
+
+  const resetSet = () => {
+    setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
+    setEvaluated(false);
+    setActiveTaskId(null);
+    resetDragState();
+    reset();
+    if (tasks.length > 0) {
+      start();
+    }
+  };
+
+  // Assignment logic
+  const assignAnswer = (taskId: string, answer: { value: string; base: number }) => {
+    setAssignments(prev => {
+      const next = { ...prev };
+      for (const k of Object.keys(next)) {
+        if (next[k] && next[k]!.value === answer.value && next[k]!.base === answer.base) next[k] = null;
+      }
+      next[taskId] = answer;
+      return next;
+    });
+    setActiveTaskId(null);
+  };
+
+  const onDropAnswer = (taskId: string, answer: { value: string; base: number }) => {
+    assignAnswer(taskId, answer);
+  };
+
+  const usedAnswerKeys = useMemo(() => {
+    return new Set(
+      Object.values(assignments)
+        .filter((a): a is { value: string; base: number } => !!a)
+        .map(a => `${a.value}|${a.base}`)
+    );
+  }, [assignments]);
+
+  const allAssigned = useMemo(() => tasks.length > 0 && tasks.every(t => assignments[t.id]), [tasks, assignments]);
+  const correctCount = useMemo(() => tasks.filter(t => {
+    const a = assignments[t.id];
+    return a && a.value === t.expected && a.base === t.base;
+  }).length, [tasks, assignments]);
 
   const evaluate = () => {
     setEvaluated(true);
     stop();
-
-    const correct = correctSimulated; // replace with real check later
-    const total = totalPerStage;
+    const difficulty = stages[stageIndex];
+    const total = tasks.length;
+    const correct = tasks.filter(t => {
+      const a = assignments[t.id];
+      return a && a.value === t.expected && a.base === t.base;
+    }).length;
     const points = correct;
-
-    const updated = [...stageScores];
-    updated[stageIndex] = { stage: stageIndex + 1, correct, total, points };
-    setStageScores(updated);
-
+    setStageScores(prev => {
+      const next = [...prev];
+      next[stageIndex] = { difficulty, correct, total, points };
+      return next;
+    });
     if (stageIndex === stages.length - 1) {
       const elapsedMs = getElapsed();
-      const withinThreshold = elapsedMs <= timeBonusThresholdMs;
-      const timeBonus = withinThreshold ? timeBonusPoints : 0;
-      const totalCorrect = updated.reduce((s, x) => s + (x?.correct ?? 0), 0);
-      const totalPossible = updated.reduce((s, x) => s + (x?.total ?? 0), 0);
+      const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
+      const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
+      const totalCorrect = stageScores.reduce((sum, s) => sum + (s?.correct ?? 0), 0) + correct;
+      const totalPossible = stageScores.reduce((sum, s) => sum + (s?.total ?? 0), 0) + total;
       const totalPoints = totalCorrect + timeBonus;
-      setFinalResult({ elapsedMs, withinThreshold, timeBonus, perStage: updated, totalCorrect, totalPossible, totalPoints });
+      const perStage: PAStageScore[] = (() => {
+        const base = [...stageScores];
+        base[stageIndex] = { difficulty, correct, total, points };
+        return base;
+      })();
+      setFinalResult({ elapsedMs, withinThreshold, timeBonus, perStage, totalCorrect, totalPossible, totalPoints });
     }
   };
 
   const goToNextStage = () => {
     if (stageIndex < stages.length - 1) {
-      const next = stageIndex + 1;
-      setStageIndex(next);
-      startStage(next, { resetTimer: false });
+      const nextIndex = stageIndex + 1;
+      setStageIndex(nextIndex);
+      startSetForStage(nextIndex, { resetTimer: false });
     }
   };
 
@@ -98,61 +183,64 @@ const PositiveArithmeticComponent: React.FC = () => {
         <h1>Positive Arithmetik – Übung 1.2</h1>
       </div>
 
-      {hasStarted && (
-        <div className="ns-timer-section">
-          <div className="ns-titles">
-            <div className="ns-title">Additionen und Subtraktionen (positiv)</div>
-            <div className="ns-subtitle">Löse die Aufgaben pro Stufe und werte aus.</div>
-          </div>
-          <Timer 
-            time={time}
-            isRunning={isRunning}
-            formatTime={formatTime}
-            getElapsed={getElapsed}
-            className="ns-timer"
-          />
-          <div className="task-progress-info">
-            <span className="progress-text">Aufgabe {stageIndex + 1} / {stages.length}</span>
-            <div className="progress-bar">
-              <div className="progress-fill" style={{ width: `${((stageIndex + 1) / stages.length) * 100}%` }} />
-            </div>
-          </div>
-        </div>
-      )}
 
-      {hasStarted && (
-        <div className="ns-content" ref={containerRef}>
+      {hasStarted && tasks.length > 0 && (
+        <div className={`ns-content ${activeTaskId ? 'has-active' : ''}`} ref={containerRef}>
           <div className="equations-and-results">
             <div className="equations-section">
-              {/* Placeholder content; swap with actual arithmetic problems later */}
-              <div className="equation-row">Aufgaben hier platzieren (Stufe {stageIndex + 1})</div>
+              {tasks.map((t) => {
+                const assigned = assignments[t.id];
+                const isCorrect = evaluated && !!assigned && assigned.value === t.expected && assigned.base === t.base;
+                const isWrong = evaluated && !!assigned && !(assigned.value === t.expected && assigned.base === t.base);
+                const isActive = activeTaskId === t.id;
+                return (
+                  <EquationRow
+                    key={t.id}
+                    task={t}
+                    assignment={assigned}
+                    isCorrect={isCorrect}
+                    isWrong={isWrong}
+                    isActive={isActive}
+                    isDragOver={dragOverTaskId === t.id}
+                    onClick={() => setActiveTaskId(t.id)}
+                    onDragOver={(e) => handleDragOver(e, t.id)}
+                    onDragEnter={(e) => handleDragEnter(e, t.id)}
+                    onDragLeave={handleDragLeave}
+                    onDrop={(e) => handleDrop(e, t.id, onDropAnswer)}
+                  />
+                );
+              })}
             </div>
-            <div className="results-section">
-              <div className="result-item">
-                Simulierte Korrekte: 
-                <button onClick={() => setCorrectSimulated((c) => Math.min(totalPerStage, c + 1))}>+1</button>
-                <button onClick={() => setCorrectSimulated((c) => Math.max(0, c - 1))}>-1</button>
-                <strong style={{ marginLeft: 8 }}>{correctSimulated} / {totalPerStage}</strong>
-              </div>
-            </div>
+            <ResultsSection
+              answerPool={answerPool}
+              usedAnswerKeys={usedAnswerKeys}
+              assignments={assignments}
+              draggedAnswer={draggedAnswer}
+              activeTaskId={activeTaskId}
+              tasks={tasks}
+              handleDragStart={handleDragStart}
+              handleDragEnd={handleDragEnd}
+              assignAnswer={assignAnswer}
+            />
           </div>
-
-          <ConnectionOverlay connectionLines={[]} />
-
+          <ConnectionOverlay connectionLines={connectionLines} />
           <div className="ns-controls">
             <div className="actions">
-              {/* No reset needed for placeholder; add later when tasks exist */}
-              <button onClick={evaluate}>Auswerten</button>
+              {!evaluated && (
+                <button onClick={resetSet} disabled={!tasks.length}>Zurücksetzen</button>
+              )}
+              <button onClick={evaluate} disabled={!allAssigned}>Auswerten</button>
               {evaluated && stageIndex < stages.length - 1 && (
                 <button onClick={goToNextStage}>Weiter</button>
               )}
             </div>
             {evaluated && (
-              <div className="result">Ergebnis: {correctSimulated} / {totalPerStage} richtig</div>
+              <div className="result">Ergebnis: {correctCount} / {tasks.length} richtig</div>
             )}
           </div>
         </div>
       )}
+
 
       {!hasStarted && (
         <div className="ns-start-overlay">
@@ -170,13 +258,13 @@ const PositiveArithmeticComponent: React.FC = () => {
             </div>
             <div className="ns-summary-row">
               <span>Grenze für Bonus:</span>
-              <strong>{formatTime(timeBonusThresholdMs)} ({finalResult.withinThreshold ? 'unter' : 'über'})</strong>
+              <strong>{formatTime(evalConfig.timeBonusThresholdMs)} ({finalResult.withinThreshold ? 'unter' : 'über'})</strong>
             </div>
             <hr />
             <div className="ns-summary-stages">
               {finalResult.perStage.map((s, idx) => (
                 <div key={idx} className="ns-summary-row">
-                  <span>Stufe {s.stage}:</span>
+                  <span>Stufe {idx + 1} ({s.difficulty.charAt(0).toUpperCase() + s.difficulty.slice(1)}):</span>
                   <strong>{s.correct} / {s.total} Punkte</strong>
                 </div>
               ))}
