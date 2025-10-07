@@ -6,8 +6,8 @@ import DashboardPage from './features/dashboard/dashboard.page';
 import TwosComplementPage from './features/tasks/twosComplement/twoscomplement.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
-import NumberSystemPage from './features/tasks/number-system/NumberSystem.page';
 import DataPackagePage from './features/tasks/dataPackage/DataPackage.page';
+import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 
 const App: React.FC = () => {
   return (
@@ -71,10 +71,10 @@ const App: React.FC = () => {
           />
 
           <Route 
-            path="/tasks/number-system" 
+            path="/practice-task-one" 
             element={
               <ProtectedRoute>
-                <NumberSystemPage />
+                <PracticeTaskOnePage />
               </ProtectedRoute>
             } 
           />

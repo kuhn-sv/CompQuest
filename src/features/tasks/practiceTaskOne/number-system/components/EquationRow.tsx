@@ -1,5 +1,5 @@
 import React from 'react';
-import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
+import NumberWithBase from '../../../../../shared/components/number/NumberWithBase.component';
 import type { NumberTask, AnswerOption } from '../interfaces/numberSystem.interface';
 
 interface EquationRowProps {

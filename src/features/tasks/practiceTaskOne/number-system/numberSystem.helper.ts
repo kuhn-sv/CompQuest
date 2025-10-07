@@ -1,4 +1,4 @@
-import { Difficulty } from '../../../shared/enums/difficulty.enum';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 import type { Base } from './types/bases.type';
 import type { NumberTask, GeneratedSet, AnswerOption } from './interfaces/numberSystem.interface';
 

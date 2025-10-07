@@ -1,5 +1,5 @@
 import React from 'react';
-import { Difficulty, DIFFICULTIES } from '../../../../shared/enums/difficulty.enum';
+import { Difficulty, DIFFICULTIES } from '../../../../../shared/enums/difficulty.enum';
 
 const difficultyLabels: Record<Difficulty, string> = {
 	[Difficulty.Easy]: 'leicht',

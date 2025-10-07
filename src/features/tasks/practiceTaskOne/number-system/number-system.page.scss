@@ -1,7 +1,6 @@
-@use '../../../styles/_variables' as *;
+@use '../../../../styles/_variables' as *;
 
 // Local fallbacks
-$danger-red: #dc3545;
 $ns-box-width: 120px;
 $ns-row-height: 64px; // Fixed row height for perfect alignment
 $ns-field-height: 40px; // Fixed field height
@@ -21,6 +20,49 @@ $ns-field-height: 40px; // Fixed field height
 		color: $dark-gray;
 		opacity: 0.8;
 		&:hover { opacity: 1; }
+	}
+}
+
+.ns-timer-section {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	gap: $spacing-lg;
+	margin-bottom: $spacing-lg;
+	flex-wrap: wrap;
+	
+	.task-progress-info {
+		display: flex;
+		flex-direction: column;
+		gap: $spacing-sm;
+		align-items: center;
+		
+		.progress-text {
+			font-size: 0.875rem;
+			color: $medium-gray-slate;
+			font-weight: 500;
+			white-space: nowrap;
+		}
+		
+		.progress-bar {
+			width: 120px;
+			height: 6px;
+			background: $light-gray-border;
+			border-radius: 3px;
+			overflow: hidden;
+
+			.progress-fill {
+				height: 100%;
+				background: $gradient-primary;
+				border-radius: 3px;
+				transition: width 0.3s ease;
+			}
+		}
+	}
+	
+	.ns-timer {
+		// Custom styling for the number system timer
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	}
 }
 
@@ -88,35 +130,28 @@ $ns-field-height: 40px; // Fixed field height
 	}
 
 	&.correct {
-		background: rgba(34, 197, 94, 0.1);
-		border: 2px solid #22c55e;
-		border-radius: $border-radius-sm;
+		border: 2px solid $success-green-vivid;
+		animation: correctPulse 0.6s ease-out;
 	}
 
-	&.wrong {
-		background: rgba(239, 68, 68, 0.1);
-		border: 2px solid #ef4444;
-		border-radius: $border-radius-sm;
+	&.incorrect {
+		border: 2px solid $danger-red-vivid;
+		animation: incorrectShake 0.5s ease-in-out;
 	}
 
 	&.drag-over {
-		background: rgba(59, 130, 246, 0.15);
-		border: 2px dashed #3b82f6;
-		border-radius: $border-radius-sm;
-		transform: scale(1.02);
-		transition: all 0.2s ease;
-	}
-
-	.connector-line {
+		border: 2px dashed $primary-blue-vivid;
+		background-color: $primary-blue-overlay-5;
+	}	.connector-line {
 		width: 120px; // Verdoppelt von 40px auf 80px
 		height: 3px;
-		background: linear-gradient(90deg, #3b82f6, #6366f1);
+		background: $gradient-primary;
 		border-radius: 1.5px;
 	}
 
 	.equals-sign {
 		background: white;
-		border: 2px solid #3b82f6;
+		border: 2px solid $primary-blue-vivid;
 		border-radius: 50%;
 		width: 36px;
 		height: 36px;
@@ -124,7 +159,7 @@ $ns-field-height: 40px; // Fixed field height
 		align-items: center;
 		justify-content: center;
 		font-weight: bold;
-		color: #3b82f6;
+		color: $primary-blue-vivid;
 		font-size: 16px;
 	}
 
@@ -139,7 +174,7 @@ $ns-field-height: 40px; // Fixed field height
 
 	.lead-line {
 		height: 3px;
-		background: linear-gradient(90deg, #3b82f6, #6366f1);
+		background: $gradient-primary;
 		border-radius: 1.5px;
 		
 		&--leading {
@@ -174,17 +209,17 @@ $ns-field-height: 40px; // Fixed field height
 	justify-content: center;
 	border: 2px solid $border-color-default;
 	transition: all 0.3s ease;
-	color: #000000; // Ensure black text color
+	color: $black; // Ensure black text color
 	
 	&.source-field {
-		background: #f8fafc;
-		border-color: #e2e8f0;
-		color: #000000; // Ensure black text color
+		background: $light-gray-bg-alt;
+		border-color: $light-gray-border;
+		color: $black; // Ensure black text color
 	}
 	
 	&.result-field {
 		cursor: pointer;
-		color: #000000; // Ensure black text color
+		color: $black; // Ensure black text color
 		
 		&:hover:not(.used):not(.assigned) {
 			background: $light-gray;
@@ -197,10 +232,10 @@ $ns-field-height: 40px; // Fixed field height
 		}
 		
 		&.assigned {
-			background: rgba(59, 130, 246, 0.1);
+			background: $primary-blue-overlay;
 			border-color: $primary-blue;
 			animation: slideInResult 0.4s ease-out;
-			color: #000000; // Ensure black text color even when assigned
+			color: $black; // Ensure black text color even when assigned
 		}
 
 		&.dragging {
@@ -261,9 +296,8 @@ $ns-field-height: 40px; // Fixed field height
 		cursor: grabbing;
 	}
 	
-	// Ensure all child elements don't interfere with drag
+	// Ensure child elements don't interfere with click but allow drag
 	* {
-		pointer-events: none !important;
 		user-select: none !important;
 		-webkit-user-select: none !important;
 		-moz-user-select: none !important;
@@ -273,7 +307,38 @@ $ns-field-height: 40px; // Fixed field height
 
 // Improve drop zone visibility
 .equation-row.drag-over .result-placeholder {
-	background: rgba(59, 130, 246, 0.1);
-	border: 2px dashed #3b82f6;
+	background: $primary-blue-overlay;
+	border: 2px dashed $primary-blue-vivid;
 	border-radius: $border-radius-sm;
+}
+
+// Responsive design for timer section
+@media (max-width: 768px) {
+	.ns-timer-section {
+		flex-direction: column;
+		gap: $spacing-md;
+		
+		.task-progress-info {
+			.progress-bar {
+				width: 150px; // Slightly wider on mobile
+			}
+		}
+	}
+}
+
+@media (max-width: 480px) {
+	.ns-timer-section {
+		gap: $spacing-sm;
+		
+		.task-progress-info {
+			.progress-text {
+				font-size: 0.8rem;
+			}
+			
+			.progress-bar {
+				width: 120px;
+				height: 4px;
+			}
+		}
+	}
 }

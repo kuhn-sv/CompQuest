@@ -1,7 +1,7 @@
 import React from 'react';
 import { AssignmentMap } from '../numberSystem.types';
 import type { AnswerOption } from '../interfaces/numberSystem.interface';
-import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
+import NumberWithBase from '../../../../../shared/components/number/NumberWithBase.component';
 
 interface ResultsSectionProps {
   answerPool: AnswerOption[];
@@ -48,7 +48,7 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
                   if (targetTaskId) assignAnswer(targetTaskId, answer);
                 }}
               >
-                <div style={{ pointerEvents: 'none', userSelect: 'none' }}>
+                <div style={{ userSelect: 'none' }}>
                   <NumberWithBase value={answer.value} base={answer.base} />
                 </div>
               </div>

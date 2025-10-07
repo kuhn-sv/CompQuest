@@ -10,16 +10,16 @@ const DashboardPage: React.FC = () => {
 
   const exercises = [
     {
+      id: 'practice-task-one',
+      title: 'Übungsaufgabe 1.1',
+      description: 'Zahlensystem-Konverter: Verbinde Zahlen mit ihren entsprechenden Darstellungen',
+      path: '/practice-task-one'
+    },
+    {
       id: 'data-package',
       title: 'Data Package',
       description: 'Übungsaufgabe zum Thema Datenverpackung und Binärdarstellung',
       path: '/tasks/data-package'
-    },
-    {
-      id: 'number-system',
-      title: 'Zahlensysteme (1.1)',
-      description: 'Konvertiere Zahlen zwischen Binär, Dezimal, Oktal und Hexadezimal',
-      path: '/tasks/number-system'
     },
     {
       id: 'twos-complement',

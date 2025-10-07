@@ -1,6 +1,54 @@
 import { useEffect, useState } from 'react';
 import type { ConnectionLine } from '../components/ConnectionOverlay';
 
+export interface ConnectionLineSelectors {
+  taskContainerSelector: string;
+  taskRowSelector: string;
+  taskTargetSelector: string;
+  answerContainerSelector: string;
+  answerRowSelectorTemplate: string;
+}
+
+export interface ConnectionLineCoordinateConfig {
+  taskCoordinates: {
+    x: 'left' | 'right' | 'center';
+    y: 'top' | 'bottom' | 'center';
+  };
+  answerCoordinates: {
+    x: 'left' | 'right' | 'center';
+    y: 'top' | 'bottom' | 'center';
+  };
+}
+
+export const CONNECTION_LINE_PRESETS = {
+  NUMBER_SYSTEM: {
+    selectors: {
+      taskContainerSelector: '.equations-section',
+      taskRowSelector: '.equation-row',
+      taskTargetSelector: '.result-placeholder',
+      answerContainerSelector: '.results-section',
+      answerRowSelectorTemplate: '.result-row.row-{index}'
+    },
+    coordinateConfig: {
+      taskCoordinates: { x: 'right', y: 'center' },
+      answerCoordinates: { x: 'left', y: 'center' }
+    }
+  },
+  LEFT_TO_RIGHT: {
+    selectors: {
+      taskContainerSelector: '.task-container',
+      taskRowSelector: '.task-item',
+      taskTargetSelector: '.target',
+      answerContainerSelector: '.answer-container',
+      answerRowSelectorTemplate: '.answer-item.item-{index}'
+    },
+    coordinateConfig: {
+      taskCoordinates: { x: 'right', y: 'center' },
+      answerCoordinates: { x: 'left', y: 'center' }
+    }
+  }
+} as const;
+
 export interface ConnectionLineCalculationProps<T, A> {
   tasks: T[];
   assignments: Record<string, A | null>;
@@ -8,6 +56,8 @@ export interface ConnectionLineCalculationProps<T, A> {
   containerRef: React.RefObject<HTMLDivElement>;
   getTaskId: (task: T) => string;
   compareAnswers: (assignment: A, poolAnswer: A) => boolean;
+  selectors: ConnectionLineSelectors;
+  coordinateConfig?: ConnectionLineCoordinateConfig;
   debug?: boolean;
 }
 
@@ -18,83 +68,119 @@ export function useConnectionLines<T, A>({
   containerRef,
   getTaskId,
   compareAnswers,
+  selectors,
+  coordinateConfig = {
+    taskCoordinates: { x: 'right', y: 'center' },
+    answerCoordinates: { x: 'left', y: 'center' }
+  },
   debug = false
 }: ConnectionLineCalculationProps<T, A>) {
   const [connectionLines, setConnectionLines] = useState<ConnectionLine[]>([]);
 
+  const calculateCoordinates = (
+    element: Element,
+    containerRect: DOMRect,
+    config: { x: 'left' | 'right' | 'center'; y: 'top' | 'bottom' | 'center' }
+  ) => {
+    const rect = element.getBoundingClientRect();
+    
+    let x: number;
+    switch (config.x) {
+      case 'left':
+        x = rect.left - containerRect.left;
+        break;
+      case 'right':
+        x = rect.right - containerRect.left;
+        break;
+      case 'center':
+        x = rect.left + rect.width / 2 - containerRect.left;
+        break;
+    }
+    
+    let y: number;
+    switch (config.y) {
+      case 'top':
+        y = rect.top - containerRect.top;
+        break;
+      case 'bottom':
+        y = rect.bottom - containerRect.top;
+        break;
+      case 'center':
+        y = rect.top + rect.height / 2 - containerRect.top;
+        break;
+    }
+    
+    return { x, y };
+  };
+
   useEffect(() => {
     const calculateConnectionLines = () => {
       if (!containerRef.current) {
-        if (debug) console.log('No container ref');
         return;
       }
       
-      const lines: ConnectionLine[] = [];
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
       
-      if (debug) console.log('Calculating connection lines, assignments:', assignments);
+      const lines: ConnectionLine[] = [];
       
-      // Find all assigned results
       tasks.forEach((task, taskIndex) => {
         const taskId = getTaskId(task);
         const assignment = assignments[taskId];
-        if (debug) console.log(`Task ${taskIndex}:`, taskId, 'assignment:', assignment);
         if (!assignment) return;
         
-        // Find the equation row element
-        const equationRow = container.querySelector(`.equation-row:nth-child(${taskIndex + 1})`);
-        if (debug) console.log('Found equation row:', equationRow);
-        if (!equationRow) return;
+        const taskRow = container.querySelector(`${selectors.taskContainerSelector} ${selectors.taskRowSelector}:nth-child(${taskIndex + 1})`);
+        if (!taskRow) return;
         
-        // Find the result placeholder in that row
-        const resultPlaceholder = equationRow.querySelector('.result-placeholder');
-        if (debug) console.log('Found result placeholder:', resultPlaceholder);
-        if (!resultPlaceholder) return;
+        const taskTarget = taskRow.querySelector(selectors.taskTargetSelector);
+        if (!taskTarget) return;
         
-        // Find the original answer position in results section
         const answerIndex = answerPool.findIndex(poolAnswer => 
           compareAnswers(assignment, poolAnswer)
         );
-        if (debug) console.log('Answer index:', answerIndex);
         if (answerIndex === -1) return;
         
-        const resultRow = container.querySelector(`.results-section .result-row.row-${answerIndex}`);
-        if (debug) console.log('Found result row:', resultRow);
-        if (!resultRow) return;
+        const answerRowSelector = selectors.answerRowSelectorTemplate.replace('{index}', answerIndex.toString());
+        const answerRow = container.querySelector(`${selectors.answerContainerSelector} ${answerRowSelector}`);
+        if (!answerRow) return;
         
-        // Calculate coordinates
-        const placeholderRect = resultPlaceholder.getBoundingClientRect();
-        const resultRowRect = resultRow.getBoundingClientRect();
-        
-        // Start from the right edge of the result placeholder (end of connector line)
-        const fromX = placeholderRect.right - containerRect.left;
-        const fromY = placeholderRect.top + placeholderRect.height / 2 - containerRect.top;
-        
-        // End at the left edge of the result row (where the connector line segment appears)
-        const toX = resultRowRect.left - containerRect.left;
-        const toY = resultRowRect.top + resultRowRect.height / 2 - containerRect.top;
-        
-        if (debug) console.log('Line coordinates:', { fromX, fromY, toX, toY });
+        const fromCoords = calculateCoordinates(taskTarget, containerRect, coordinateConfig.taskCoordinates);
+        const toCoords = calculateCoordinates(answerRow, containerRect, coordinateConfig.answerCoordinates);
         
         lines.push({
-          fromX,
-          fromY,
-          toX,
-          toY,
+          fromX: fromCoords.x,
+          fromY: fromCoords.y,
+          toX: toCoords.x,
+          toY: toCoords.y,
           taskId,
           answerIndex
         });
       });
       
-      if (debug) console.log('Final connection lines:', lines);
       setConnectionLines(lines);
     };
+
+    const calculateWithRetry = () => {
+      calculateConnectionLines();
+      
+      const timeouts = [50, 100, 200, 500];
+      timeouts.forEach(delay => {
+        setTimeout(calculateConnectionLines, delay);
+      });
+    };
+
+    const handleResize = () => {
+      setTimeout(calculateConnectionLines, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
     
-    // Delay calculation to ensure DOM is updated
-    const timeoutId = setTimeout(calculateConnectionLines, 100);
-    return () => clearTimeout(timeoutId);
-  }, [tasks, assignments, answerPool, containerRef, getTaskId, compareAnswers, debug]);
+    calculateWithRetry();
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [tasks, assignments, answerPool, containerRef, getTaskId, compareAnswers, selectors, coordinateConfig, debug]);
 
   return connectionLines;
 }

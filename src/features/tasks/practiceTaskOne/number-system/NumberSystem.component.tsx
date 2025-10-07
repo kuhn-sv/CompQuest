@@ -2,14 +2,23 @@ import React, { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import './number-system.page.scss';
 import { generateSet } from './numberSystem.helper';
-import { Difficulty } from '../../../shared/enums/difficulty.enum';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 import type { NumberTask, AnswerOption } from './interfaces/numberSystem.interface';
 import type { AssignmentMap } from './numberSystem.types';
 import { DifficultySelector, EquationRow, ResultsSection } from './components';
-import { ConnectionOverlay } from '../../../shared/components/ConnectionOverlay';
-import { useDragAndDrop, useConnectionLines } from '../../../shared/hooks';
+import { ConnectionOverlay, Timer } from '../../../../shared/components';
+import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
 
-const NumberSystemPage: React.FC = () => {
+interface NumberSystemComponentProps {
+	taskProgress?: {
+		current: number;
+		total: number;
+	};
+}
+
+const NumberSystemComponent: React.FC<NumberSystemComponentProps> = ({ 
+	taskProgress
+}) => {
 	const [difficulty, setDifficulty] = useState<Difficulty>(Difficulty.Easy);
 	const [tasks, setTasks] = useState<NumberTask[]>([]);
 	const [answerPool, setAnswerPool] = useState<AnswerOption[]>([]);
@@ -17,6 +26,9 @@ const NumberSystemPage: React.FC = () => {
 	const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
 	const containerRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
 	const [evaluated, setEvaluated] = useState<boolean>(false);
+
+	// Timer functionality
+	const { time, isRunning, start, stop, reset, formatTime } = useTimer();
 
 	// Drag and Drop logic
 	const {
@@ -29,7 +41,7 @@ const NumberSystemPage: React.FC = () => {
 		handleDrop,
 		handleDragEnd,
 		resetDragState
-	} = useDragAndDrop<AnswerOption>();
+	} = useDragAndDrop<AnswerOption>(DRAG_DROP_PRESETS.NUMBER_SYSTEM);
 
 	// Connection lines calculation
 	const connectionLines = useConnectionLines({
@@ -40,6 +52,7 @@ const NumberSystemPage: React.FC = () => {
 		getTaskId: (task) => task.id,
 		compareAnswers: (assignment, poolAnswer) => 
 			assignment.value === poolAnswer.value && assignment.base === poolAnswer.base,
+		...CONNECTION_LINE_PRESETS.NUMBER_SYSTEM,
 		debug: false
 	});
 
@@ -50,6 +63,9 @@ const NumberSystemPage: React.FC = () => {
 		setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
 		setEvaluated(false);
 		setActiveTaskId(null);
+		// Start the timer when a new set begins
+		reset();
+		start();
 	};
 
 	const resetSet = () => {
@@ -57,6 +73,11 @@ const NumberSystemPage: React.FC = () => {
 		setEvaluated(false);
 		setActiveTaskId(null);
 		resetDragState();
+		// Reset and restart timer
+		reset();
+		if (tasks.length > 0) {
+			start();
+		}
 	};
 
 	// Wrapper function for assignment logic
@@ -95,6 +116,11 @@ const NumberSystemPage: React.FC = () => {
 
 	const evaluate = () => {
 		setEvaluated(true);
+		// Stop timer when task is completed successfully
+		const success = correctCount === tasks.length;
+		if (success) {
+			stop();
+		}
 	};
 
 	return (
@@ -103,6 +129,31 @@ const NumberSystemPage: React.FC = () => {
 				<Link to="/dashboard" className="back-to-dashboard">← Zurück zum Dashboard</Link>
 				<h1>Zahlensysteme – Übung 1.1</h1>
 			</div>
+
+			{/* Timer and progress display - always visible when tasks are active */}
+			{tasks.length > 0 && (
+				<div className="ns-timer-section">
+					{taskProgress && (
+						<div className="task-progress-info">
+							<span className="progress-text">
+								Aufgabe {taskProgress.current} / {taskProgress.total}
+							</span>
+							<div className="progress-bar">
+								<div 
+									className="progress-fill"
+									style={{ width: `${(taskProgress.current / taskProgress.total) * 100}%` }}
+								/>
+							</div>
+						</div>
+					)}
+					<Timer 
+						time={time}
+						isRunning={isRunning}
+						formatTime={formatTime}
+						className="ns-timer"
+					/>
+				</div>
+			)}
 
 			<DifficultySelector
 				difficulty={difficulty}
@@ -161,13 +212,6 @@ const NumberSystemPage: React.FC = () => {
 						/>
 					</div>
 
-					{/* Debug info (can be removed later) */}
-					{draggedAnswer && (
-						<div style={{ position: 'fixed', top: '10px', right: '10px', background: 'rgba(0,0,0,0.8)', color: 'white', padding: '10px', borderRadius: '5px', zIndex: 1000 }}>
-							Dragging: {draggedAnswer.value}<sub>{draggedAnswer.base}</sub>
-						</div>
-					)}
-
 					{/* SVG overlay for connection lines */}
 					<ConnectionOverlay connectionLines={connectionLines} />
 				</div>
@@ -176,4 +220,4 @@ const NumberSystemPage: React.FC = () => {
 	);
 };
 
-export default NumberSystemPage;
+export default NumberSystemComponent;

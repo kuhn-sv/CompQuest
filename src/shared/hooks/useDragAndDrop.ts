@@ -5,6 +5,36 @@ export interface DragDropItem {
   base: number;
 }
 
+export interface DragDropSelectors {
+  /** Selector for draggable elements that need visual feedback during drag */
+  draggableElementSelector: string;
+}
+
+export interface DragDropConfig {
+  /** CSS selectors for finding DOM elements */
+  selectors: DragDropSelectors;
+  /** Enable visual feedback during drag operations */
+  enableVisualFeedback?: boolean;
+}
+
+// Preset configurations for common use cases
+export const DRAG_DROP_PRESETS = {
+  /** Standard configuration for NumberSystem component */
+  NUMBER_SYSTEM: {
+    selectors: {
+      draggableElementSelector: '.input-field.result-field'
+    },
+    enableVisualFeedback: true
+  },
+  /** Generic configuration for any draggable elements */
+  GENERIC: {
+    selectors: {
+      draggableElementSelector: '.draggable-item'
+    },
+    enableVisualFeedback: true
+  }
+} as const;
+
 export interface DragDropHandlers<T extends DragDropItem> {
   draggedItem: T | null;
   dragOverTargetId: string | null;
@@ -17,7 +47,7 @@ export interface DragDropHandlers<T extends DragDropItem> {
   resetDragState: () => void;
 }
 
-export function useDragAndDrop<T extends DragDropItem>(): DragDropHandlers<T> {
+export function useDragAndDrop<T extends DragDropItem>(config: DragDropConfig): DragDropHandlers<T> {
   const [draggedItem, setDraggedItem] = useState<T | null>(null);
   const [dragOverTargetId, setDragOverTargetId] = useState<string | null>(null);
 
@@ -34,13 +64,15 @@ export function useDragAndDrop<T extends DragDropItem>(): DragDropHandlers<T> {
     // Prevent event bubbling
     e.stopPropagation();
     
-    // Add visual feedback immediately
-    setTimeout(() => {
-      const element = e.target as HTMLElement;
-      element.style.opacity = '0.5';
-      element.style.transform = 'rotate(3deg)';
-    }, 0);
-  }, []);
+    // Add visual feedback immediately if enabled
+    if (config.enableVisualFeedback) {
+      setTimeout(() => {
+        const element = e.target as HTMLElement;
+        element.style.opacity = '0.5';
+        element.style.transform = 'rotate(3deg)';
+      }, 0);
+    }
+  }, [config.enableVisualFeedback]);
 
   const handleDragOver = useCallback((e: React.DragEvent, targetId: string) => {
     e.preventDefault();
@@ -83,13 +115,15 @@ export function useDragAndDrop<T extends DragDropItem>(): DragDropHandlers<T> {
     setDraggedItem(null);
     setDragOverTargetId(null);
     
-    // Reset visual styling
-    const draggedElements = document.querySelectorAll('.input-field.result-field');
-    draggedElements.forEach(el => {
-      (el as HTMLElement).style.opacity = '';
-      (el as HTMLElement).style.transform = '';
-    });
-  }, []);
+    // Reset visual styling if enabled
+    if (config.enableVisualFeedback) {
+      const draggedElements = document.querySelectorAll(config.selectors.draggableElementSelector);
+      draggedElements.forEach(el => {
+        (el as HTMLElement).style.opacity = '';
+        (el as HTMLElement).style.transform = '';
+      });
+    }
+  }, [config.selectors.draggableElementSelector, config.enableVisualFeedback]);
 
   const resetDragState = useCallback(() => {
     setDraggedItem(null);
