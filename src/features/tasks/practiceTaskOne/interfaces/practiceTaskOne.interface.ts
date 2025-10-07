@@ -1,4 +1,4 @@
-export type SubTaskType = 'number-system' | 'data-package' | 'twos-complement';
+export type SubTaskType = 'number-system' | 'positive-arithmetic' | 'data-package' | 'twos-complement';
 
 export interface SubTaskConfig {
   id: SubTaskType;

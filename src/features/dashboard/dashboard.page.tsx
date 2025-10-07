@@ -10,6 +10,18 @@ const DashboardPage: React.FC = () => {
 
   const exercises = [
     {
+      id: 'number-system-direct',
+      title: 'Zahlensysteme – Übung 1.1 (Direkt)',
+      description: 'Direkter Einstieg in den Zahlensystem-Konverter (Easy→Medium→Hard).',
+      path: '/task/number-system'
+    },
+    {
+      id: 'positive-arithmetic-direct',
+      title: 'Positive Arithmetik – Übung 1.2 (Direkt)',
+      description: 'Direkter Einstieg in Positive Arithmetik (Skelett/Prototyp).',
+      path: '/task/positive-arithmetic'
+    },
+    {
       id: 'practice-task-one',
       title: 'Übungsaufgabe 1.1',
       description: 'Zahlensystem-Konverter: Verbinde Zahlen mit ihren entsprechenden Darstellungen',

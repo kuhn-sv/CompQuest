@@ -79,6 +79,28 @@ const App: React.FC = () => {
             } 
           />
 
+          {/* Direct links into specific Practice Task One subtasks */}
+          <Route 
+            path="/task/number-system" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage initialSubTask="number-system" />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/task/positive-arithmetic" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage initialSubTask="positive-arithmetic" />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Compatibility redirects for pluralized paths */}
+          <Route path="/tasks/number-system" element={<Navigate to="/task/number-system" replace />} />
+
           {/* Root Route - Redirect basierend auf Auth Status */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           

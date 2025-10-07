@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { ConnectionLine } from '../components/ConnectionOverlay';
 
 export interface ConnectionLineSelectors {
@@ -76,6 +76,7 @@ export function useConnectionLines<T, A>({
   debug = false
 }: ConnectionLineCalculationProps<T, A>) {
   const [connectionLines, setConnectionLines] = useState<ConnectionLine[]>([]);
+  const timeoutsRef = useRef<number[]>([]);
 
   const calculateCoordinates = (
     element: Element,
@@ -114,6 +115,19 @@ export function useConnectionLines<T, A>({
   };
 
   useEffect(() => {
+    const shallowEqualLines = (a: ConnectionLine[], b: ConnectionLine[]) => {
+      if (a.length !== b.length) return false;
+      for (let i = 0; i < a.length; i++) {
+        const x = a[i], y = b[i];
+        if (
+          x.fromX !== y.fromX || x.fromY !== y.fromY ||
+          x.toX !== y.toX || x.toY !== y.toY ||
+          x.taskId !== y.taskId || x.answerIndex !== y.answerIndex
+        ) return false;
+      }
+      return true;
+    };
+
     const calculateConnectionLines = () => {
       if (!containerRef.current) {
         return;
@@ -157,15 +171,20 @@ export function useConnectionLines<T, A>({
         });
       });
       
-      setConnectionLines(lines);
+      // Only update state if lines actually changed to prevent render loops
+      setConnectionLines(prev => (shallowEqualLines(prev, lines) ? prev : lines));
     };
 
     const calculateWithRetry = () => {
       calculateConnectionLines();
       
       const timeouts = [50, 100, 200, 500];
+      // Clear previous pending timeouts
+      timeoutsRef.current.forEach(id => clearTimeout(id));
+      timeoutsRef.current = [];
       timeouts.forEach(delay => {
-        setTimeout(calculateConnectionLines, delay);
+        const id = window.setTimeout(calculateConnectionLines, delay);
+        timeoutsRef.current.push(id);
       });
     };
 
@@ -179,6 +198,9 @@ export function useConnectionLines<T, A>({
     
     return () => {
       window.removeEventListener('resize', handleResize);
+      // Cleanup pending timeouts
+      timeoutsRef.current.forEach(id => clearTimeout(id));
+      timeoutsRef.current = [];
     };
   }, [tasks, assignments, answerPool, containerRef, getTaskId, compareAnswers, selectors, coordinateConfig, debug]);
 

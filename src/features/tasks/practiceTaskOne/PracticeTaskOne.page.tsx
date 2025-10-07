@@ -5,6 +5,7 @@ import {
   SubTaskComponentProps
 } from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
+import PositiveArithmeticComponent from './positive-arithmetic/PositiveArithmetic.component';
 // TODO: Import other subtasks when they're available
 // import DataPackagePage from '../dataPackage/DataPackage.page';
 // import TwosComplementPage from '../twosComplement/TwosComplement.page';
@@ -26,6 +27,12 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
       title: 'Zahlensystem-Konverter',
       description: 'Verbinde jede Zahl mit ihrem passenden Gegenstück rechts.',
       component: NumberSystemComponent as React.ComponentType<SubTaskComponentProps>
+    },
+    {
+      id: 'positive-arithmetic',
+      title: 'Positive Arithmetik',
+      description: 'Additionen und Subtraktionen mit positiven Zahlen.',
+      component: PositiveArithmeticComponent as React.ComponentType<SubTaskComponentProps>
     },
     // TODO: Add other subtasks when available
     // {
@@ -77,12 +84,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
         {/* Task Content */}
         <div className="practice-task-one-page__task-content">
           {CurrentTaskComponent && (
-            <CurrentTaskComponent 
-              taskProgress={{
-                current: currentTaskIndex + 1,
-                total: subTaskConfigs.length
-              }}
-            />
+            <CurrentTaskComponent />
           )}
         </div>
       </div>

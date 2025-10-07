@@ -60,20 +60,15 @@ const ranges: Record<Difficulty, { min: number; max: number }> = {
 
 export const generateLeichtSet = (): GeneratedSet => {
   const { min, max } = ranges[Difficulty.Easy];
-  // Two directions: bin->dec and dec->bin; produce 3 tasks total
-  const directions: Array<{ from: Base; to: Base }> = [
-    { from: 2, to: 10 },
-    { from: 10, to: 2 },
-  ];
+  // Easy: Always decimal (left) to binary (right), 4 tasks
   const tasks: NumberTask[] = [];
-
-  // generate 3 random tasks, alternating directions
-  for (let i = 0; i < 3; i++) {
-    const dir = directions[i % directions.length];
+  for (let i = 0; i < 4; i++) {
     const n = randomInt(min, max);
-    const sourceValue = dir.from === 10 ? String(n) : toBaseString(n, dir.from);
-    const expectedValue = toBaseString(n, dir.to);
-    tasks.push({ id: uid(), fromBase: dir.from, toBase: dir.to, sourceValue, expectedValue });
+    const fromBase: Base = 10;
+    const toBaseVal: Base = 2;
+    const sourceValue = String(n);
+    const expectedValue = toBaseString(n, toBaseVal);
+    tasks.push({ id: uid(), fromBase, toBase: toBaseVal, sourceValue, expectedValue });
   }
 
   const answerPool: AnswerOption[] = shuffle(
@@ -82,12 +77,71 @@ export const generateLeichtSet = (): GeneratedSet => {
   return { tasks, answerPool };
 };
 
+// Medium: decimal ↔ binary, octal, hexadecimal (cover all three bases once)
+export const generateMittelSet = (): GeneratedSet => {
+  const { min, max } = ranges[Difficulty.Medium];
+  const bases: Base[] = [2, 8, 16];
+
+  // Medium: Always decimal (left) to one of [2,8,16]; 4 tasks
+  // Ensure all three bases appear at least once; the 4th is a random repeat
+  const extraBase = bases[randomInt(0, bases.length - 1)];
+  const taskBases: Base[] = shuffle([...bases, extraBase]);
+
+  const tasks: NumberTask[] = taskBases.map((b) => {
+    const n = randomInt(min, max);
+    const fromBase: Base = 10;
+    const toBaseVal: Base = b;
+    const sourceValue = String(n);
+    const expectedValue = toBaseString(n, toBaseVal);
+    return { id: uid(), fromBase, toBase: toBaseVal, sourceValue, expectedValue };
+  });
+
+  const answerPool: AnswerOption[] = shuffle(
+    tasks.map<AnswerOption>((t) => ({ value: t.expectedValue, base: t.toBase }))
+  );
+
+  return { tasks, answerPool };
+};
+
+// Hard: all base variations between 2, 8, 10, 16 (unordered pairs), random direction per pair
+export const generateSchwerSet = (): GeneratedSet => {
+  const { min, max } = ranges[Difficulty.Hard];
+  const bases: Base[] = [2, 8, 10, 16];
+  const pairs: Array<[Base, Base]> = [];
+  for (let i = 0; i < bases.length; i++) {
+    for (let j = i + 1; j < bases.length; j++) {
+      pairs.push([bases[i], bases[j]]);
+    }
+  }
+
+  // Pick exactly 4 unique random pairs
+  const selectedPairs = shuffle(pairs).slice(0, 4);
+
+  const tasks: NumberTask[] = selectedPairs.map(([a, b]) => {
+    const n = randomInt(min, max);
+    const flip = Math.random() < 0.5;
+    const fromBase: Base = flip ? a : b;
+    const toBaseVal: Base = flip ? b : a;
+    const sourceValue = fromBase === 10 ? String(n) : toBaseString(n, fromBase);
+    const expectedValue = toBaseString(n, toBaseVal);
+    return { id: uid(), fromBase, toBase: toBaseVal, sourceValue, expectedValue };
+  });
+
+  const answerPool: AnswerOption[] = shuffle(
+    tasks.map<AnswerOption>((t) => ({ value: t.expectedValue, base: t.toBase }))
+  );
+
+  return { tasks, answerPool };
+};
+
 export const generateSet = (difficulty: Difficulty): GeneratedSet => {
   switch (difficulty) {
     case Difficulty.Easy:
       return generateLeichtSet();
     case Difficulty.Medium:
+      return generateMittelSet();
     case Difficulty.Hard:
+      return generateSchwerSet();
     case Difficulty.Expert:
       // Placeholder: refine later for each difficulty
       return generateLeichtSet();

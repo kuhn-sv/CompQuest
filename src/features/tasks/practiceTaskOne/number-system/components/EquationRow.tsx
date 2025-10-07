@@ -31,7 +31,7 @@ export const EquationRow: React.FC<EquationRowProps> = ({
 }) => {
 	return (
 		<div 
-			className={`equation-row ${isCorrect ? 'correct' : ''} ${isWrong ? 'wrong' : ''} ${isActive ? 'active' : ''} ${assignment ? 'has-result' : ''} ${isDragOver ? 'drag-over' : ''}`} 
+			className={`equation-row ${isCorrect ? 'correct' : ''} ${isWrong ? 'incorrect' : ''} ${isActive ? 'active' : ''} ${assignment ? 'has-result' : ''} ${isDragOver ? 'drag-over' : ''}`} 
 			onClick={onClick}
 			onDragOver={onDragOver}
 			onDragEnter={onDragEnter}
