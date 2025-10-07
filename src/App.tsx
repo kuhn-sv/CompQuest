@@ -6,7 +6,7 @@ import DashboardPage from './features/dashboard/dashboard.page';
 import TwosComplementPage from './features/tasks/twosComplement/twoscomplement.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
-import DataPackagePage from './features/tasks/dataPackage/DataPackage.page';
+import DataPackagePage from './features/tasks/dataPackage/datapackage.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 
 const App: React.FC = () => {
