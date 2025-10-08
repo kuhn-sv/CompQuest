@@ -1,0 +1,129 @@
+// Shared styles for number system and positive arithmetic tasks
+@use '../../styles/_variables' as *;
+
+.equation-row {
+  display: flex;
+  align-items: center;
+  height: $ns-row-height;
+  transition: background $transition-slow;
+  position: relative;
+
+  &.active {
+    background: rgba(0,0,0,0.03);
+    border-radius: $border-radius-sm;
+  }
+  &.correct {
+    border: none;
+    animation: correctPulse 0.6s ease-out;
+  }
+  &.incorrect {
+    border: none;
+    animation: incorrectShake 0.5s ease-in-out;
+  }
+  &.drag-over {
+    border: 2px dashed var(--primary);
+    background-color: var(--surface);
+  }
+  .connector-line {
+    width: 120px;
+    height: 3px;
+    background: var(--primary);
+    border-radius: 1.5px;
+    &.success { background: var(--success); }
+    &.error { background: var(--error); }
+  }
+  .equals-sign {
+    background: var(--surface);
+    border: 2px solid var(--primary);
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 16px;
+    &.success { background: var(--success); border-color: var(--success); color: #fff; }
+    &.error { background: var(--error); border-color: var(--error); color: #fff; }
+  }
+  .result-placeholder {
+    min-width: $ns-box-width;
+    height: $ns-field-height;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+  }
+}
+
+.lead-line {
+  height: 2px;
+  background: var(--primary);
+  border-radius: 1.5px;
+  &--leading {
+    width: 60px;
+    flex-shrink: 0;
+  }
+  &--trailing {
+    flex: 1;
+    min-width: 80px;
+    background: var(--primary10);
+    &.success { background: var(--success); }
+    &.error { background: var(--error); }
+  }
+}
+
+.input-field {
+  height: $ns-field-height;
+  padding: $spacing-sm;
+  width: $ns-box-width;
+  border-radius: $border-radius-sm;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--primary);
+  transition: all 0.3s ease;
+  &.result-field {
+    border-color: var(--surface-border);
+    cursor: pointer;
+    &.used { opacity: 0.3; cursor: not-allowed; }
+  &.assigned { background: var(--surface); border-color: var(--primary); animation: slideInResult 0.4s ease-out; }
+  &.dragging { opacity: 0.5; transform: rotate(3deg); cursor: grabbing; }
+  &.success { background: var(--success); border-color: transparent; color: #fff; box-shadow: none; }
+  &.error { background: var(--error); border-color: transparent; color: #fff; box-shadow: none; }
+  }
+}
+
+.result-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: $ns-row-height;
+  transition: opacity 0.3s ease;
+  .connection-line {
+    position: absolute;
+    left: 100%;
+    top: 0;
+    width: 100px;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+    &.success { background: var(--success); }
+    &.error { background: var(--error); }
+  }
+}
+
+@keyframes slideInResult {
+  from { opacity: 0; transform: translateX(100px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes correctPulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--success), 0.5); }
+  70% { box-shadow: 0 0 0 8px rgba(var(--success), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--success), 0); }
+}
+@keyframes incorrectShake {
+  10%, 90% { transform: translateX(-2px); }
+  20%, 80% { transform: translateX(4px); }
+  30%, 50%, 70% { transform: translateX(-6px); }
+  40%, 60% { transform: translateX(6px); }
+}

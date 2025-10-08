@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from './shared/hooks/useTheme';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, ProtectedRoute } from './features/auth';
 import './App.scss';
@@ -10,9 +11,12 @@ import DataPackagePage from './features/tasks/dataPackage/datapackage.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 
 const App: React.FC = () => {
+  // Initialize theme handling (forced to dark by useTheme implementation)
+  useTheme();
   return (
     <AuthProvider>
       <Router>
+        {/* Theme toggle removed; app runs in dark mode */}
         <Routes>
           {/* Public Routes - nur für nicht angemeldete Nutzer */}
           <Route 

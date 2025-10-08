@@ -15,15 +15,14 @@
     .equals-sign {
         font-size: $font-size-lg;
         font-weight: $font-weight-bold;
-        color: $dark-gray;
+        
         margin: 0 $spacing-sm;
     }
     
     .result-input {
         padding: $spacing-sm $spacing-md;
-        border: $border-width-base solid $border-color-default;
+        border: $border-width-base solid ;
         border-radius: $border-radius-sm;
-        background-color: $light-gray-2;
         min-width: $input-width-md;
         text-align: center;
         transition: all $transition-slow;
@@ -34,15 +33,15 @@
         }
         
         &.correct {
-            background-color: $success-green-bg;
-            border-color: $success-green;
-            color: $success-green-text;
+            background-color: var(--success)-bg;
+            border-color: var(--success);
+            color: var(--success)-text;
             font-weight: $font-weight-bold;
         }
     }
     
     .success-indicator {
-        color: $success-green;
+        color: var(--success);
         font-size: 1.5em;
         font-weight: $font-weight-bold;
         margin-left: $spacing-sm;

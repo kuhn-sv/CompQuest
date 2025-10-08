@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
+import ExercisesList from './components/ExercisesList.component';
+import ExercisesModal from './components/ExercisesModal.component';
 import { useAuth } from '../auth';
 import './dashboard.page.scss';
 import Model3D from './components/model3d/model3d.component';
@@ -90,41 +92,9 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Exercises Overlay */}
-      {showExercises && (
-        <div className="dashboard__overlay">
-          <div className="dashboard__overlay-content">
-            <div className="dashboard__overlay-header">
-              <h2>Übungsaufgaben</h2>
-              <button 
-                className="dashboard__close-btn"
-                onClick={() => setShowExercises(false)}
-                aria-label="Schließen"
-              >
-                ✕
-              </button>
-            </div>
-            
-            <div className="dashboard__exercises">
-              {exercises.map((exercise) => (
-                <Link
-                  key={exercise.id}
-                  to={exercise.path}
-                  className="dashboard__exercise-card"
-                >
-                  <h3 className="dashboard__exercise-title">{exercise.title}</h3>
-                  <p className="dashboard__exercise-description">
-                    {exercise.description}
-                  </p>
-                  <div className="dashboard__exercise-arrow">
-                    <span>→</span>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <ExercisesModal show={showExercises} onClose={() => setShowExercises(false)}>
+        <ExercisesList exercises={exercises} />
+      </ExercisesModal>
     </div>
   );
 };

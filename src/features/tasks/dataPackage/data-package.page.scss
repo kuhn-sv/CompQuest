@@ -29,7 +29,7 @@
   h1 {
     margin: 0;
     font-size: 2rem;
-    color: $dark-gray;
+    
     font-weight: $font-weight-bold;
   }
 }
@@ -41,7 +41,7 @@
     display: block;
     margin-bottom: $spacing-sm;
     font-weight: $font-weight-semibold;
-    color: $dark-gray;
+    
   }
 }
 
@@ -52,14 +52,12 @@
   
   .generated-number-input {
     padding: $spacing-sm $spacing-md;
-    border: $border-width-thick solid $medium-gray-3;
+    border: $border-width-thick solid var(--surface)-3;
     border-radius: $border-radius-sm;
     font-size: $font-size-base;
     font-weight: $font-weight-bold;
     width: $input-width-sm;
-    text-align: center;
-    background-color: $light-gray;
-    color: $dark-gray;
+    text-align: center;    
     
     &:disabled {
       opacity: 0.8;
@@ -69,8 +67,6 @@
   
   .generate-button {
     padding: $spacing-sm $spacing-lg;
-    background-color: $primary-blue-light;
-    color: $white;
     border: none;
     border-radius: $border-radius-sm;
     font-size: $font-size-sm;

@@ -2,9 +2,13 @@ import React, { useMemo, useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import '../number-system/number-system.page.scss';
 import { ConnectionOverlay } from '../../../../shared/components';
+import TaskActionButtons from '../../../../shared/components/TaskActionButtons/TaskActionButtons.component';
 import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
-import { EquationRow } from './EquationRow';
+import type { DragDropItem } from '../../../../shared/hooks/useDragAndDrop';
+import { EquationRow as SharedEquationRow } from '../../../../shared/components/equationrow/EquationRow';
+import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
 import { ResultsSection } from './ResultsSection';
+import type { AnswerOptionBase } from '../../../../shared/numberTask/NumberTask.types';
 import { generateAdditionSet, AdditionTask } from './addition.helper';
 import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 
@@ -30,8 +34,8 @@ const PositiveArithmeticComponent: React.FC = () => {
   const stages: Difficulty[] = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard];
   const [stageIndex, setStageIndex] = useState<number>(0);
   const [tasks, setTasks] = useState<AdditionTask[]>([]);
-  const [answerPool, setAnswerPool] = useState<{ value: string; base: number }[]>([]);
-  const [assignments, setAssignments] = useState<Record<string, { value: string; base: number } | null>>({});
+  const [answerPool, setAnswerPool] = useState<AnswerOptionBase[]>([]);
+  const [assignments, setAssignments] = useState<Record<string, AnswerOptionBase | null>>({});
   const [activeTaskId, setActiveTaskId] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null) as React.RefObject<HTMLDivElement>;
   const [evaluated, setEvaluated] = useState<boolean>(false);
@@ -45,22 +49,35 @@ const PositiveArithmeticComponent: React.FC = () => {
 
   // Drag and Drop logic
   const {
-    draggedItem: draggedAnswer,
+    draggedItem: draggedAnswerInternal,
     dragOverTargetId: dragOverTaskId,
-    handleDragStart,
+    handleDragStart: handleDragStartInternal,
     handleDragOver,
     handleDragEnter,
     handleDragLeave,
     handleDrop,
     handleDragEnd,
     resetDragState
-  } = useDragAndDrop<{ value: string; base: number }>(DRAG_DROP_PRESETS.NUMBER_SYSTEM);
+  } = useDragAndDrop<DragDropItem>(DRAG_DROP_PRESETS.NUMBER_SYSTEM);
+
+  // Map internal DnD item (requires base: number) to external AnswerOptionBase shape
+  const draggedAnswer: AnswerOptionBase | null = draggedAnswerInternal ? { value: draggedAnswerInternal.value, base: draggedAnswerInternal.base } : null;
+  const handleDragStart = useCallback((e: React.DragEvent, answer: AnswerOptionBase) => {
+    const baseNum = typeof answer.base === 'string' ? parseInt(answer.base, 10) : (answer.base as number | undefined);
+    if (baseNum == null || Number.isNaN(baseNum)) return; // ignore invalid drag
+    handleDragStartInternal(e, { value: answer.value, base: baseNum });
+  }, [handleDragStartInternal]);
 
   // Connection lines calculation
   const getTaskIdCb = useCallback((task: AdditionTask) => task.id, []);
-  const compareAnswersCb = useCallback((assignment: { value: string; base: number }, poolAnswer: { value: string; base: number }) => (
+  const compareAnswersCb = useCallback((assignment: AnswerOptionBase, poolAnswer: AnswerOptionBase) => (
     assignment.value === poolAnswer.value && assignment.base === poolAnswer.base
   ), []);
+  const evaluateStatusCb = useCallback((task: AdditionTask, assignment: AnswerOptionBase) => {
+    const aBase = typeof assignment.base === 'string' ? parseInt(assignment.base, 10) : assignment.base;
+    if (assignment.value === task.expected && aBase === task.base) return 'correct';
+    return 'wrong';
+  }, []);
 
   const connectionLines = useConnectionLines({
     tasks,
@@ -70,13 +87,15 @@ const PositiveArithmeticComponent: React.FC = () => {
     getTaskId: getTaskIdCb,
     compareAnswers: compareAnswersCb,
     ...CONNECTION_LINE_PRESETS.NUMBER_SYSTEM,
-    debug: false
+    debug: false,
+    evaluated,
+    evaluateStatus: evaluateStatusCb
   });
 
   const startSetForStage = (idx: number, options?: { resetTimer?: boolean }) => {
     const { resetTimer: shouldResetTimer = true } = options ?? {};
     const difficulty = stages[idx];
-    const { tasks, answerPool } = generateAdditionSet(difficulty);
+  const { tasks, answerPool } = generateAdditionSet(difficulty);
     setTasks(tasks);
     setAnswerPool(answerPool);
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
@@ -107,7 +126,7 @@ const PositiveArithmeticComponent: React.FC = () => {
   };
 
   // Assignment logic
-  const assignAnswer = (taskId: string, answer: { value: string; base: number }) => {
+  const assignAnswer = (taskId: string, answer: AnswerOptionBase) => {
     setAssignments(prev => {
       const next = { ...prev };
       for (const k of Object.keys(next)) {
@@ -119,7 +138,7 @@ const PositiveArithmeticComponent: React.FC = () => {
     setActiveTaskId(null);
   };
 
-  const onDropAnswer = (taskId: string, answer: { value: string; base: number }) => {
+  const onDropAnswer = (taskId: string, answer: AnswerOptionBase) => {
     assignAnswer(taskId, answer);
   };
 
@@ -134,7 +153,8 @@ const PositiveArithmeticComponent: React.FC = () => {
   const allAssigned = useMemo(() => tasks.length > 0 && tasks.every(t => assignments[t.id]), [tasks, assignments]);
   const correctCount = useMemo(() => tasks.filter(t => {
     const a = assignments[t.id];
-    return a && a.value === t.expected && a.base === t.base;
+    const aBase = typeof a?.base === 'string' ? parseInt(a.base, 10) : a?.base;
+    return !!a && a.value === t.expected && aBase === t.base;
   }).length, [tasks, assignments]);
 
   const evaluate = () => {
@@ -144,7 +164,8 @@ const PositiveArithmeticComponent: React.FC = () => {
     const total = tasks.length;
     const correct = tasks.filter(t => {
       const a = assignments[t.id];
-      return a && a.value === t.expected && a.base === t.base;
+      const aBase = typeof a?.base === 'string' ? parseInt(a.base, 10) : a?.base;
+      return !!a && a.value === t.expected && aBase === t.base;
     }).length;
     const points = correct;
     setStageScores(prev => {
@@ -190,14 +211,23 @@ const PositiveArithmeticComponent: React.FC = () => {
             <div className="equations-section">
               {tasks.map((t) => {
                 const assigned = assignments[t.id];
-                const isCorrect = evaluated && !!assigned && assigned.value === t.expected && assigned.base === t.base;
-                const isWrong = evaluated && !!assigned && !(assigned.value === t.expected && assigned.base === t.base);
+                const assignedBase = typeof assigned?.base === 'string' ? parseInt(assigned.base, 10) : assigned?.base;
+                const isCorrect = evaluated && !!assigned && assigned.value === t.expected && assignedBase === t.base;
+                const isWrong = evaluated && !!assigned && !(assigned.value === t.expected && assignedBase === t.base);
                 const isActive = activeTaskId === t.id;
+                const [zahl1, zahl2] = t.left.split(' + ');
+                const baseSub = t.base === 2 ? '₂' : t.base === 8 ? '₈' : t.base === 16 ? '₁₆' : '';
                 return (
-                  <EquationRow
+                  <SharedEquationRow
                     key={t.id}
-                    task={t}
-                    assignment={assigned}
+                    hasAssignment={!!assigned}
+                    sourceContent={
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
+                        <span>{zahl1}<sub style={{ marginLeft: 2 }}>{baseSub}</sub></span>
+                        <span>+ {zahl2}<sub style={{ marginLeft: 2 }}>{baseSub}</sub></span>
+                      </div>
+                    }
+                    assignedContent={assigned && assignedBase ? <NumberWithBase value={assigned.value} base={assignedBase as 2|8|10|16} /> : null}
                     isCorrect={isCorrect}
                     isWrong={isWrong}
                     isActive={isActive}
@@ -221,19 +251,22 @@ const PositiveArithmeticComponent: React.FC = () => {
               handleDragStart={handleDragStart}
               handleDragEnd={handleDragEnd}
               assignAnswer={assignAnswer}
+              evaluated={evaluated}
             />
           </div>
           <ConnectionOverlay connectionLines={connectionLines} />
           <div className="ns-controls">
-            <div className="actions">
-              {!evaluated && (
-                <button onClick={resetSet} disabled={!tasks.length}>Zurücksetzen</button>
-              )}
-              <button onClick={evaluate} disabled={!allAssigned}>Auswerten</button>
-              {evaluated && stageIndex < stages.length - 1 && (
-                <button onClick={goToNextStage}>Weiter</button>
-              )}
-            </div>
+            <TaskActionButtons
+              onReset={resetSet}
+              onEvaluate={evaluate}
+              onNext={goToNextStage}
+              showReset={!evaluated}
+              showEvaluate={true}
+              showNext={evaluated && stageIndex < stages.length - 1}
+              disableReset={!tasks.length}
+              disableEvaluate={!allAssigned}
+              disableNext={false}
+            />
             {evaluated && (
               <div className="result">Ergebnis: {correctCount} / {tasks.length} richtig</div>
             )}

@@ -7,6 +7,7 @@ export interface ConnectionLine {
   toY: number;
   taskId: string;
   answerIndex: number;
+  status?: 'correct' | 'wrong';
 }
 
 interface ConnectionOverlayProps {
@@ -37,15 +38,17 @@ export const ConnectionOverlay: React.FC<ConnectionOverlayProps> = ({
         {/* Define gradient for consistent line styling */}
         <defs>
           <linearGradient id="lineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-            <stop offset="0%" style={{stopColor: '#3b82f6', stopOpacity: 1}} />
-            <stop offset="100%" style={{stopColor: '#6366f1', stopOpacity: 1}} />
+            <stop offset="0%" style={{stopColor: 'var(--primary)', stopOpacity: 1}} />
+            <stop offset="100%" style={{stopColor: 'var(--primary)', stopOpacity: 1}} />
           </linearGradient>
         </defs>
         
         {connectionLines.map((line) => {
           // Calculate bend points for L-shaped line - extend further left to close gap
           const midX = line.fromX + (line.toX - line.fromX) * 0.3; // Closer to fromX (30% instead of 60%)
-                    
+          let strokeColor = 'var(--primary10)';
+          if (line.status === 'correct') strokeColor = 'var(--success)';
+          if (line.status === 'wrong') strokeColor = 'var(--error)';
           return (
             <g key={`${line.taskId}-${line.answerIndex}`}>
               {/* Horizontal segment from result to bend point */}
@@ -54,8 +57,8 @@ export const ConnectionOverlay: React.FC<ConnectionOverlayProps> = ({
                 y1={line.fromY}
                 x2={midX}
                 y2={line.fromY}
-                stroke="#3b82f6"
-                strokeWidth="3"
+                stroke={strokeColor}
+                strokeWidth="2"
               />
               {/* Vertical segment at bend point */}
               <line
@@ -63,8 +66,8 @@ export const ConnectionOverlay: React.FC<ConnectionOverlayProps> = ({
                 y1={line.fromY}
                 x2={midX}
                 y2={line.toY}
-                stroke="#3b82f6"
-                strokeWidth="3"
+                stroke={strokeColor}
+                strokeWidth="2"
               />
               {/* Horizontal segment from bend point to original position */}
               <line
@@ -72,8 +75,8 @@ export const ConnectionOverlay: React.FC<ConnectionOverlayProps> = ({
                 y1={line.toY}
                 x2={line.toX}
                 y2={line.toY}
-                stroke="#3b82f6"
-                strokeWidth="3"
+                stroke={strokeColor}
+                strokeWidth="2"
               />
             </g>
           );

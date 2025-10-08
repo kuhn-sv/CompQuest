@@ -22,7 +22,7 @@ input[type="number"] {
 
   input[type="number"] {
     padding: $spacing-sm $spacing-md;
-    border: $border-width-base solid $border-color-default;
+    border: $border-width-base solid ;
     border-radius: $border-radius-sm;
     text-align: center;
     font-size: $font-size-base;
@@ -47,7 +47,7 @@ input[type="number"] {
       height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
-      border-bottom: 20px solid $primary-button-color; // Yellow triangle pointing up
+      border-bottom: 20px solid var(--primary-btn-bg); // Yellow triangle pointing up
     }
 
     &.down::before {
@@ -56,19 +56,12 @@ input[type="number"] {
       height: 0;
       border-left: 15px solid transparent;
       border-right: 15px solid transparent;
-      border-top: 20px solid $primary-button-color; // Yellow triangle pointing down
+      border-top: 20px solid var(--primary-btn-bg); // Yellow triangle pointing down
     }
 
     &:hover {
       transform: scale(1.1);
-      
-      &.up::before {
-        border-bottom-color: $primary-button-hover-color;
-      }
-      
-      &.down::before {
-        border-top-color: $primary-button-hover-color;
-      }
+    
     }
 
     &:active {
@@ -79,13 +72,6 @@ input[type="number"] {
       cursor: not-allowed;
       transform: none;
       
-      &.up::before {
-        border-bottom-color: $disabled-button-color;
-      }
-      
-      &.down::before {
-        border-top-color: $disabled-button-color;
-      }
     }
   }
 }

@@ -1,0 +1,78 @@
+.dashboard__exercises {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.dashboard__exercise-card {
+  background: var(--surface);
+  border-radius: 12px;
+  padding: 2rem;
+  text-decoration: none;
+  color: var(--text);
+  box-shadow: 0 8px 32px var(--surface-shadow);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+  border: 2px solid var(--surface-border);
+
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 48px var(--surface-shadow);
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: left 0.5s;
+  }
+
+  &:hover::before {
+    left: 100%;
+  }
+}
+
+.dashboard__exercise-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text);
+}
+
+.dashboard__exercise-description {
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.dashboard__exercise-arrow {
+  position: absolute;
+  bottom: 1.5rem;
+  right: 2rem;
+  
+  span {
+    font-size: 1.5rem;
+    transition: transform 0.3s ease;
+    color: var(--primary);
+  }
+}
+
+.dashboard__exercise-card:hover .dashboard__exercise-arrow span {
+  transform: translateX(4px);
+}
+
+@media (max-width: 768px) {
+  .dashboard__exercises {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .dashboard__exercise-card {
+    padding: 1.5rem;
+  }
+}

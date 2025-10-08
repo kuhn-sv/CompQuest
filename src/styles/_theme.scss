@@ -1,0 +1,92 @@
+:root[data-theme="light"] {
+  --text:   #0C1817FF; /* 100% */
+  --text-secondary: #0C1817B3; /* 70% */
+  --text-tertiary: #0C18174D; /* 30% */
+  --text10: #0C18171A; /* 10% */
+
+  --primary-btn-text: var(--background);
+  --secondary-btn-text: var(--text);
+
+  --primary-btn-bg: var(--primary);
+  --secondary-btn-bg: var(--secondary30);
+
+  --primary:   #296560FF;
+  --primary70: #296560B3;
+  --primary30: #2965604D;
+  --primary10: #2965601A;
+
+  --background: #F4FAFA;
+
+  --secondary:   #85D1C9FF;
+  --secondary70: #85D1C9B3;
+  --secondary30: #85D1C94D;
+  --secondary10: #85D1C91A;
+
+  --accent:   #349890FF;
+  --accent70: #349890B3;
+  --accent30: #3498904D;
+  --accent10: #3498901A;
+
+  /* Leichte Card-Variation für Light Mode */
+  --surface: #F4FAFA; /* echte weiße Fläche */
+  --surface-border: #0C181710; /* Textfarbe @ 6% Opacity (Hex 10 = ~6%) */
+  --surface-shadow: 0px 2px 6px #0C18171A; /* Textfarbe @ 10% */
+
+  --highlight: rgba(154, 214, 209, 0.10); /* Strokes bei Hintergründen = primary @10% */
+  --stroke-background: rgba(154, 214, 209, 0.10); /* Strokes bei Hintergründen = primary @10% */
+
+   /* States */
+  --success: #64E593;
+  --warning: #FACC15;
+  --error: #FF4D6D;
+}
+
+:root[data-theme="dark"] {
+  
+  --background: #050a0a;
+
+  --text:   #E7F3F2FF; /* 100% */
+  --text-secondary: #E7F3F2B3; /* 70% */
+  --text-tertiary: #E7F3F24D; /* 30% */
+  --text10: #E7F3F21A; /* 10% */
+
+  --primary-btn-text: var(--background);
+  --secondary-btn-text: var(--text);
+
+
+  --primary-btn-bg: var(--primary);
+  --secondary-btn-bg: var(--secondary30);
+
+
+  /* PRIMARY (#9AD6D1) */
+  --primary:   #9AD6D1FF;
+  --primary70: #9AD6D1B3;
+  --primary30: #9AD6D14D;
+  --primary10: #9AD6D11A;
+
+  /* SECONDARY (#2E7A72) */
+  --secondary:   #2E7A72FF;
+  --secondary70: #2E7A72B3;
+  --secondary30: #2E7A724D;
+  --secondary10: #2E7A721A;
+
+  /* ACCENT (#67CBC3) */
+  --accent:   #67CBC3FF;
+  --accent70: #67CBC3B3;
+  --accent30: #67CBC34D;
+  --accent10: #67CBC31A;
+
+
+  /* --- Surface & Elevation System --- */
+  --surface: rgba(255, 255, 255, 0.03);   /* Cards = #fff @ 3% */
+  --surface-border: var(--primary10);
+  --surface-shadow: 0px 0px px transparent;
+
+  --highlight: rgba(154, 214, 209, 0.10); /* Background-Highlight = primary @10% */
+  --stroke-background: rgba(154, 214, 209, 0.10); /* Strokes bei Hintergründen = primary @10% */
+
+  /* --- State Colors --- */
+  --success: #64E593;
+  --warning: #FACC15;
+  --error: #FF4D6D;
+}

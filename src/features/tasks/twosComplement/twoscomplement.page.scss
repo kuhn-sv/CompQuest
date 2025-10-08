@@ -12,16 +12,17 @@
   .back-to-dashboard {
     display: inline-flex;
     align-items: center;
-    color: #667eea;
+    color: var(--primary-500);
     text-decoration: none;
     font-weight: $font-weight-semibold;
     margin-bottom: $spacing-md;
     padding: $spacing-sm $spacing-md;
     border-radius: $border-radius-sm;
+    border-color: var(--surface-border);
     transition: all 0.2s ease;
     
     &:hover {
-      background-color: rgba(102, 126, 234, 0.1);
+    background-color: var(--primary-100);
       transform: translateX(-2px);
     }
   }
@@ -29,7 +30,6 @@
   h1 {
     margin: 0;
     font-size: 2rem;
-    color: $dark-gray;
     font-weight: $font-weight-bold;
   }
 }
@@ -37,28 +37,26 @@
 .twos-complement-content {
   p {
     font-size: 1.1rem;
-    color: $medium-gray-2;
     line-height: 1.6;
     margin-bottom: $spacing-lg;
   }
 }
 
 .exercise-placeholder {
-  background-color: #f8f9fa;
-  border: 2px dashed #dee2e6;
+  background-color: var(--background-100);
+  border: 2px dashed var(--background-300);
   border-radius: $border-radius-md;
   padding: $spacing-3xl;
   text-align: center;
   margin-top: $spacing-xl;
   
   h2 {
-    color: $medium-gray-2;
     margin-bottom: $spacing-md;
     font-size: 1.5rem;
   }
   
   p {
-    color: $medium-gray-3;
+  color: var(--text-300);
     font-style: italic;
     margin: 0;
   }

@@ -3,11 +3,10 @@
 .nwb {
   display: inline-flex;
   align-items: baseline;
-  color: inherit; // Inherit color from parent
 }
 
 .nwb__sub {
   margin-left: 2px;
-  color: #666666; // Slightly darker gray for better contrast while keeping it distinct
+  color: var(--text-secondary);
   font-size: 1.0em; // Increased from 0.85em to make base numbers more readable
 }

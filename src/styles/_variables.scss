@@ -1,56 +1,13 @@
-// ==========================================================================
+// ===========================================================================
+@use './_theme.scss' as *;
 // DESIGN SYSTEM VARIABLES
 // ==========================================================================
 
 // Colors
 // --------------------------------------------------------------------------
-// Primary Colors
-$primary-blue: #646cff;
-$primary-blue-hover: #535bf2;
-$primary-blue-light: #007acc;
-$primary-blue-vivid: #3b82f6;
-$primary-purple: #6366f1;
 
-$react-blue: #61dafb;
 
-// Neutral Colors
-$white: #ffffff;
-$black: #000000;
-$near-white: rgba(255, 255, 255, 0.87);
-$light-gray: #f9f9f9;
-$light-gray-2: #f5f5f5;
-$light-gray-border: #e2e8f0;
-$light-gray-bg: #f1f5f9;
-$light-gray-bg-alt: #f8fafc;
-$medium-gray: #888;
-$medium-gray-2: #ccc;
-$medium-gray-3: #ddd;
-$medium-gray-slate: #64748b;
-$medium-gray-border: #94a3b8;
-$medium-gray-border-alt: #cbd5e1;
-$medium-gray-text: #475569;
-$dark-gray: #333;
-$dark-gray-text: #1a202c;
-$darker-gray: #1a1a1a;
-$darkest-gray: #242424;
 
-// State Colors
-$success-green: #28a745;
-$success-green-bg: #d4edda;
-$success-green-text: #155724;
-$success-green-vivid: #22c55e;
-
-$danger-red: #dc2626;
-$danger-red-alt: #dc3545;
-$danger-red-vivid: #ef4444;
-
-$warning-yellow: #ffd700;
-$warning-yellow-hover: #ffed4a;
-
-// Button Colors
-$primary-button-color: #ffd700;
-$primary-button-hover-color: #ffed4a;
-$disabled-button-color: #ccc;
 
 // Spacing
 // --------------------------------------------------------------------------
@@ -96,20 +53,10 @@ $border-width-thick: 2px;
 $border-radius-sm: 4px;
 $border-radius-md: 8px;
 
-$border-color-default: $medium-gray-2;
-$border-color-focus: $primary-blue;
-
 // Shadows & Effects
 // --------------------------------------------------------------------------
 $shadow-blue: drop-shadow(0 0 2em #646cffaa);
 $shadow-react: drop-shadow(0 0 2em #61dafbaa);
-
-// Gradients
-$gradient-primary: linear-gradient(90deg, $primary-blue-vivid, $primary-purple);
-
-// Semi-transparent overlays
-$primary-blue-overlay: rgba(59, 130, 246, 0.1);
-$primary-blue-overlay-5: rgba(59, 130, 246, 0.05);
 
 // Transitions
 // --------------------------------------------------------------------------

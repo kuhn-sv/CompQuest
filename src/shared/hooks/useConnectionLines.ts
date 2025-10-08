@@ -59,6 +59,8 @@ export interface ConnectionLineCalculationProps<T, A> {
   selectors: ConnectionLineSelectors;
   coordinateConfig?: ConnectionLineCoordinateConfig;
   debug?: boolean;
+  evaluated?: boolean;
+  evaluateStatus?: (task: T, assignment: A) => 'correct' | 'wrong' | undefined;
 }
 
 export function useConnectionLines<T, A>({
@@ -73,7 +75,9 @@ export function useConnectionLines<T, A>({
     taskCoordinates: { x: 'right', y: 'center' },
     answerCoordinates: { x: 'left', y: 'center' }
   },
-  debug = false
+  debug = false,
+  evaluated = false,
+  evaluateStatus
 }: ConnectionLineCalculationProps<T, A>) {
   const [connectionLines, setConnectionLines] = useState<ConnectionLine[]>([]);
   const timeoutsRef = useRef<number[]>([]);
@@ -84,7 +88,7 @@ export function useConnectionLines<T, A>({
     config: { x: 'left' | 'right' | 'center'; y: 'top' | 'bottom' | 'center' }
   ) => {
     const rect = element.getBoundingClientRect();
-    
+
     let x: number;
     switch (config.x) {
       case 'left':
@@ -97,7 +101,7 @@ export function useConnectionLines<T, A>({
         x = rect.left + rect.width / 2 - containerRect.left;
         break;
     }
-    
+
     let y: number;
     switch (config.y) {
       case 'top':
@@ -110,7 +114,7 @@ export function useConnectionLines<T, A>({
         y = rect.top + rect.height / 2 - containerRect.top;
         break;
     }
-    
+
     return { x, y };
   };
 
@@ -129,60 +133,66 @@ export function useConnectionLines<T, A>({
     };
 
     const calculateConnectionLines = () => {
-      if (!containerRef.current) {
-        return;
-      }
-      
+      if (!containerRef.current) return;
+
       const container = containerRef.current;
       const containerRect = container.getBoundingClientRect();
-      
+
       const lines: ConnectionLine[] = [];
-      
-      tasks.forEach((task, taskIndex) => {
+
+      tasks.forEach((task: T, taskIndex: number) => {
         const taskId = getTaskId(task);
         const assignment = assignments[taskId];
         if (!assignment) return;
-        
-        const taskRow = container.querySelector(`${selectors.taskContainerSelector} ${selectors.taskRowSelector}:nth-child(${taskIndex + 1})`);
+
+        const taskRow = container.querySelector(
+          `${selectors.taskContainerSelector} ${selectors.taskRowSelector}:nth-child(${taskIndex + 1})`
+        );
         if (!taskRow) return;
-        
+
         const taskTarget = taskRow.querySelector(selectors.taskTargetSelector);
         if (!taskTarget) return;
-        
-        const answerIndex = answerPool.findIndex(poolAnswer => 
-          compareAnswers(assignment, poolAnswer)
-        );
+
+        const answerIndex = answerPool.findIndex((poolAnswer) => compareAnswers(assignment, poolAnswer));
         if (answerIndex === -1) return;
-        
+
         const answerRowSelector = selectors.answerRowSelectorTemplate.replace('{index}', answerIndex.toString());
-        const answerRow = container.querySelector(`${selectors.answerContainerSelector} ${answerRowSelector}`);
+        const answerRow = container.querySelector(
+          `${selectors.answerContainerSelector} ${answerRowSelector}`
+        );
         if (!answerRow) return;
-        
+
         const fromCoords = calculateCoordinates(taskTarget, containerRect, coordinateConfig.taskCoordinates);
         const toCoords = calculateCoordinates(answerRow, containerRect, coordinateConfig.answerCoordinates);
-        
+
+        let status: 'correct' | 'wrong' | undefined;
+        if (evaluated && evaluateStatus) {
+          status = evaluateStatus(task, assignment as A);
+        }
+
         lines.push({
           fromX: fromCoords.x,
           fromY: fromCoords.y,
           toX: toCoords.x,
           toY: toCoords.y,
           taskId,
-          answerIndex
+          answerIndex,
+          status
         });
       });
-      
+
       // Only update state if lines actually changed to prevent render loops
-      setConnectionLines(prev => (shallowEqualLines(prev, lines) ? prev : lines));
+      setConnectionLines((prev) => (shallowEqualLines(prev, lines) ? prev : lines));
     };
 
     const calculateWithRetry = () => {
       calculateConnectionLines();
-      
+
       const timeouts = [50, 100, 200, 500];
       // Clear previous pending timeouts
-      timeoutsRef.current.forEach(id => clearTimeout(id));
+      timeoutsRef.current.forEach((id) => clearTimeout(id));
       timeoutsRef.current = [];
-      timeouts.forEach(delay => {
+      timeouts.forEach((delay) => {
         const id = window.setTimeout(calculateConnectionLines, delay);
         timeoutsRef.current.push(id);
       });
@@ -193,16 +203,16 @@ export function useConnectionLines<T, A>({
     };
 
     window.addEventListener('resize', handleResize);
-    
+
     calculateWithRetry();
-    
+
     return () => {
       window.removeEventListener('resize', handleResize);
       // Cleanup pending timeouts
-      timeoutsRef.current.forEach(id => clearTimeout(id));
+      timeoutsRef.current.forEach((id) => clearTimeout(id));
       timeoutsRef.current = [];
     };
-  }, [tasks, assignments, answerPool, containerRef, getTaskId, compareAnswers, selectors, coordinateConfig, debug]);
+  }, [tasks, assignments, answerPool, containerRef, getTaskId, compareAnswers, selectors, coordinateConfig, debug, evaluated, evaluateStatus]);
 
   return connectionLines;
 }

@@ -5,6 +5,9 @@ export interface AdditionTask {
   left: string; // z.B. "1010 + 1101"
   base: number; // 2, 8, 16
   expected: string; // Ergebnis als String in der jeweiligen Basis
+  sourceValue: string;
+  expectedValue: string;
+  toBase: number | string;
 }
 
 export interface AdditionSet {
@@ -34,7 +37,15 @@ function generateAdditionSet(difficulty: Difficulty): AdditionSet {
     const b = randomInt(min, max);
     const left = `${toBaseString(a, base)} + ${toBaseString(b, base)}`;
     const expected = toBaseString(a + b, base);
-    tasks.push({ id: uid(), left, base, expected });
+    tasks.push({
+      id: uid(),
+      left,
+      base,
+      expected,
+      sourceValue: left,
+      expectedValue: expected,
+      toBase: base
+    });
   }
   const answerPool = tasks.map(t => ({ value: t.expected, base: t.base }));
   return { tasks, answerPool: answerPool.sort(() => Math.random() - 0.5) };

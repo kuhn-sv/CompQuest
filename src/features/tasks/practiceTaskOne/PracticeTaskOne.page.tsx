@@ -18,7 +18,7 @@ interface PracticeTaskOnePageProps {
 const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
   initialSubTask = 'number-system'
 }) => {
-  const [currentSubTask, setCurrentSubTask] = useState<SubTaskType>(initialSubTask);
+  const [currentSubTask] = useState<SubTaskType>(initialSubTask);
 
   // Configuration for all subtasks
   const subTaskConfigs: SubTaskConfig[] = [
@@ -52,13 +52,6 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
   const currentTaskIndex = subTaskConfigs.findIndex(task => task.id === currentSubTask);
   const currentTask = subTaskConfigs[currentTaskIndex];
 
-  const handleBackToDashboard = () => {
-    // Reset state when navigating away
-    setCurrentSubTask(initialSubTask);
-    // Navigation logic would go here in a real app
-    // For example: navigate('/dashboard')
-  };
-
   const CurrentTaskComponent = currentTask?.component;
 
   return (
@@ -70,15 +63,6 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
             <h2 className="task-title">{currentTask?.title}</h2>
             <p className="task-description">{currentTask?.description}</p>
           </div>
-          
-          {/* Back to dashboard button */}
-          <button
-            className="practice-task-one-page__back"
-            onClick={handleBackToDashboard}
-            aria-label="Zurück zum Dashboard"
-          >
-            ← Zurück
-          </button>
         </div>
 
         {/* Task Content */}

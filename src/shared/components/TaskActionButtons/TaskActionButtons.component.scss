@@ -1,0 +1,33 @@
+.task-action-buttons {
+  display: flex;
+  gap: 1rem;
+
+  
+  button {
+    padding: 0.5rem 1.2rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    border: none;
+
+    cursor: pointer;
+    transition: background 0.2s;
+
+    &:disabled {
+      cursor: not-allowed;
+
+    }
+  }
+
+  .task-action-btn {
+    &.primary {
+        color: var(--primary-btn-text);
+        background: var(--primary-btn-bg);
+    }
+
+    &.secondary {
+        background: var(--secondary-btn-bg);
+        color: var(--secondary-btn-text);
+    }
+
+  }
+}

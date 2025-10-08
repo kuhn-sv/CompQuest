@@ -6,8 +6,11 @@ import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 import type { NumberTask, AnswerOption } from './interfaces/numberSystem.interface';
 import type { StageScore, EvaluationConfig, EvaluationResult } from './interfaces/evaluation.interface';
 import type { AssignmentMap } from './numberSystem.types';
-import { EquationRow, ResultsSection } from './components';
+import { ResultsSection } from './components';
+import { EquationRow as SharedEquationRow } from '../../../../shared/components/equationrow/EquationRow';
+import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
 import { ConnectionOverlay, Timer } from '../../../../shared/components';
+import TaskActionButtons from '../../../../shared/components/TaskActionButtons/TaskActionButtons.component';
 import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
 
 type NumberSystemComponentProps = object;
@@ -51,16 +54,33 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 		assignment.value === poolAnswer.value && assignment.base === poolAnswer.base
 	), []);
 
-	const connectionLines = useConnectionLines({
-		tasks,
-		assignments,
-		answerPool,
-		containerRef,
-		getTaskId: getTaskIdCb,
-		compareAnswers: compareAnswersCb,
-		...CONNECTION_LINE_PRESETS.NUMBER_SYSTEM,
-		debug: false
-	});
+		const rawConnectionLines = useConnectionLines({
+			tasks,
+			assignments,
+			answerPool,
+			containerRef,
+			getTaskId: getTaskIdCb,
+			compareAnswers: compareAnswersCb,
+			...CONNECTION_LINE_PRESETS.NUMBER_SYSTEM,
+			debug: false
+		});
+
+		// Nach Auswertung: Status für jede Linie setzen
+		const connectionLines = useMemo(() => {
+				if (!evaluated) return rawConnectionLines;
+				return rawConnectionLines.map(line => {
+					const task = tasks.find(t => t.id === line.taskId);
+					const assigned = assignments[line.taskId];
+					let status: 'correct' | 'wrong' = 'wrong';
+					if (assigned && task && assigned.value === task.expectedValue && assigned.base === task.toBase) {
+						status = 'correct';
+					}
+					return {
+						...line,
+						status
+					};
+				});
+		}, [rawConnectionLines, evaluated, tasks, assignments]);
 
 	const startSetForStage = (idx: number, options?: { resetTimer?: boolean }) => {
 		const { resetTimer: shouldResetTimer = true } = options ?? {};
@@ -180,7 +200,6 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 	return (
 		<div className="number-system-container">
 			<div className="ns-header">
-				<Link to="/dashboard" className="back-to-dashboard">← Zurück zum Dashboard</Link>
 				<h1>Zahlensysteme – Übung 1.1</h1>
 			</div>
 
@@ -223,12 +242,12 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 								const isCorrect = evaluated && !!assigned && assigned.value === t.expectedValue && assigned.base === t.toBase;
 								const isWrong = evaluated && !!assigned && !(assigned.value === t.expectedValue && assigned.base === t.toBase);
 								const isActive = activeTaskId === t.id;
-								
 								return (
-									<EquationRow
+									<SharedEquationRow
 										key={t.id}
-										task={t}
-										assignment={assigned}
+										hasAssignment={!!assigned}
+										sourceContent={<NumberWithBase value={t.sourceValue} base={t.fromBase} />}
+										assignedContent={assigned ? <NumberWithBase value={assigned.value} base={assigned.base} /> : null}
 										isCorrect={isCorrect}
 										isWrong={isWrong}
 										isActive={isActive}
@@ -244,33 +263,36 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 						</div>
 
 						{/* Right side: Available results */}
-						<ResultsSection 
-							answerPool={answerPool}
-							usedAnswerKeys={usedAnswerKeys}
-							assignments={assignments}
-							draggedAnswer={draggedAnswer}
-							activeTaskId={activeTaskId}
-							tasks={tasks}
-							handleDragStart={handleDragStart}
-							handleDragEnd={handleDragEnd}
-							assignAnswer={assignAnswer}
-						/>
+									<ResultsSection 
+										answerPool={answerPool}
+										usedAnswerKeys={usedAnswerKeys}
+										assignments={assignments}
+										draggedAnswer={draggedAnswer}
+										activeTaskId={activeTaskId}
+										tasks={tasks}
+										handleDragStart={handleDragStart}
+										handleDragEnd={handleDragEnd}
+										assignAnswer={assignAnswer}
+										evaluated={evaluated}
+									/>
 					</div>
 
 					{/* SVG overlay for connection lines */}
 					<ConnectionOverlay connectionLines={connectionLines} />
 
-					{/* Controls (Reset/Auswerten/Weiter) inside Aufgabe bottom-right */}
+					{/* Wiederverwendbare Button-Komponente für Aufgabenaktionen */}
 					<div className="ns-controls">
-						<div className="actions">
-							{!evaluated && (
-								<button onClick={resetSet} disabled={!tasks.length}>Zurücksetzen</button>
-							)}
-							<button onClick={evaluate} disabled={!allAssigned}>Auswerten</button>
-							{evaluated && stageIndex < stages.length - 1 && (
-								<button onClick={goToNextStage}>Weiter</button>
-							)}
-						</div>
+						<TaskActionButtons
+							onReset={resetSet}
+							onEvaluate={evaluate}
+							onNext={goToNextStage}
+							showReset={!evaluated}
+							showEvaluate={true}
+							showNext={evaluated && stageIndex < stages.length - 1}
+							disableReset={!tasks.length}
+							disableEvaluate={!allAssigned}
+							disableNext={false}
+						/>
 						{evaluated && (
 							<div className="result">
 								Ergebnis: {correctCount} / {tasks.length} richtig
