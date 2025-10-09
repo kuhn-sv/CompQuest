@@ -21,17 +21,8 @@ interface PAStageScore {
   points: number;
 }
 
-interface PAResultSummary {
-  elapsedMs: number;
-  withinThreshold: boolean;
-  timeBonus: number;
-  perStage: PAStageScore[];
-  totalCorrect: number;
-  totalPossible: number;
-  totalPoints: number;
-}
 
-const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, arithmeticMode = 'positive' }) => {
+const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onSummaryChange, onHudChange, arithmeticMode = 'positive' }) => {
   // 3-stage flow: Easy, Medium, Hard
   const stages: Difficulty[] = useMemo(() => [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard], []);
   const [stageIndex, setStageIndex] = useState<number>(0);
@@ -43,11 +34,11 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [stageScores, setStageScores] = useState<PAStageScore[]>([]);
-  const [finalResult, setFinalResult] = useState<PAResultSummary | null>(null);
+  // final summary is lifted to container
 
   // Config: 3 minutes threshold = 180000 ms, 1 point bonus
   const evalConfig = useMemo(() => ({ timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1 }), []);
-  const { start, stop, reset, formatTime, getElapsed } = useTimer();
+  const { start, stop, reset, getElapsed } = useTimer();
 
   // Drag and Drop logic
   const {
@@ -114,7 +105,13 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
     setHasStarted(true);
     setStageIndex(0);
     startSetForStage(0, { resetTimer: true });
-  }, [startSetForStage]);
+    // Start parent HUD timer and set initial progress
+    onHudChangeRef.current?.({
+      progress: { current: 1, total: stages.length },
+      requestTimer: 'start',
+      subtitle: arithmeticMode === 'twos-complement' ? 'Additionen im Zweierkomplement (3 Stufen)' : 'Positive Additionen und Subtraktionen (3 Stufen)'
+    });
+  }, [startSetForStage, arithmeticMode, stages.length]);
 
   const resetSet = useCallback(() => {
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
@@ -125,20 +122,36 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
     if (tasks.length > 0) {
       start();
     }
-  }, [reset, resetDragState, start, tasks]);
+    // Reset and restart parent HUD timer
+    onHudChangeRef.current?.({ progress: { current: stageIndex + 1, total: stages.length }, requestTimer: 'reset' });
+    onHudChangeRef.current?.({ progress: { current: stageIndex + 1, total: stages.length }, requestTimer: 'start' });
+  }, [reset, resetDragState, start, tasks, stageIndex, stages.length]);
 
   // Assignment logic
   const assignAnswer = useCallback((taskId: string, answer: AnswerOptionBase) => {
     setAssignments(prev => {
-      const next = { ...prev };
-      for (const k of Object.keys(next)) {
-        if (next[k] && next[k]!.value === answer.value && next[k]!.base === answer.base) next[k] = null;
+      const toKey = (a: { value: string; base?: number | string } | null | undefined) => a ? `${a.value}|${a.base}` : '';
+      const targetKey = toKey(answer);
+      const prevAssignedKey = toKey(prev[taskId]);
+
+      // No-op if the same answer is already assigned to this task
+      if (prevAssignedKey === targetKey) return prev;
+
+      // How many identical answers exist in the pool?
+      const available = answerPool.filter(a => `${a.value}|${a.base}` === targetKey).length;
+      // How many are currently assigned (excluding current task to avoid double counting)?
+      const currentlyAssigned = Object.entries(prev)
+        .filter(([tid, a]) => tid !== taskId && a && toKey(a) === targetKey).length;
+
+      // If capacity available, assign without removing previous uses
+      if (currentlyAssigned < available) {
+        return { ...prev, [taskId]: answer };
       }
-      next[taskId] = answer;
-      return next;
+      // Otherwise, capacity is full; ignore to avoid stealing from other tasks
+      return prev;
     });
     setActiveTaskId(null);
-  }, []);
+  }, [answerPool]);
 
   const onDropAnswer = useCallback((taskId: string, answer: AnswerOptionBase) => {
     assignAnswer(taskId, answer);
@@ -153,11 +166,6 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
   }, [assignments]);
 
   const allAssigned = useMemo(() => tasks.length > 0 && tasks.every(t => assignments[t.id]), [tasks, assignments]);
-  const correctCount = useMemo(() => tasks.filter(t => {
-    const a = assignments[t.id];
-    const aBase = typeof a?.base === 'string' ? parseInt(a.base, 10) : a?.base;
-    return !!a && a.value === t.expected && aBase === t.base;
-  }).length, [tasks, assignments]);
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
@@ -176,50 +184,103 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
       return next;
     });
     if (stageIndex === stages.length - 1) {
+      // Stop parent HUD timer when finishing the last stage
+      onHudChangeRef.current?.({ progress: { current: stages.length, total: stages.length }, requestTimer: 'stop' });
       const elapsedMs = getElapsed();
       const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
       const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
-      const totalCorrect = stageScores.reduce((sum, s) => sum + (s?.correct ?? 0), 0) + correct;
-      const totalPossible = stageScores.reduce((sum, s) => sum + (s?.total ?? 0), 0) + total;
-      const totalPoints = totalCorrect + timeBonus;
-      const perStage: PAStageScore[] = (() => {
+      const perStage = (() => {
         const base = [...stageScores];
         base[stageIndex] = { difficulty, correct, total, points };
         return base;
       })();
-      setFinalResult({ elapsedMs, withinThreshold, timeBonus, perStage, totalCorrect, totalPossible, totalPoints });
+      const totalCorrect = perStage.reduce((sum, s) => sum + (s?.correct ?? 0), 0);
+      const totalPossible = perStage.reduce((sum, s) => sum + (s?.total ?? 0), 0);
+      const totalPoints = totalCorrect + timeBonus;
+      onSummaryChange?.({
+        elapsedMs,
+        withinThreshold,
+        timeBonus,
+        perStage: perStage.map(s => ({ ...s, difficulty: s.difficulty })),
+        totalCorrect,
+        totalPossible,
+        totalPoints,
+        thresholdMs: evalConfig.timeBonusThresholdMs,
+      });
     }
-  }, [assignments, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, stageIndex, stageScores, stages, stop, tasks]);
+  }, [assignments, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, onSummaryChange, stageIndex, stageScores, stages, stop, tasks]);
 
   const goToNextStage = useCallback(() => {
     if (stageIndex < stages.length - 1) {
       const nextIndex = stageIndex + 1;
       setStageIndex(nextIndex);
       startSetForStage(nextIndex, { resetTimer: false });
+      // Update HUD progress on stage advance (timer continues)
+      onHudChangeRef.current?.({ progress: { current: nextIndex + 1, total: stages.length } });
     }
-  }, [stageIndex, stages, startSetForStage]);
+  }, [stageIndex, stages.length, startSetForStage]);
 
-  // Provide footer controls to parent
-  useEffect(() => {
-    if (!hasStarted || tasks.length === 0) {
-      onControlsChange?.(null);
-      return;
-    }
-    onControlsChange?.({
-      onReset: resetSet,
-      onEvaluate: evaluate,
-      onNext: goToNextStage,
+  // Provide footer controls to parent (stabilized to avoid update loops)
+  // Keep latest handlers in refs to avoid changing identities in controls object
+  const resetSetRef = useRef(resetSet);
+  const evaluateRef = useRef(evaluate);
+  const goToNextStageRef = useRef(goToNextStage);
+  const onHudChangeRef = useRef(onHudChange);
+
+  useEffect(() => { resetSetRef.current = resetSet; }, [resetSet]);
+  useEffect(() => { evaluateRef.current = evaluate; }, [evaluate]);
+  useEffect(() => { goToNextStageRef.current = goToNextStage; }, [goToNextStage]);
+  useEffect(() => { onHudChangeRef.current = onHudChange; }, [onHudChange]);
+
+  // Stable wrappers so callbacks in controls remain referentially stable
+  const onResetStable = useCallback(() => { resetSetRef.current(); }, []);
+  const onEvaluateStable = useCallback(() => { evaluateRef.current(); }, []);
+  const onNextStable = useCallback(() => { goToNextStageRef.current(); }, []);
+
+  const controls = useMemo(() => {
+    if (!hasStarted || tasks.length === 0) return null;
+    return {
+      onReset: onResetStable,
+      onEvaluate: onEvaluateStable,
+      onNext: onNextStable,
       showReset: !evaluated,
       showEvaluate: true,
       showNext: evaluated && stageIndex < stages.length - 1,
       disableReset: !tasks.length,
       disableEvaluate: !allAssigned,
       disableNext: false,
-    });
-    return () => {
-      onControlsChange?.(null);
     };
-  }, [hasStarted, tasks.length, evaluated, stageIndex, stages, allAssigned, correctCount, onControlsChange, resetSet, evaluate, goToNextStage]);
+  }, [hasStarted, tasks.length, evaluated, stageIndex, stages.length, allAssigned, onResetStable, onEvaluateStable, onNextStable]);
+
+  const prevControlsRef = useRef<typeof controls>(null);
+  useEffect(() => {
+    if (!onControlsChange) return;
+    // Only notify parent when the controls actually change reference
+    if (prevControlsRef.current !== controls) {
+      onControlsChange(controls);
+      prevControlsRef.current = controls;
+    }
+    return () => {
+      // Clear controls on unmount
+      if (prevControlsRef.current !== null) {
+        onControlsChange(null);
+        prevControlsRef.current = null;
+      }
+    };
+  }, [controls, onControlsChange]);
+
+  // Keep HUD progress/subtitle in sync when stage index or start state changes
+  useEffect(() => {
+    if (!hasStarted) return;
+    onHudChangeRef.current?.({
+      progress: { current: stageIndex + 1, total: stages.length },
+      subtitle: arithmeticMode === 'twos-complement' ? 'Additionen im Zweierkomplement (3 Stufen)' : 'Positive Additionen und Subtraktionen (3 Stufen)'
+    });
+    // Cleanup resets HUD when component unmounts
+    return () => {
+      onHudChangeRef.current?.(null);
+    };
+  }, [hasStarted, stageIndex, stages.length, arithmeticMode]);
 
   return (
     <div className="number-system-container">
@@ -243,7 +304,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
                 const baseSub = t.base === 2 ? '₂' : t.base === 8 ? '₈' : t.base === 16 ? '₁₆' : '';
                 return (
                   <SharedEquationRow
-                    key={t.id}
+                    key={`pa-task:${t.id}`}
                     hasAssignment={!!assigned}
                     sourceContent={
                       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', lineHeight: 1.2 }}>
@@ -276,6 +337,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
               handleDragEnd={handleDragEnd}
               assignAnswer={assignAnswer}
               evaluated={evaluated}
+              keyPrefix={arithmeticMode === 'twos-complement' ? 'tc-pa' : 'pa'}
               renderAnswer={(a) => (
                 typeof a.base === 'number' ? (
                   <NumberWithBase value={a.value} base={a.base as 2|8|10|16} />
@@ -297,46 +359,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
         </div>
       )}
 
-      {finalResult && (
-        <div className="ns-summary-overlay" role="dialog" aria-modal="true">
-          <div className="ns-summary-card">
-            <h2>Auswertung</h2>
-            <div className="ns-summary-row">
-              <span>Zeit:</span>
-              <strong>{formatTime(finalResult.elapsedMs)}</strong>
-            </div>
-            <div className="ns-summary-row">
-              <span>Grenze für Bonus:</span>
-              <strong>{formatTime(evalConfig.timeBonusThresholdMs)} ({finalResult.withinThreshold ? 'unter' : 'über'})</strong>
-            </div>
-            <hr />
-            <div className="ns-summary-stages">
-              {finalResult.perStage.map((s, idx) => (
-                <div key={idx} className="ns-summary-row">
-                  <span>Stufe {idx + 1} ({s.difficulty.charAt(0).toUpperCase() + s.difficulty.slice(1)}):</span>
-                  <strong>{s.correct} / {s.total} Punkte</strong>
-                </div>
-              ))}
-            </div>
-            <hr />
-            <div className="ns-summary-row">
-              <span>Gesamt (Antworten):</span>
-              <strong>{finalResult.totalCorrect} / {finalResult.totalPossible}</strong>
-            </div>
-            <div className="ns-summary-row">
-              <span>Zeitbonus:</span>
-              <strong>{finalResult.timeBonus}</strong>
-            </div>
-            <div className="ns-summary-total">
-              <span>Gesamtpunkte:</span>
-              <strong>{finalResult.totalPoints}</strong>
-            </div>
-            <div className="ns-summary-actions">
-              <Link to="/dashboard" className="button">Beenden</Link>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Summary overlay moved to container */}
     </div>
   );
 };

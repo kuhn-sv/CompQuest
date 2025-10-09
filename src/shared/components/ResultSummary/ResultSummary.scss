@@ -1,0 +1,109 @@
+/* Summary Overlay – redesigned */
+.summary-overlay {
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.summary-card {
+  width: min(960px, 96vw);
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  box-shadow: var(--surface-shadow);
+  padding: 2rem;
+  color: var(--text);
+}
+
+.summary-header {
+  display: grid;
+  place-items: center;
+}
+
+.summary-icon {
+  width: 84px;
+  height: 84px;
+  display: grid;
+  place-items: center;
+  border-radius: 9999px;
+  background: var(--secondary10);
+  img { width: 60px; height: 60px; display: block; }
+}
+
+.summary-title {
+  font-size: clamp(1.2rem, 1.5vw + 1rem, 1.8rem);
+  font-weight: 700;
+  text-align: center;
+  margin: 6px 0;
+}
+
+.summary-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+.metric {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+  display: grid;
+  justify-items: center;
+}
+.metric-label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+.metric-value {
+  color: var(--text);
+  font-size: 1.6rem;
+  font-weight: 800;
+}
+
+.summary-feedback {
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 1rem 1.25rem;
+}
+.feedback-title { font-size: 1.25rem; margin-bottom: 0.5rem; }
+.feedback-text { color: var(--text-secondary); line-height: 1.6; }
+
+.summary-actions {
+  width: 100%;
+  display: flex;
+  gap: 0.75rem;
+  justify-content: flex-end;
+  padding: 12px;
+}
+
+.summary-btn {
+  appearance: none;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  padding: 0.75rem 1.25rem;
+  font-size: 1rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: transform 120ms ease, opacity 120ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.summary-btn.primary {
+  background: var(--primary-btn-bg);
+  color: var(--primary-btn-text);
+  border-color: transparent;
+}
+.summary-btn.secondary {
+  background: var(--secondary-btn-bg);
+  color: var(--secondary-btn-text);
+}
+.summary-btn:active { transform: translateY(1px); }
+
+/* legacy rows kept hidden in new design */
+.summary-row { display: none; }
+.summary-stages { display: none; }
+.summary-total { display: none; }

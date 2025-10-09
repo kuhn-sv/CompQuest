@@ -9,12 +9,11 @@ import {
 import NumberSystemComponent from './number-system/NumberSystem.component';
 import PositiveArithmeticComponent from './positive-arithmetic/PositiveArithmetic.component';
 import ComplementsComponent from './complements/Complements.component';
-// TODO: Import other subtasks when they're available
-// import DataPackagePage from '../dataPackage/DataPackage.page';
-// import TwosComplementPage from '../twosComplement/TwosComplement.page';
 import './PracticeTaskOne.page.scss';
 import TaskActionButtons from '../../../shared/components/TaskActionButtons/TaskActionButtons.component';
 import { Timer } from '../../../shared/components';
+import SummaryOverlay from '../../../shared/components/ResultSummary/ResultSummary';
+import type { TaskSummaryState } from './interfaces';
 import { useTimer } from '../../../shared/hooks';
 
 interface PracticeTaskOnePageProps {
@@ -68,18 +67,21 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
   // Footer controls provided by child subtask
   const [footerControls, setFooterControls] = useState<TaskFooterControls | null>(null);
   const [hudState, setHudState] = useState<TaskHudState | null>(null);
+  const [summaryState, setSummaryState] = useState<TaskSummaryState | null>(null);
   const { time, isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
   // Reset footer controls when task changes
   useEffect(() => {
     setFooterControls(null);
     setHudState(null);
+    setSummaryState(null);
   }, [currentTaskIndex]);
 
   return (
     <div className="practice-task-one-page">
       <div className="practice-task-one-page__container">
         {/* Header */}
-        <div className="practice-task-one-page__header">
+  {!summaryState && (
+  <div className="practice-task-one-page__header">
           <div className="header-row header-row--top">
             <div className="task-info">
               <h2 className="task-title">{currentTask?.title}</h2>
@@ -110,11 +112,12 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
               />
             </div>
           </div>
-        </div>
+  </div>
+  )}
 
         {/* Task Content */}
         <div className="practice-task-one-page__task-content">
-          {CurrentTaskComponent && (
+          {!summaryState && CurrentTaskComponent && (
             <CurrentTaskComponent 
               onControlsChange={setFooterControls}
               onHudChange={(hud) => {
@@ -124,26 +127,49 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
                 if (hud.requestTimer === 'stop') stop();
                 if (hud.requestTimer === 'reset') reset();
               }}
+              onSummaryChange={setSummaryState}
+            />
+          )}
+          {summaryState && (
+            <SummaryOverlay
+              result={{
+                elapsedMs: summaryState.elapsedMs,
+                totalCorrect: summaryState.totalCorrect,
+                totalPossible: summaryState.totalPossible,
+                totalPoints: summaryState.totalPoints,
+              }}
+              formatTime={formatTime}
+              endHref="/dashboard"
+              endLabel="Beenden"
+              onClose={() => setSummaryState(null)}
             />
           )}
         </div>
 
         {/* Unified footer with task action buttons */}
-        <div className="practice-task-one-page__footer">
-          {footerControls && (
-            <TaskActionButtons
-              onReset={footerControls.onReset}
-              onEvaluate={footerControls.onEvaluate}
-              onNext={footerControls.onNext}
-              showReset={footerControls.showReset}
-              showEvaluate={footerControls.showEvaluate}
-              showNext={footerControls.showNext}
-              disableReset={footerControls.disableReset}
-              disableEvaluate={footerControls.disableEvaluate}
-              disableNext={footerControls.disableNext}
-            />
-          )}
-        </div>
+        {!summaryState && (
+          <div className="practice-task-one-page__footer">
+            {footerControls && (
+              <TaskActionButtons
+                onReset={footerControls.onReset}
+                onEvaluate={() => {
+                  stop();
+                  footerControls.onEvaluate();
+                }}
+                onNext={() => {
+                  start();
+                  footerControls.onNext?.();
+                }}
+                showReset={footerControls.showReset}
+                showEvaluate={footerControls.showEvaluate}
+                showNext={footerControls.showNext}
+                disableReset={footerControls.disableReset}
+                disableEvaluate={footerControls.disableEvaluate}
+                disableNext={footerControls.disableNext}
+              />
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

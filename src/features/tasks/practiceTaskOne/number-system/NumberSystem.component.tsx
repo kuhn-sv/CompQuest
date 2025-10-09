@@ -1,19 +1,20 @@
 import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+// import { Link } from 'react-router-dom';
 import './number-system.page.scss';
 import { generateSet } from './numberSystem.helper';
 import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 import type { NumberTask, AnswerOption } from './interfaces/numberSystem.interface';
-import type { StageScore, EvaluationConfig, EvaluationResult } from './interfaces/evaluation.interface';
+import type { StageScore, EvaluationConfig } from './interfaces/evaluation.interface';
 import type { AssignmentMap } from './numberSystem.types';
 import { ResultsSection } from './components';
 import { EquationRow as SharedEquationRow } from '../../../../shared/components/equationrow/EquationRow';
 import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
 import { ConnectionOverlay } from '../../../../shared/components';
+// Summary overlay is rendered by container; we emit data via onSummaryChange
 import type { SubTaskComponentProps } from '../interfaces';
 import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
 
-const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange }) => {
+const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange, onSummaryChange }) => {
 	// Staged progression: Easy → Medium → Hard
 	const stages: Difficulty[] = useMemo(() => [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard], []);
 	const [stageIndex, setStageIndex] = useState<number>(0);
@@ -25,13 +26,13 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 	const [evaluated, setEvaluated] = useState<boolean>(false);
 	const [hasStarted, setHasStarted] = useState<boolean>(false);
 	const [stageScores, setStageScores] = useState<StageScore[]>([]);
-	const [finalResult, setFinalResult] = useState<EvaluationResult | null>(null);
+	// final summary is lifted to container
 
 	// Config: 3 minutes threshold = 180000 ms, 1 point bonus
 	const evalConfig: EvaluationConfig = useMemo(() => ({ timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1 }), []);
 
 	// Timer functionality
-	const { isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
+	const { isRunning, start, stop, reset, getElapsed } = useTimer();
 
 	// Drag and Drop logic
 	const {
@@ -117,18 +118,27 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 
 	// Wrapper function for assignment logic
 		const assignAnswer = useCallback((taskId: string, answer: AnswerOption) => {
-		// If answer is already used, swap: remove from previous task
-		setAssignments(prev => {
-			const next: AssignmentMap = { ...prev };
-			// Remove any previous usage of this answer
-			for (const k of Object.keys(next)) {
-				if (next[k] && next[k]!.value === answer.value && next[k]!.base === answer.base) next[k] = null;
-			}
-			next[taskId] = answer;
-			return next;
-		});
-		setActiveTaskId(null);
-		}, []);
+			setAssignments(prev => {
+				const toKey = (a: { value: string; base: number } | null | undefined) => a ? `${a.value}|${a.base}` : '';
+				const targetKey = toKey(answer as { value: string; base: number });
+				const prevAssignedKey = toKey(prev[taskId]);
+
+				// No-op if the same answer is already assigned to this task
+				if (prevAssignedKey === targetKey) return prev;
+
+				// How many identical answers exist in the pool?
+				const available = answerPool.filter(a => `${a.value}|${a.base}` === targetKey).length;
+				// How many are currently assigned (excluding current task)?
+				const currentlyAssigned = Object.entries(prev)
+					.filter(([tid, a]) => tid !== taskId && a && toKey(a as { value: string; base: number }) === targetKey).length;
+
+				if (currentlyAssigned < available) {
+					return { ...prev, [taskId]: answer };
+				}
+				return prev; // capacity full; don't steal previous assignments
+			});
+			setActiveTaskId(null);
+		}, [answerPool]);
 
 	// Drop handler for the hook
 	const onDropAnswer = (taskId: string, answer: AnswerOption) => {
@@ -157,14 +167,9 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 	}, [assignments]);
 
 	const allAssigned = useMemo(() => tasks.length > 0 && tasks.every(t => assignments[t.id]), [tasks, assignments]);
-	const correctCount = useMemo(() => tasks.filter(t => {
-		const a = assignments[t.id];
-		return a && a.value === t.expectedValue && a.base === t.toBase;
-	}).length, [tasks, assignments]);
 
 	const evaluate = useCallback(() => {
 		setEvaluated(true);
-		// Stop timer upon evaluation to freeze time display
 		stop();
 
 		// Compute stage score
@@ -182,22 +187,31 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 			return next;
 		});
 
-		// If this was the last stage, compute final result
+		// If this was the last stage, compute final result and emit to container
 		if (stageIndex === stages.length - 1) {
 			const elapsedMs = getElapsed();
 			const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
 			const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
-			const totalCorrect = stageScores.reduce((sum, s) => sum + (s?.correct ?? 0), 0) + correct;
-			const totalPossible = stageScores.reduce((sum, s) => sum + (s?.total ?? 0), 0) + total;
-			const totalPoints = totalCorrect + timeBonus;
-			const perStage: StageScore[] = (() => {
+			const perStage = (() => {
 				const base = [...stageScores];
 				base[stageIndex] = { difficulty, correct, total, points };
 				return base;
 			})();
-			setFinalResult({ elapsedMs, withinThreshold, timeBonus, perStage, totalCorrect, totalPossible, totalPoints });
+			const totalCorrect = perStage.reduce((sum, s) => sum + (s?.correct ?? 0), 0);
+			const totalPossible = perStage.reduce((sum, s) => sum + (s?.total ?? 0), 0);
+			const totalPoints = totalCorrect + timeBonus;
+			onSummaryChange?.({
+				elapsedMs,
+				withinThreshold,
+				timeBonus,
+				perStage: perStage.map(s => ({ ...s })),
+				totalCorrect,
+				totalPossible,
+				totalPoints,
+				thresholdMs: evalConfig.timeBonusThresholdMs,
+			});
 		}
-	}, [assignments, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, stageIndex, stageScores, stages, stop, tasks]);
+	}, [assignments, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, onSummaryChange, stageIndex, stageScores, stages, stop, tasks]);
 
 	const goToNextStage = useCallback(() => {
 		if (stageIndex < stages.length - 1) {
@@ -208,40 +222,64 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 		}
 	}, [stageIndex, stages, startSetForStage]);
 
-	// Provide footer controls to parent
-	useEffect(() => {
-		if (!hasStarted || tasks.length === 0) {
-			onControlsChange?.(null);
-			onHudChange?.(null);
-			return;
-		}
-		onControlsChange?.({
-			onReset: resetSet,
-			onEvaluate: evaluate,
-			onNext: goToNextStage,
+	// Provide footer controls to parent (stabilized)
+	const resetSetRef = useRef(resetSet);
+	const evaluateRef = useRef(evaluate);
+	const goToNextStageRef = useRef(goToNextStage);
+
+	useEffect(() => { resetSetRef.current = resetSet; }, [resetSet]);
+	useEffect(() => { evaluateRef.current = evaluate; }, [evaluate]);
+	useEffect(() => { goToNextStageRef.current = goToNextStage; }, [goToNextStage]);
+
+	const onResetStable = useCallback(() => { resetSetRef.current(); }, []);
+	const onEvaluateStable = useCallback(() => { evaluateRef.current(); }, []);
+	const onNextStable = useCallback(() => { goToNextStageRef.current(); }, []);
+
+	const controls = useMemo(() => {
+		if (!hasStarted || tasks.length === 0) return null;
+		return {
+			onReset: onResetStable,
+			onEvaluate: onEvaluateStable,
+			onNext: onNextStable,
 			showReset: !evaluated,
 			showEvaluate: true,
 			showNext: evaluated && stageIndex < stages.length - 1,
 			disableReset: !tasks.length,
 			disableEvaluate: !allAssigned,
 			disableNext: false,
-		});
-		// Cleanup when unmounting
-		return () => {
-			onControlsChange?.(null);
-			onHudChange?.(null);
 		};
-	}, [hasStarted, tasks.length, evaluated, stageIndex, stages, allAssigned, correctCount, onControlsChange, onHudChange, resetSet, evaluate, goToNextStage]);
+	}, [hasStarted, tasks.length, evaluated, stageIndex, stages.length, allAssigned, onResetStable, onEvaluateStable, onNextStable]);
+
+	const prevControlsRef = useRef<typeof controls>(null);
+	const onControlsChangeRef = useRef(onControlsChange);
+	const onHudChangeRef = useRef(onHudChange);
+	useEffect(() => { onControlsChangeRef.current = onControlsChange; }, [onControlsChange]);
+	useEffect(() => { onHudChangeRef.current = onHudChange; }, [onHudChange]);
+	useEffect(() => {
+		if (!onControlsChangeRef.current) return;
+		if (prevControlsRef.current !== controls) {
+			onControlsChangeRef.current(controls);
+			prevControlsRef.current = controls;
+		}
+	}, [controls]);
+
+	// Unmount-only cleanup for controls and HUD
+	useEffect(() => {
+		return () => {
+			onControlsChangeRef.current?.(null);
+			onHudChangeRef.current?.(null);
+		};
+	}, []);
 
 	// Update HUD in parent header
 	useEffect(() => {
 		if (!hasStarted || tasks.length === 0) return;
-		onHudChange?.({
+		onHudChangeRef.current?.({
 			subtitle: 'Datenfluss wiederherstellen',
 			progress: { current: stageIndex + 1, total: stages.length },
 			requestTimer: isRunning ? 'start' : undefined,
 		});
-	}, [hasStarted, tasks.length, stageIndex, stages.length, isRunning, onHudChange]);
+	}, [hasStarted, tasks.length, stageIndex, stages.length, isRunning]);
 
 	return (
 		<div className="number-system-container">
@@ -257,14 +295,14 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 					<div className="equations-and-results">
 						{/* Left side: Equation rows */}
 						<div className="equations-section">
-							{tasks.map((t) => {
+								{tasks.map((t) => {
 								const assigned = assignments[t.id];
 								const isCorrect = evaluated && !!assigned && assigned.value === t.expectedValue && assigned.base === t.toBase;
 								const isWrong = evaluated && !!assigned && !(assigned.value === t.expectedValue && assigned.base === t.toBase);
 								const isActive = activeTaskId === t.id;
-								return (
+									return (
 									<SharedEquationRow
-										key={t.id}
+											key={`ns-task:${t.id}`}
 										hasAssignment={!!assigned}
 										sourceContent={<NumberWithBase value={t.sourceValue} base={t.fromBase} />}
 										assignedContent={assigned ? <NumberWithBase value={assigned.value} base={assigned.base} /> : null}
@@ -283,7 +321,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 						</div>
 
 						{/* Right side: Available results */}
-									<ResultsSection 
+										<ResultsSection 
 										answerPool={answerPool}
 										usedAnswerKeys={usedAnswerKeys}
 										assignments={assignments}
@@ -294,6 +332,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 										handleDragEnd={handleDragEnd}
 										assignAnswer={assignAnswerAdapter}
 										evaluated={evaluated}
+											keyPrefix="ns"
 										renderAnswer={(a) => (
 										  typeof a.base === 'number'
 											? <NumberWithBase value={a.value} base={a.base as 2|8|10|16} />
@@ -318,47 +357,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChan
 				</div>
 			)}
 
-			{/* Final evaluation summary overlay */}
-			{finalResult && (
-				<div className="ns-summary-overlay" role="dialog" aria-modal="true">
-					<div className="ns-summary-card">
-						<h2>Auswertung</h2>
-						<div className="ns-summary-row">
-							<span>Zeit:</span>
-							<strong>{formatTime(finalResult.elapsedMs)}</strong>
-						</div>
-						<div className="ns-summary-row">
-							<span>Grenze für Bonus:</span>
-							<strong>{formatTime(evalConfig.timeBonusThresholdMs)} ({finalResult.withinThreshold ? 'unter' : 'über'})</strong>
-						</div>
-						<hr />
-						<div className="ns-summary-stages">
-							{finalResult.perStage.map((s, idx) => (
-								<div key={idx} className="ns-summary-row">
-									<span>Stufe {idx + 1} ({s.difficulty.charAt(0).toUpperCase() + s.difficulty.slice(1)}):</span>
-									<strong>{s.correct} / {s.total} Punkte</strong>
-								</div>
-							))}
-						</div>
-						<hr />
-						<div className="ns-summary-row">
-							<span>Gesamt (Antworten):</span>
-							<strong>{finalResult.totalCorrect} / {finalResult.totalPossible}</strong>
-						</div>
-						<div className="ns-summary-row">
-							<span>Zeitbonus:</span>
-							<strong>{finalResult.timeBonus}</strong>
-						</div>
-						<div className="ns-summary-total">
-							<span>Gesamtpunkte:</span>
-							<strong>{finalResult.totalPoints}</strong>
-						</div>
-						<div className="ns-summary-actions">
-							<Link to="/dashboard" className="button">Beenden</Link>
-						</div>
-					</div>
-				</div>
-			)}
+			{/* Summary overlay moved to container */}
 		</div>
 	);
 };

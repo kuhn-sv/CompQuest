@@ -10,6 +10,7 @@
   align-items: center;
 
   &__container {
+    position: relative; // provide positioning context for overlays
     width: 70vw; // fixed container size ~70%
     height: 80vh;
     max-width: none;

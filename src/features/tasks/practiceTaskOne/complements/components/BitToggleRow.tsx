@@ -17,7 +17,7 @@ const BitToggleRow: React.FC<BitToggleRowProps> = ({ bits, onChange, className, 
   return (
     <div className={className ?? ''} aria-label="Bits umschalten">
       {bits.map((b, i) => (
-        <BitToggleButton key={i} value={b} onToggle={() => toggleBit(i)} disabled={disabled} />
+        <BitToggleButton key={`bit:${i}:${b}`} value={b} onToggle={() => toggleBit(i)} disabled={disabled} />
       ))}
     </div>
   );

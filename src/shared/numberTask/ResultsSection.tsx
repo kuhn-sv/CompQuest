@@ -3,6 +3,7 @@ import type { NumberTaskBase, AnswerOptionBase, AssignmentMapBase } from './Numb
 
 interface ResultsSectionProps {
   answerPool: AnswerOptionBase[];
+  // Deprecated: a Set of value|base keys marks used, but fails for duplicates. Kept for compatibility.
   usedAnswerKeys: Set<string>;
   assignments: AssignmentMapBase;
   draggedAnswer: AnswerOptionBase | null;
@@ -14,26 +15,45 @@ interface ResultsSectionProps {
   evaluated: boolean;
   // Optional renderer to display an answer value (e.g., wrap with NumberWithBase)
   renderAnswer?: (answer: AnswerOptionBase) => React.ReactNode;
+  // Optional prefix used to build stable, unique keys for answer rows
+  keyPrefix?: string;
 }
 
-export const ResultsSection: React.FC<ResultsSectionProps> = ({
-  answerPool,
-  usedAnswerKeys,
-  assignments,
-  draggedAnswer,
-  activeTaskId,
-  tasks,
-  handleDragStart,
-  handleDragEnd,
-  assignAnswer,
-  evaluated,
-  renderAnswer,
-}) => {
+export const ResultsSection: React.FC<ResultsSectionProps> = (props) => {
+  const {
+    answerPool,
+    assignments,
+    draggedAnswer,
+    activeTaskId,
+    tasks,
+    handleDragStart,
+    handleDragEnd,
+    assignAnswer,
+    evaluated,
+    renderAnswer,
+    keyPrefix = 'result',
+  } = props;
+  // Build a count of how many answers of each value|base are assigned
+  const assignedCountByKey = new Map<string, number>();
+  for (const t of tasks) {
+    const a = assignments[t.id];
+    if (!a) continue;
+    const k = `${a.value}|${a.base}`;
+    assignedCountByKey.set(k, (assignedCountByKey.get(k) ?? 0) + 1);
+  }
+
+  // Track how many of each key we've encountered while rendering, so only
+  // the first N instances (where N = assigned count) are marked as used/hidden
+  const seenSoFar = new Map<string, number>();
+
   return (
     <div className="results-section">
       {answerPool.map((answer, index) => {
         const aKey = `${answer.value}|${answer.base}`;
-        const used = usedAnswerKeys.has(aKey);
+        const maxUsed = assignedCountByKey.get(aKey) ?? 0;
+        const seen = seenSoFar.get(aKey) ?? 0;
+        const used = seen < maxUsed;
+        if (used) seenSoFar.set(aKey, seen + 1);
         let assignedToTask: NumberTaskBase | undefined;
         let resultState = '';
         for (const t of tasks) {
@@ -50,8 +70,10 @@ export const ResultsSection: React.FC<ResultsSectionProps> = ({
             break;
           }
         }
+        // Use a scoped key including prefix and index to avoid collisions when values repeat
+        const rowKey = `${keyPrefix}:${index}:${aKey}`;
         return (
-          <div key={aKey} className={`result-row row-${index}`}>
+          <div key={rowKey} className={`result-row row-${index}`}>
             {!used && (
               <div
                 className={`input-field result-field${assignedToTask ? ' assigned' : ''}${resultState ? ' ' + resultState : ''} ${draggedAnswer && draggedAnswer.value === answer.value && draggedAnswer.base === answer.base ? 'dragging' : ''}`}

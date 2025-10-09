@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
 import BitToggleRow from './components/BitToggleRow';
@@ -6,19 +6,26 @@ import BitToggleRow from './components/BitToggleRow';
 import type { SubTaskComponentProps } from '../interfaces';
 import { useTimer } from '../../../../shared/hooks';
 import { generateRounds, ComplementRound, invertBits, twosComplement, bitsToString } from './complements.helper.ts';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 
 type Round = ComplementRound;
 
 const DEFAULT_BIT_COUNT = 8;
 
-const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange }) => {
+const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange, onSummaryChange }) => {
   const rounds: Round[] = useMemo(() => generateRounds(4, DEFAULT_BIT_COUNT), []);
   const [roundIndex, setRoundIndex] = useState<number>(0);
   const [bits, setBits] = useState<number[]>(Array(DEFAULT_BIT_COUNT).fill(0));
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
 
-  const { isRunning, start, stop, reset } = useTimer();
+  const { isRunning, start, stop, reset, getElapsed } = useTimer();
+
+  // Shared evaluation config like other tasks
+  const evalConfig = useMemo(() => ({ timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1 }), []);
+
+  // Accumulate per-round scores and final summary
+  const [stageScores, setStageScores] = useState<Array<{ difficulty: Difficulty; correct: number; total: number; points: number }>>([]);
 
   const current = rounds[roundIndex];
 
@@ -47,7 +54,42 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
   const evaluate = React.useCallback(() => {
     setEvaluated(true);
     stop();
-  }, [stop]);
+    const correct = bitsToString(bits) === bitsToString(expectedBits) ? 1 : 0;
+    const total = 1;
+    const points = correct;
+    const difficulty = Difficulty.Easy; // Complements rounds have uniform difficulty for now
+
+    setStageScores(prev => {
+      const next = [...prev];
+      next[roundIndex] = { difficulty, correct, total, points };
+      return next;
+    });
+
+    // If last round, compute final summary
+    if (roundIndex === rounds.length - 1) {
+      const elapsedMs = getElapsed();
+      const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
+      const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
+      const baseScores = (() => {
+        const base = [...stageScores];
+        base[roundIndex] = { difficulty, correct, total, points };
+        return base;
+      })();
+      const totalCorrect = baseScores.reduce((sum, s) => sum + (s?.correct ?? 0), 0);
+      const totalPossible = baseScores.reduce((sum, s) => sum + (s?.total ?? 0), 0);
+      const totalPoints = totalCorrect + timeBonus;
+      onSummaryChange?.({
+        elapsedMs,
+        withinThreshold,
+        timeBonus,
+        perStage: baseScores.map(s => ({ ...s, difficulty: s.difficulty })),
+        totalCorrect,
+        totalPossible,
+        totalPoints,
+        thresholdMs: evalConfig.timeBonusThresholdMs,
+      });
+    }
+  }, [bits, expectedBits, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, onSummaryChange, roundIndex, rounds.length, stageScores, stop]);
 
   const next = React.useCallback(() => {
     if (roundIndex < rounds.length - 1) {
@@ -59,39 +101,64 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
     }
   }, [roundIndex, rounds, start]);
 
-  // Provide footer controls to parent
-  useEffect(() => {
-    if (!hasStarted) {
-      onControlsChange?.(null);
-      onHudChange?.(null);
-      return;
-    }
-    onControlsChange?.({
-      onReset: resetTask,
-      onEvaluate: evaluate,
-      onNext: next,
+  // Provide footer controls to parent (stabilized)
+  const resetRef = useRef(resetTask);
+  const evaluateRef = useRef(evaluate);
+  const nextRef = useRef(next);
+
+  useEffect(() => { resetRef.current = resetTask; }, [resetTask]);
+  useEffect(() => { evaluateRef.current = evaluate; }, [evaluate]);
+  useEffect(() => { nextRef.current = next; }, [next]);
+
+  const onResetStable = useCallback(() => { resetRef.current(); }, []);
+  const onEvaluateStable = useCallback(() => { evaluateRef.current(); }, []);
+  const onNextStable = useCallback(() => { nextRef.current(); }, []);
+
+  const controls = useMemo(() => {
+    if (!hasStarted) return null;
+    return {
+      onReset: onResetStable,
+      onEvaluate: onEvaluateStable,
+      onNext: onNextStable,
       showReset: !evaluated,
       showEvaluate: true,
       showNext: evaluated && roundIndex < rounds.length - 1,
-      disableReset: evaluated, // disable reset after evaluation
-      disableEvaluate: evaluated, // disable evaluate after evaluation
-      disableNext: !evaluated, // next only after evaluation
-    });
-    return () => {
-      onControlsChange?.(null);
-      onHudChange?.(null);
+      disableReset: evaluated,
+      disableEvaluate: evaluated,
+      disableNext: !evaluated,
     };
-  }, [hasStarted, evaluated, roundIndex, rounds.length, isCorrect, expectedBits, onControlsChange, onHudChange, resetTask, evaluate, next]);
+  }, [hasStarted, evaluated, roundIndex, rounds.length, onResetStable, onEvaluateStable, onNextStable]);
+
+  const prevControlsRef = useRef<typeof controls>(null);
+  const onControlsChangeRef = useRef(onControlsChange);
+  const onHudChangeRef = useRef(onHudChange);
+  useEffect(() => { onControlsChangeRef.current = onControlsChange; }, [onControlsChange]);
+  useEffect(() => { onHudChangeRef.current = onHudChange; }, [onHudChange]);
+  useEffect(() => {
+    if (!onControlsChangeRef.current) return;
+    if (prevControlsRef.current !== controls) {
+      onControlsChangeRef.current(controls);
+      prevControlsRef.current = controls;
+    }
+  }, [controls]);
+
+  // Unmount-only cleanup (use refs to avoid re-running on parent callback identity changes)
+  useEffect(() => {
+    return () => {
+      onControlsChangeRef.current?.(null);
+      onHudChangeRef.current?.(null);
+    };
+  }, []);
 
   // Update HUD in parent: subtitle + progress + timer control
   useEffect(() => {
     if (!hasStarted) return;
-    onHudChange?.({
+    onHudChangeRef.current?.({
       subtitle: 'Datenfluss wiederherstellen',
       progress: { current: roundIndex + 1, total: rounds.length },
       requestTimer: isRunning ? 'start' : undefined,
     });
-  }, [hasStarted, roundIndex, rounds.length, isRunning, onHudChange]);
+  }, [hasStarted, roundIndex, rounds.length, isRunning]);
 
   return (
     <div className="number-system-container complements-container">
@@ -130,6 +197,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
           <button className="ns-start-button" onClick={startTask} aria-label="Aufgabe starten">Start</button>
         </div>
       )}
+
+      {/* Summary overlay moved to container */}
     </div>
   );
 };
