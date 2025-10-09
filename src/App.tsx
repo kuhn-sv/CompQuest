@@ -102,8 +102,18 @@ const App: React.FC = () => {
             } 
           />
 
+          <Route 
+            path="/task/complements" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage initialSubTask="complements" />
+              </ProtectedRoute>
+            } 
+          />
+
           {/* Compatibility redirects for pluralized paths */}
           <Route path="/tasks/number-system" element={<Navigate to="/task/number-system" replace />} />
+          <Route path="/tasks/complements" element={<Navigate to="/task/complements" replace />} />
 
           {/* Root Route - Redirect basierend auf Auth Status */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

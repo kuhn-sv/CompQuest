@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import './number-system.page.scss';
 import { generateSet } from './numberSystem.helper';
@@ -9,15 +9,13 @@ import type { AssignmentMap } from './numberSystem.types';
 import { ResultsSection } from './components';
 import { EquationRow as SharedEquationRow } from '../../../../shared/components/equationrow/EquationRow';
 import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
-import { ConnectionOverlay, Timer } from '../../../../shared/components';
-import TaskActionButtons from '../../../../shared/components/TaskActionButtons/TaskActionButtons.component';
+import { ConnectionOverlay } from '../../../../shared/components';
+import type { SubTaskComponentProps } from '../interfaces';
 import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
 
-type NumberSystemComponentProps = object;
-
-const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
+const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange }) => {
 	// Staged progression: Easy → Medium → Hard
-	const stages: Difficulty[] = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard];
+	const stages: Difficulty[] = useMemo(() => [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard], []);
 	const [stageIndex, setStageIndex] = useState<number>(0);
 	const [tasks, setTasks] = useState<NumberTask[]>([]);
 	const [answerPool, setAnswerPool] = useState<AnswerOption[]>([]);
@@ -33,7 +31,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 	const evalConfig: EvaluationConfig = useMemo(() => ({ timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1 }), []);
 
 	// Timer functionality
-	const { time, isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
+	const { isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
 
 	// Drag and Drop logic
 	const {
@@ -82,7 +80,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 				});
 		}, [rawConnectionLines, evaluated, tasks, assignments]);
 
-	const startSetForStage = (idx: number, options?: { resetTimer?: boolean }) => {
+	const startSetForStage = useCallback((idx: number, options?: { resetTimer?: boolean }) => {
 		const { resetTimer: shouldResetTimer = true } = options ?? {};
 		const difficulty = stages[idx];
 		const { tasks, answerPool } = generateSet(difficulty);
@@ -96,16 +94,16 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 			reset();
 		}
 		start();
-	};
+	}, [reset, start, stages]);
 
 	// Initial start handler: reveal tasks and kick off stage 1
-	const handleInitialStart = () => {
+	const handleInitialStart = useCallback(() => {
 		setHasStarted(true);
 		setStageIndex(0);
 		startSetForStage(0, { resetTimer: true });
-	};
+	}, [startSetForStage]);
 
-	const resetSet = () => {
+	const resetSet = useCallback(() => {
 		setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
 		setEvaluated(false);
 		setActiveTaskId(null);
@@ -115,7 +113,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 		if (tasks.length > 0) {
 			start();
 		}
-	};
+	}, [reset, resetDragState, start, tasks]);
 
 	// Wrapper function for assignment logic
 		const assignAnswer = useCallback((taskId: string, answer: AnswerOption) => {
@@ -164,7 +162,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 		return a && a.value === t.expectedValue && a.base === t.toBase;
 	}).length, [tasks, assignments]);
 
-	const evaluate = () => {
+	const evaluate = useCallback(() => {
 		setEvaluated(true);
 		// Stop timer upon evaluation to freeze time display
 		stop();
@@ -199,16 +197,51 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 			})();
 			setFinalResult({ elapsedMs, withinThreshold, timeBonus, perStage, totalCorrect, totalPossible, totalPoints });
 		}
-	};
+	}, [assignments, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, stageIndex, stageScores, stages, stop, tasks]);
 
-	const goToNextStage = () => {
+	const goToNextStage = useCallback(() => {
 		if (stageIndex < stages.length - 1) {
 			const nextIndex = stageIndex + 1;
 			setStageIndex(nextIndex);
 			// Resume timer: do not reset
 			startSetForStage(nextIndex, { resetTimer: false });
 		}
-	};
+	}, [stageIndex, stages, startSetForStage]);
+
+	// Provide footer controls to parent
+	useEffect(() => {
+		if (!hasStarted || tasks.length === 0) {
+			onControlsChange?.(null);
+			onHudChange?.(null);
+			return;
+		}
+		onControlsChange?.({
+			onReset: resetSet,
+			onEvaluate: evaluate,
+			onNext: goToNextStage,
+			showReset: !evaluated,
+			showEvaluate: true,
+			showNext: evaluated && stageIndex < stages.length - 1,
+			disableReset: !tasks.length,
+			disableEvaluate: !allAssigned,
+			disableNext: false,
+		});
+		// Cleanup when unmounting
+		return () => {
+			onControlsChange?.(null);
+			onHudChange?.(null);
+		};
+	}, [hasStarted, tasks.length, evaluated, stageIndex, stages, allAssigned, correctCount, onControlsChange, onHudChange, resetSet, evaluate, goToNextStage]);
+
+	// Update HUD in parent header
+	useEffect(() => {
+		if (!hasStarted || tasks.length === 0) return;
+		onHudChange?.({
+			subtitle: 'Datenfluss wiederherstellen',
+			progress: { current: stageIndex + 1, total: stages.length },
+			requestTimer: isRunning ? 'start' : undefined,
+		});
+	}, [hasStarted, tasks.length, stageIndex, stages.length, isRunning, onHudChange]);
 
 	return (
 		<div className="number-system-container">
@@ -216,33 +249,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 				<h1>Zahlensysteme – Übung 1.1</h1>
 			</div>
 
-			{/* Timer and internal 3-stage progress display */}
-			{hasStarted && tasks.length > 0 && (
-				<div className="ns-timer-section">
-					<div className="ns-titles">
-						<div className="ns-title">Datenfluss wiederherstellen</div>
-						<div className="ns-subtitle">Verbinde jede Zahl links mit dem passenden Gegenstück rechts, um den Datenfluss wiederherzustellen</div>
-					</div>
-					<Timer 
-						time={time}
-						isRunning={isRunning}
-						formatTime={formatTime}
-						getElapsed={getElapsed}
-						className="ns-timer"
-					/>
-					<div className="task-progress-info">
-						<span className="progress-text">
-							Aufgabe {stageIndex + 1} / {stages.length}
-						</span>
-						<div className="progress-bar">
-							<div 
-								className="progress-fill"
-								style={{ width: `${((stageIndex + 1) / stages.length) * 100}%` }}
-							/>
-						</div>
-					</div>
-				</div>
-			)}
+			{/* Header timer/progress moved to container */}
 
 
 			{hasStarted && tasks.length > 0 && (
@@ -298,25 +305,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 					{/* SVG overlay for connection lines */}
 					<ConnectionOverlay connectionLines={connectionLines} />
 
-					{/* Wiederverwendbare Button-Komponente für Aufgabenaktionen */}
-					<div className="ns-controls">
-						<TaskActionButtons
-							onReset={resetSet}
-							onEvaluate={evaluate}
-							onNext={goToNextStage}
-							showReset={!evaluated}
-							showEvaluate={true}
-							showNext={evaluated && stageIndex < stages.length - 1}
-							disableReset={!tasks.length}
-							disableEvaluate={!allAssigned}
-							disableNext={false}
-						/>
-						{evaluated && (
-							<div className="result">
-								Ergebnis: {correctCount} / {tasks.length} richtig
-							</div>
-						)}
-					</div>
+					{/* Controls moved to parent footer */}
 				</div>
 			)}
 
