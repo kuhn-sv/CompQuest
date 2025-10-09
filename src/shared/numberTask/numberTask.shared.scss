@@ -48,8 +48,8 @@ $ns-field-height: 40px !default;
     justify-content: center;
     font-weight: bold;
     font-size: 16px;
-    &.success { background: var(--success); border-color: var(--success); color: #fff; }
-    &.error { background: var(--error); border-color: var(--error); color: #fff; }
+    &.success { border-color: var(--success); color: #fff; }
+    &.error { border-color: var(--error); color: #fff; }
   }
   .result-placeholder {
     min-width: $ns-box-width;
@@ -93,8 +93,8 @@ $ns-field-height: 40px !default;
     &.used { opacity: 0.3; cursor: not-allowed; }
   &.assigned { background: var(--surface); border-color: var(--primary); animation: slideInResult 0.4s ease-out; }
   &.dragging { opacity: 0.5; transform: rotate(3deg); cursor: grabbing; }
-  &.success { background: var(--success); border-color: transparent; color: #fff; box-shadow: none; }
-  &.error { background: var(--error); border-color: transparent; color: #fff; box-shadow: none; }
+  &.success { border-color: var(--success); color: #fff; box-shadow: none; }
+  &.error { border-color: var(--error); color: #fff; box-shadow: none; }
   }
 }
 
