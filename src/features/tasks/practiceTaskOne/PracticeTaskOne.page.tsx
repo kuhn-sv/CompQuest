@@ -21,6 +21,11 @@ interface PracticeTaskOnePageProps {
   initialSubTask?: SubTaskType;
 }
 
+// Stable wrapper to inject arithmeticMode without recreating component identity on each render
+const TwosComplementArithmeticSubtask: React.FC<SubTaskComponentProps> = (props) => (
+  <PositiveArithmeticComponent {...props} arithmeticMode="twos-complement" />
+);
+
 const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
   initialSubTask = 'number-system'
 }) => {
@@ -46,19 +51,13 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
       description: 'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
       component: ComplementsComponent as React.ComponentType<SubTaskComponentProps>
     },
-    // TODO: Add other subtasks when available
-    // {
-    //   id: 'data-package',
-    //   title: 'Datenfluss wiederherstellen',
-    //   description: 'Stelle den Datenfluss wieder her.',
-    //   component: DataPackagePage as React.ComponentType<SubTaskComponentProps>
-    // },
-    // {
-    //   id: 'twos-complement',
-    //   title: 'Zweierkomplement',
-    //   description: 'Arbeite mit Zweierkomplementdarstellung.',
-    //   component: TwosComplementPage as React.ComponentType<SubTaskComponentProps>
-    // }
+    {
+      id: 'twos-complement',
+      title: 'Zweierkomplement-Arithmetik',
+      description: 'Additionen im Zweierkomplement mit fester Bitbreite (nur binär).',
+      component: TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>
+    },
+
   ];
 
   const currentTaskIndex = subTaskConfigs.findIndex(task => task.id === currentSubTask);

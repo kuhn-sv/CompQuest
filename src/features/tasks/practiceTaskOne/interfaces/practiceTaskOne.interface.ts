@@ -1,5 +1,7 @@
 export type SubTaskType = 'number-system' | 'positive-arithmetic' | 'complements' | 'data-package' | 'twos-complement';
 
+export type ArithmeticMode = 'positive' | 'twos-complement';
+
 export interface SubTaskConfig {
   id: SubTaskType;
   title: string;
@@ -16,6 +18,8 @@ export interface SubTaskComponentProps {
   onControlsChange?: (controls: TaskFooterControls | null) => void;
   // Allow a subtask to report HUD state (progress and timer control) to be shown in the container header
   onHudChange?: (hud: TaskHudState | null) => void;
+  // Arithmetic mode to determine behavior of the exercise (defaults to 'positive')
+  arithmeticMode?: ArithmeticMode;
 }
 
 export interface TaskProgress {

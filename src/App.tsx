@@ -103,6 +103,15 @@ const App: React.FC = () => {
           />
 
           <Route 
+            path="/task/twos-complement-arithmetic" 
+            element={
+              <ProtectedRoute>
+                <PracticeTaskOnePage initialSubTask="twos-complement" />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
             path="/task/complements" 
             element={
               <ProtectedRoute>
@@ -114,6 +123,7 @@ const App: React.FC = () => {
           {/* Compatibility redirects for pluralized paths */}
           <Route path="/tasks/number-system" element={<Navigate to="/task/number-system" replace />} />
           <Route path="/tasks/complements" element={<Navigate to="/task/complements" replace />} />
+          <Route path="/tasks/twos-complement-arithmetic" element={<Navigate to="/task/twos-complement-arithmetic" replace />} />
 
           {/* Root Route - Redirect basierend auf Auth Status */}
           <Route path="/" element={<Navigate to="/dashboard" replace />} />

@@ -12,6 +12,7 @@ import { ResultsSection } from '../../../../shared/numberTask/ResultsSection';
 import type { AnswerOptionBase } from '../../../../shared/numberTask/NumberTask.types';
 import { generateAdditionSet, AdditionTask } from './addition.helper';
 import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import type { ArithmeticMode } from '../interfaces';
 
 interface PAStageScore {
   difficulty: Difficulty;
@@ -30,7 +31,7 @@ interface PAResultSummary {
   totalPoints: number;
 }
 
-const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange }) => {
+const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, arithmeticMode = 'positive' }) => {
   // 3-stage flow: Easy, Medium, Hard
   const stages: Difficulty[] = useMemo(() => [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard], []);
   const [stageIndex, setStageIndex] = useState<number>(0);
@@ -96,7 +97,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
   const startSetForStage = useCallback((idx: number, options?: { resetTimer?: boolean }) => {
     const { resetTimer: shouldResetTimer = true } = options ?? {};
     const difficulty = stages[idx];
-  const { tasks, answerPool } = generateAdditionSet(difficulty);
+  const { tasks, answerPool } = generateAdditionSet(difficulty, arithmeticMode as ArithmeticMode);
     setTasks(tasks);
     setAnswerPool(answerPool);
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
@@ -106,7 +107,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
       reset();
     }
     start();
-  }, [reset, start, stages]);
+  }, [reset, start, stages, arithmeticMode]);
 
   // Initial start handler
   const handleInitialStart = useCallback(() => {
@@ -224,7 +225,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onContro
     <div className="number-system-container">
       <div className="ns-header">
         <Link to="/dashboard" className="back-to-dashboard">← Zurück zum Dashboard</Link>
-        <h1>Positive Arithmetik – Übung 1.2</h1>
+  <h1>{arithmeticMode === 'twos-complement' ? 'Zweierkomplement-Arithmetik – Übung 1.2' : 'Positive Arithmetik – Übung 1.2'}</h1>
       </div>
 
 
