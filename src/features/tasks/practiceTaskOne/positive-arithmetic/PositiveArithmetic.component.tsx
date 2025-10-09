@@ -1,8 +1,9 @@
-import React, { useMemo, useRef, useState, useCallback } from 'react';
+import React, { useMemo, useRef, useState, useCallback, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import '../number-system/number-system.page.scss';
 import { ConnectionOverlay } from '../../../../shared/components';
-import TaskActionButtons from '../../../../shared/components/TaskActionButtons/TaskActionButtons.component';
+// Footer buttons are rendered in parent; we expose controls upwards
+import type { SubTaskComponentProps } from '../interfaces';
 import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, DRAG_DROP_PRESETS } from '../../../../shared/hooks';
 import type { DragDropItem } from '../../../../shared/hooks/useDragAndDrop';
 import { EquationRow as SharedEquationRow } from '../../../../shared/components/equationrow/EquationRow';
@@ -29,9 +30,9 @@ interface PAResultSummary {
   totalPoints: number;
 }
 
-const PositiveArithmeticComponent: React.FC = () => {
+const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange }) => {
   // 3-stage flow: Easy, Medium, Hard
-  const stages: Difficulty[] = [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard];
+  const stages: Difficulty[] = useMemo(() => [Difficulty.Easy, Difficulty.Medium, Difficulty.Hard], []);
   const [stageIndex, setStageIndex] = useState<number>(0);
   const [tasks, setTasks] = useState<AdditionTask[]>([]);
   const [answerPool, setAnswerPool] = useState<AnswerOptionBase[]>([]);
@@ -92,7 +93,7 @@ const PositiveArithmeticComponent: React.FC = () => {
     evaluateStatus: evaluateStatusCb
   });
 
-  const startSetForStage = (idx: number, options?: { resetTimer?: boolean }) => {
+  const startSetForStage = useCallback((idx: number, options?: { resetTimer?: boolean }) => {
     const { resetTimer: shouldResetTimer = true } = options ?? {};
     const difficulty = stages[idx];
   const { tasks, answerPool } = generateAdditionSet(difficulty);
@@ -105,16 +106,16 @@ const PositiveArithmeticComponent: React.FC = () => {
       reset();
     }
     start();
-  };
+  }, [reset, start, stages]);
 
   // Initial start handler
-  const handleInitialStart = () => {
+  const handleInitialStart = useCallback(() => {
     setHasStarted(true);
     setStageIndex(0);
     startSetForStage(0, { resetTimer: true });
-  };
+  }, [startSetForStage]);
 
-  const resetSet = () => {
+  const resetSet = useCallback(() => {
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
     setEvaluated(false);
     setActiveTaskId(null);
@@ -123,10 +124,10 @@ const PositiveArithmeticComponent: React.FC = () => {
     if (tasks.length > 0) {
       start();
     }
-  };
+  }, [reset, resetDragState, start, tasks]);
 
   // Assignment logic
-  const assignAnswer = (taskId: string, answer: AnswerOptionBase) => {
+  const assignAnswer = useCallback((taskId: string, answer: AnswerOptionBase) => {
     setAssignments(prev => {
       const next = { ...prev };
       for (const k of Object.keys(next)) {
@@ -136,11 +137,11 @@ const PositiveArithmeticComponent: React.FC = () => {
       return next;
     });
     setActiveTaskId(null);
-  };
+  }, []);
 
-  const onDropAnswer = (taskId: string, answer: AnswerOptionBase) => {
+  const onDropAnswer = useCallback((taskId: string, answer: AnswerOptionBase) => {
     assignAnswer(taskId, answer);
-  };
+  }, [assignAnswer]);
 
   const usedAnswerKeys = useMemo(() => {
     return new Set(
@@ -157,7 +158,7 @@ const PositiveArithmeticComponent: React.FC = () => {
     return !!a && a.value === t.expected && aBase === t.base;
   }).length, [tasks, assignments]);
 
-  const evaluate = () => {
+  const evaluate = useCallback(() => {
     setEvaluated(true);
     stop();
     const difficulty = stages[stageIndex];
@@ -187,15 +188,37 @@ const PositiveArithmeticComponent: React.FC = () => {
       })();
       setFinalResult({ elapsedMs, withinThreshold, timeBonus, perStage, totalCorrect, totalPossible, totalPoints });
     }
-  };
+  }, [assignments, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, stageIndex, stageScores, stages, stop, tasks]);
 
-  const goToNextStage = () => {
+  const goToNextStage = useCallback(() => {
     if (stageIndex < stages.length - 1) {
       const nextIndex = stageIndex + 1;
       setStageIndex(nextIndex);
       startSetForStage(nextIndex, { resetTimer: false });
     }
-  };
+  }, [stageIndex, stages, startSetForStage]);
+
+  // Provide footer controls to parent
+  useEffect(() => {
+    if (!hasStarted || tasks.length === 0) {
+      onControlsChange?.(null);
+      return;
+    }
+    onControlsChange?.({
+      onReset: resetSet,
+      onEvaluate: evaluate,
+      onNext: goToNextStage,
+      showReset: !evaluated,
+      showEvaluate: true,
+      showNext: evaluated && stageIndex < stages.length - 1,
+      disableReset: !tasks.length,
+      disableEvaluate: !allAssigned,
+      disableNext: false,
+    });
+    return () => {
+      onControlsChange?.(null);
+    };
+  }, [hasStarted, tasks.length, evaluated, stageIndex, stages, allAssigned, correctCount, onControlsChange, resetSet, evaluate, goToNextStage]);
 
   return (
     <div className="number-system-container">
@@ -262,22 +285,7 @@ const PositiveArithmeticComponent: React.FC = () => {
             />
           </div>
           <ConnectionOverlay connectionLines={connectionLines} />
-          <div className="ns-controls">
-            <TaskActionButtons
-              onReset={resetSet}
-              onEvaluate={evaluate}
-              onNext={goToNextStage}
-              showReset={!evaluated}
-              showEvaluate={true}
-              showNext={evaluated && stageIndex < stages.length - 1}
-              disableReset={!tasks.length}
-              disableEvaluate={!allAssigned}
-              disableNext={false}
-            />
-            {evaluated && (
-              <div className="result">Ergebnis: {correctCount} / {tasks.length} richtig</div>
-            )}
-          </div>
+          {/* Controls moved to parent footer */}
         </div>
       )}
 

@@ -8,7 +8,10 @@ $ns-field-height: 40px; // Fixed field height
 
 .number-system-container {
 	padding: $spacing-lg;
-
+	width: 100%;
+	height: auto;
+	display: flex;
+	flex-direction: column;
 }
 
 .ns-header {
@@ -16,7 +19,6 @@ $ns-field-height: 40px; // Fixed field height
 	align-items: center;
 	gap: $spacing-md;
 	margin-bottom: $spacing-lg;
-
 }
 
 .ns-timer-section {
@@ -103,7 +105,9 @@ $ns-field-height: 40px; // Fixed field height
 	display: flex;
 	position: relative;
 	width: 100%;
-	align-items: flex-start;
+	flex: 1 1 auto;
+	align-items: center; // center vertically
+	justify-content: center; // center horizontally
 	// Reserve space so bottom-right controls don’t overlap content
 	padding-bottom: 88px;
 }

@@ -1,0 +1,159 @@
+@use '../../../../styles/_variables' as *;
+
+.complements-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center; // center content horizontally
+  justify-content: center; // center vertically within available height
+  width: 100%;
+  // height is auto so parent grid can center this block
+
+  .complements-content {
+    margin-top: 0; // remove top offset to keep perfect vertical centering
+    padding: 0 $spacing-lg $spacing-lg;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-lg;
+    align-items: center;
+    justify-content: center; // vertical centering within content block
+  }
+
+  .target-box {
+    padding: $spacing-md $spacing-lg;
+    border: 2px solid var(--surface-border);
+    border-radius: $border-radius-md;
+    background: var(--surface);
+    font-size: 18px;
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; letter-spacing: 0.5px; }
+    .sub { font-size: 14px; color: var(--text-secondary); margin-top: $spacing-xs; }
+  }
+
+  .bits-box {
+    display: flex;
+    gap: $spacing-md;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .bit-button {
+    width: 52px;
+    height: 52px;
+    border-radius: 10px;
+    border: 2px solid var(--surface-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    &:hover { border-color: var(--primary); }
+    &.active {
+      border-color: var(--primary);
+      background: var(--primary10);
+    }
+    &.disabled,
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+  }
+
+  .info-line {
+    display: flex;
+    gap: $spacing-lg;
+    align-items: center;
+    .expected.correct { color: var(--success); }
+    .expected.wrong { color: var(--error); }
+  }
+
+  // Framed area around the bit buttons with animated border overlay
+  .bits-frame {
+    position: relative;
+    padding: $spacing-2xl $spacing-2xl; // space inside the frame for the buttons row
+    // configurable frame values
+    --frame-border: 2px;
+    --frame-gap: 180px; // opening in the bottom border (can be adjusted)
+    --frame-color: var(--primary);
+
+    // draw top/left/right border; bottom stays open with a central gap
+    border: var(--frame-border) solid var(--frame-color);
+    border-bottom: none; // bottom will be drawn via pseudo elements with a center gap
+    border-radius: $border-radius-md;
+    align-self: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: min(100%, 1000px);
+    height: 200px;
+    box-sizing: border-box;
+
+    // inner content alignment
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: $spacing-lg;
+
+    // bottom border segments (left/right) with a central opening
+    &::before,
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      height: 0;
+      border-bottom: var(--frame-border) solid var(--frame-color);
+      width: calc(50% - (var(--frame-gap) / 2));
+    }
+    &::before { left: 0; }
+    &::after { right: 0; }
+
+    &__overlay {
+      pointer-events: none;
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      // overlay draws ONLY top/left/right stroke; bottom is drawn via its own pseudo elements
+      border: var(--frame-border) solid transparent;
+      border-bottom: none;
+    }
+    // overlay bottom segments to match the opening shape
+    &__overlay::before,
+    &__overlay::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      height: 0;
+      width: calc(50% - (var(--frame-gap) / 2));
+      border-bottom: var(--frame-border) solid transparent; // color assigned on state
+    }
+    &__overlay::before { left: 0; }
+    &__overlay::after { right: 0; }
+
+    // When evaluated, hide the base (primary) frame color so only result color remains
+    &.evaluated { --frame-color: transparent; }
+
+    &.evaluated.success .bits-frame__overlay {
+      border-color: var(--success);
+      animation: frameSweep 700ms ease-out forwards;
+    }
+    &.evaluated.success .bits-frame__overlay::before,
+    &.evaluated.success .bits-frame__overlay::after { border-bottom-color: var(--success); }
+
+    &.evaluated.error .bits-frame__overlay {
+      border-color: var(--error);
+      animation: frameSweep 700ms ease-out forwards;
+    }
+    &.evaluated.error .bits-frame__overlay::before,
+    &.evaluated.error .bits-frame__overlay::after { border-bottom-color: var(--error); }
+  }
+
+  // Border sweep animation: simulate drawing the rectangle
+  @keyframes frameSweep {
+    0% { clip-path: inset(0 100% 0 0 round $border-radius-md); }
+    25% { clip-path: inset(0 0 100% 0 round $border-radius-md); }
+    50% { clip-path: inset(0 0 0 100% round $border-radius-md); }
+    100% { clip-path: inset(0 0 0 0 round $border-radius-md); }
+  }
+}

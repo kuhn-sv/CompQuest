@@ -1,15 +1,18 @@
 @use '../../../styles/_variables' as *;
 
 .practice-task-one-page {
-  min-height: 100vh;
-  padding: 2rem;
+  height: 100vh; // lock viewport height to avoid page scroll
+  overflow: hidden; // disable page scrolling
+  overflow-x: hidden;
+  padding: 0; // avoid adding to 100vh which would force scroll
   display: flex;
   justify-content: center;
   align-items: center;
 
   &__container {
-    width: 100%;
-    max-width: 1200px;
+    width: 70vw; // fixed container size ~70%
+    height: 80vh;
+    max-width: none;
     background: var(--surface);
   border-radius: 12px;
   overflow: hidden;
@@ -21,17 +24,33 @@
 
   &__header {
     position: relative;
-    padding: 1.5rem 2rem;
+    padding: 1.25rem 1.75rem;
     border-bottom: 1px solid var(--surface-border);
     background: var(--highlight);
     display: flex;
-    align-items: flex-start;
-    justify-content: space-between;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .header-row--top {
+      gap: $spacing-lg;
+    }
+
+    .header-row--bottom {
+      flex-direction: column;
+      gap: 6px;
+    }
 
     .task-info {
       display: flex;
       flex-direction: column;
-      gap: $spacing-sm;
+      gap: 4px;
       flex: 1;
     }
 
@@ -45,12 +64,55 @@
       margin: 0;
       font-size: 0.95rem;
     }
+
+    .task-hud {
+      display: flex;
+      align-items: center;
+      gap: $spacing-lg;
+      flex: 0 0 auto;
+    }
+
+    .task-progress__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .task-progress__label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .task-progress__percent {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .task-progress__bar {
+      width: 100%;
+      height: 6px;
+      background: var(--surface);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .task-progress__fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
   }
 
   &__task-content {
     flex: 1;
-    overflow-y: auto;
+    overflow: hidden; // ensure inner tasks layout within the container
     padding: 0; // Let the task component handle its own padding
+    display: grid; // center inner task content
+    place-items: center; // center on both axes
+    min-height: 0; // allow the grid to size within the container
     
     // Remove the ns-header padding for container mode
     .number-system-container {
@@ -59,6 +121,26 @@
       .ns-header {
         display: none; // Hidden in container mode since we have our own header
       }
+    }
+
+    // Ensure complements container also centers nicely without stretching
+    .complements-container {
+      width: 100%;
+      max-width: 1000px; // keep reasonable reading width
+    }
+  }
+
+  &__footer {
+    height: 80px;
+    padding: 0 20px;
+    border-top: 1px solid var(--surface-border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .task-action-buttons {
+      margin: 0; // override any internal margins
     }
   }
 }

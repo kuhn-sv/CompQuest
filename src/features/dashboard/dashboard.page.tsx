@@ -24,6 +24,12 @@ const DashboardPage: React.FC = () => {
       path: '/task/positive-arithmetic'
     },
     {
+      id: 'complements-direct',
+      title: 'Einer- & Zweierkomplement – Übung 1.3 (Direkt)',
+      description: 'Direkter Einstieg in Einer- & Zweierkomplement.',
+      path: '/task/complements'
+    },
+    {
       id: 'practice-task-one',
       title: 'Übungsaufgabe 1.1',
       description: 'Zahlensystem-Konverter: Verbinde Zahlen mit ihren entsprechenden Darstellungen',
