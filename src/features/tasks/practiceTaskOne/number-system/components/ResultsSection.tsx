@@ -18,18 +18,6 @@ interface ResultsSectionProps {
   evaluated: boolean;
 }
 
-interface ResultsSectionProps {
-  answerPool: AnswerOption[];
-  usedAnswerKeys: Set<string>;
-  assignments: AssignmentMap;
-  draggedAnswer: AnswerOption | null;
-  activeTaskId: string | null;
-  tasks: NumberTask[];
-  handleDragStart: (e: React.DragEvent, answer: AnswerOption) => void;
-  handleDragEnd: () => void;
-  assignAnswer: (taskId: string, answer: AnswerOption) => void;
-}
-
 export const ResultsSection: React.FC<ResultsSectionProps> = ({
   answerPool,
   usedAnswerKeys,

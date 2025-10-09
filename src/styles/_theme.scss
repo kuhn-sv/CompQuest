@@ -80,7 +80,7 @@
   /* --- Surface & Elevation System --- */
   --surface: rgba(255, 255, 255, 0.03);   /* Cards = #fff @ 3% */
   --surface-border: var(--primary10);
-  --surface-shadow: 0px 0px px transparent;
+  --surface-shadow: 0px 0px 0px transparent;
 
   --highlight: rgba(154, 214, 209, 0.10); /* Background-Highlight = primary @10% */
   --stroke-background: rgba(154, 214, 209, 0.10); /* Strokes bei Hintergründen = primary @10% */

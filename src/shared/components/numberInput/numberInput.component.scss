@@ -22,7 +22,7 @@ input[type="number"] {
 
   input[type="number"] {
     padding: $spacing-sm $spacing-md;
-    border: $border-width-base solid ;
+    border: $border-width-base solid var(--surface-border);
     border-radius: $border-radius-sm;
     text-align: center;
     font-size: $font-size-base;

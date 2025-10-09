@@ -266,12 +266,12 @@ $ns-field-height: 40px; // Fixed field height
 		height: 100%;
 		pointer-events: none;
 		z-index: 1;
-    &.success {
-      background: var(var(--success));
-    }
-    &.error {
-      background: var(var(--error));
-    }
+		&.success {
+			background: var(--success);
+		}
+		&.error {
+			background: var(--error);
+		}
 	}
 }
 

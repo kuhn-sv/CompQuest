@@ -7,26 +7,24 @@
     padding: 0.5rem 1.2rem;
     font-size: 1rem;
     border-radius: 0.5rem;
-    border: none;
+    border: 1px solid var(--surface-border);
 
     cursor: pointer;
     transition: background 0.2s;
 
-    &:disabled {
-      cursor: not-allowed;
-
-    }
+    &:disabled { cursor: not-allowed; opacity: 0.7; }
   }
 
   .task-action-btn {
     &.primary {
-        color: var(--primary-btn-text);
-        background: var(--primary-btn-bg);
+      color: var(--primary-btn-text);
+      background: var(--primary-btn-bg);
+      border-color: transparent;
     }
 
     &.secondary {
-        background: var(--secondary-btn-bg);
-        color: var(--secondary-btn-text);
+      background: var(--secondary-btn-bg);
+      color: var(--secondary-btn-text);
     }
 
   }
