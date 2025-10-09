@@ -1,1 +1,1 @@
-export { ResultsSection } from './ResultsSection';
+export { ResultsSection } from '../../../../../shared/numberTask/ResultsSection';

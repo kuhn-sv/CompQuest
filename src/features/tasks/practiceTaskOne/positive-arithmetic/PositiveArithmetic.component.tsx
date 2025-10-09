@@ -7,7 +7,7 @@ import { useDragAndDrop, useConnectionLines, useTimer, CONNECTION_LINE_PRESETS, 
 import type { DragDropItem } from '../../../../shared/hooks/useDragAndDrop';
 import { EquationRow as SharedEquationRow } from '../../../../shared/components/equationrow/EquationRow';
 import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
-import { ResultsSection } from './ResultsSection';
+import { ResultsSection } from '../../../../shared/numberTask/ResultsSection';
 import type { AnswerOptionBase } from '../../../../shared/numberTask/NumberTask.types';
 import { generateAdditionSet, AdditionTask } from './addition.helper';
 import { Difficulty } from '../../../../shared/enums/difficulty.enum';
@@ -252,6 +252,13 @@ const PositiveArithmeticComponent: React.FC = () => {
               handleDragEnd={handleDragEnd}
               assignAnswer={assignAnswer}
               evaluated={evaluated}
+              renderAnswer={(a) => (
+                typeof a.base === 'number' ? (
+                  <NumberWithBase value={a.value} base={a.base as 2|8|10|16} />
+                ) : (
+                  a.value
+                )
+              )}
             />
           </div>
           <ConnectionOverlay connectionLines={connectionLines} />

@@ -118,7 +118,7 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 	};
 
 	// Wrapper function for assignment logic
-	const assignAnswer = (taskId: string, answer: AnswerOption) => {
+		const assignAnswer = useCallback((taskId: string, answer: AnswerOption) => {
 		// If answer is already used, swap: remove from previous task
 		setAssignments(prev => {
 			const next: AssignmentMap = { ...prev };
@@ -130,12 +130,25 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 			return next;
 		});
 		setActiveTaskId(null);
-	};
+		}, []);
 
 	// Drop handler for the hook
 	const onDropAnswer = (taskId: string, answer: AnswerOption) => {
 		assignAnswer(taskId, answer);
 	};
+
+		// Adapters to use shared ResultsSection (accepts broader AnswerOptionBase)
+		const handleDragStartAdapter = useCallback((e: React.DragEvent, answer: { value: string; base?: number | string }) => {
+			if (typeof answer.base === 'number') {
+				handleDragStart(e, { value: answer.value, base: answer.base as AnswerOption['base'] });
+			}
+		}, [handleDragStart]);
+
+		const assignAnswerAdapter = useCallback((taskId: string, answer: { value: string; base?: number | string }) => {
+			if (typeof answer.base === 'number') {
+				assignAnswer(taskId, { value: answer.value, base: answer.base as AnswerOption['base'] });
+			}
+		}, [assignAnswer]);
 
 	const usedAnswerKeys = useMemo(() => {
 		return new Set(
@@ -270,10 +283,15 @@ const NumberSystemComponent: React.FC<NumberSystemComponentProps> = () => {
 										draggedAnswer={draggedAnswer}
 										activeTaskId={activeTaskId}
 										tasks={tasks}
-										handleDragStart={handleDragStart}
+										handleDragStart={handleDragStartAdapter}
 										handleDragEnd={handleDragEnd}
-										assignAnswer={assignAnswer}
+										assignAnswer={assignAnswerAdapter}
 										evaluated={evaluated}
+										renderAnswer={(a) => (
+										  typeof a.base === 'number'
+											? <NumberWithBase value={a.value} base={a.base as 2|8|10|16} />
+											: a.value
+										)}
 									/>
 					</div>
 
