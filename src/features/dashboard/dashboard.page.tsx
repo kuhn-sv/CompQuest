@@ -13,15 +13,21 @@ const DashboardPage: React.FC = () => {
   const exercises = [
     {
       id: 'number-system-direct',
-      title: 'Zahlensysteme – Übung 1.1 (Direkt)',
-      description: 'Direkter Einstieg in den Zahlensystem-Konverter (Easy→Medium→Hard).',
+      title: '1.1 Zahlensystem-Konverter',
+      description: 'Wandeln zwischen verschiedenen Zahlensystemen um und festige dein Basiswissen.',
       path: '/task/number-system'
     },
     {
       id: 'positive-arithmetic-direct',
-      title: 'Positive Arithmetik – Übung 1.2 (Direkt)',
-      description: 'Direkter Einstieg in Positive Arithmetik (Skelett/Prototyp).',
+      title: '1.2 Positive Arithmetik',
+      description: 'Rechne mit Binärzahlen und trainiere Addition, Subtraktion und Überträge.',
       path: '/task/positive-arithmetic'
+    },
+     {
+      id: 'twos-complement',
+      title: '1.3 Einer- & Zweierkomplement',
+      description: 'Lerne, wie negative Zahlen im Binärsystem dargestellt werden.',
+      path: '/tasks/twos-complement'
     },
     {
       id: 'practice-task-one',
@@ -35,12 +41,7 @@ const DashboardPage: React.FC = () => {
       description: 'Übungsaufgabe zum Thema Datenverpackung und Binärdarstellung',
       path: '/tasks/data-package'
     },
-    {
-      id: 'twos-complement',
-      title: 'Zweierkomplement',
-      description: 'Übungsaufgabe zum Thema Zweierkomplement und negative Zahlen',
-      path: '/tasks/twos-complement'
-    }
+   
   ];
 
   const handleCpuClick = () => {
