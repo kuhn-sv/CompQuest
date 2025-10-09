@@ -1,6 +1,11 @@
 // Shared styles for number system and positive arithmetic tasks
 @use '../../styles/_variables' as *;
 
+// Provide sensible defaults; pages can ignore or override via their own layout
+$ns-box-width: 120px !default;
+$ns-row-height: 64px !default;
+$ns-field-height: 40px !default;
+
 .equation-row {
   display: flex;
   align-items: center;

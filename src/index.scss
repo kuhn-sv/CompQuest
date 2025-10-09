@@ -1,5 +1,6 @@
 @use './styles/_variables' as *;
 @use './styles/_theme' as *;
+@use './shared/numberTask/numberTask.shared' as *;
 
 :root {
   font-family: $font-family-base;

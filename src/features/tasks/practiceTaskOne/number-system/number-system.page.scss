@@ -1,4 +1,5 @@
 @use '../../../../styles/_variables' as *;
+@use '../../../../shared/numberTask/numberTask.shared' as *;
 
 // Local fallbacks
 $ns-box-width: 120px;
@@ -139,166 +140,16 @@ $ns-field-height: 40px; // Fixed field height
 	// Remove padding-top since we use fixed row heights now
 }
 
-.equation-row {
-	display: flex;
-	align-items: center;
-	height: $ns-row-height; // Fixed height for consistent alignment
-	transition: background $transition-slow;
-	position: relative;
+// equation-row, connector-line, equals-sign, result-placeholder are provided by shared styles
 
-	&.active { 
-		background: rgba(0,0,0,0.03);
-		border-radius: $border-radius-sm;
-	}
-
-		&.correct {
-			border: none;
-			animation: correctPulse 0.6s ease-out;
-		}
-
-		&.incorrect {
-			border: none;
-			animation: incorrectShake 0.5s ease-in-out;
-		}
-
-	&.drag-over {
-		border: 2px dashed var(--primary);
-		background-color: var(--surface);
-	}	.connector-line {
-		width: 120px; // Verdoppelt von 40px auf 80px
-		height: 3px;
-		background: var(--primary);
-		border-radius: 1.5px;
-	}
-
-	.equals-sign {
-		background: var(--surface);
-		border: 2px solid var(--primary);
-		border-radius: 50%;
-		width: 36px;
-		height: 36px;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-weight: bold;
-		font-size: 16px;
-	}
-
-	.result-placeholder {
-		min-width: $ns-box-width;
-		height: $ns-field-height; // Fixed height to match input fields
-		display: flex;
-		align-items: center;
-		justify-content: flex-start; // Align content to the left
-	}
-}
-
-	.lead-line {
-		height: 2px;
-		background: var(--primary);
-		border-radius: 1.5px;
-		
-			&--trailing {
-				flex: 1;
-				min-width: 80px;
-				background: var(--primary10);
-
-				&.success {
-					background: var(--success);
-				}
-				&.error {
-					background: var(--error);
-				}
-			}
-		}
+// lead-line provided by shared styles
 
 	
-.input-field {
-	height: $ns-field-height; // Fixed height for consistency
-	padding: $spacing-sm;
-	width: $ns-box-width;
-	border-radius: $border-radius-sm;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	border: 2px solid var(--primary);
-	transition: all 0.3s ease;
+// input-field and result-field styles are provided by shared styles; keep only local interaction tweaks if needed
 
-	&.result-field {
-		border-color: var(--surface-border);
-		cursor: pointer;
-		
-		&:hover:not(.used):not(.assigned) {
-			border-color: var(--primary);
-		}
-		
-		&.used {
-			opacity: 0.3;
-			cursor: not-allowed;
-		}
-		
-		&.assigned {
-			background: var(--surface);
-			border-color: var(--primary);
-			animation: slideInResult 0.4s ease-out;
-		}
+// result-row provided by shared styles
 
-		&.dragging {
-			opacity: 0.5;
-			transform: rotate(3deg);
-			cursor: grabbing;
-		}
-	}
-}
-
-.result-row {
-	position: relative;
-	display: flex;
-	align-items: center;
-	height: $ns-row-height; // Match equation-row height exactly
-	transition: opacity 0.3s ease;
-	
-	.connection-line {
-		position: absolute;
-		left: 100%;
-		top: 0;
-		width: 100px;
-		height: 100%;
-		pointer-events: none;
-		z-index: 1;
-		&.success {
-			background: var(--success);
-		}
-		&.error {
-			background: var(--error);
-		}
-	}
-}
-
-@keyframes slideInResult {
-	from {
-		opacity: 0;
-		transform: translateX(100px);
-	}
-	to {
-		opacity: 1;
-		transform: translateX(0);
-	}
-}
-
-// Feedback animations
-@keyframes correctPulse {
-	0% { box-shadow: 0 0 0 0 rgba(var(--success), 0.5); }
-	70% { box-shadow: 0 0 0 8px rgba(var(--success), 0); }
-	100% { box-shadow: 0 0 0 0 rgba(var(--success), 0); }
-}
-
-@keyframes incorrectShake {
-	10%, 90% { transform: translateX(-2px); }
-	20%, 80% { transform: translateX(4px); }
-	30%, 50%, 70% { transform: translateX(-6px); }
-	40%, 60% { transform: translateX(6px); }
-}
+// animations provided by shared styles
 
 // Dim non-selected answers slightly when a row is active
 .ns-content.has-active .input-field.result-field:not(.used):not(.assigned) {
@@ -339,30 +190,7 @@ $ns-field-height: 40px; // Fixed field height
 
 // Success/Error coloring for evaluation results
 
-.connector-line.success {
-	background: var(--success);
-}
-.connector-line.error {
-	background: var(--error);
-}
-
-.equals-sign.success {
-	border-color: var(--success);
-	color: #fff;
-}
-.equals-sign.error {
-	border-color: var(--error);
-	color: #fff;
-}
-
-.input-field.result-field.assigned.success {
-	border-color: var(--success);
-	color: #fff;
-}
-.input-field.result-field.assigned.error {
-	border-color: var(--error);
-	color: #fff;
-}
+// success/error variants provided by shared styles
 
 // Responsive design for timer section
 @media (max-width: 768px) {
