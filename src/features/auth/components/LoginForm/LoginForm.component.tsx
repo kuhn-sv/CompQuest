@@ -83,7 +83,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
 			<div className="login-form__header">
 				<h2 className="login-form__title">Anmelden</h2>
 				<p className="login-form__subtitle">
-					Melden Sie sich an, um Ihren Fortschritt zu speichern
+					Melde dich an und lerne das Innere eines Computers kennen.
 				</p>
 			</div>
 

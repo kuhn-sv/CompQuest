@@ -38,9 +38,15 @@ const AuthPage: React.FC = () => {
       <div className="auth-page">
         <div className="auth-page__container">
           <div className="auth-page__header">
-            <h1 className="auth-page__logo">CompQuest</h1>
+            <div className="auth-page__logo-container">
+            <img
+              src="/favicon.svg"
+              alt="CompQuest Logo"
+              className="auth-page__logo-icon"
+            />
+            <h1 className="auth-page__logo">CompQuest</h1></div>
             <p className="auth-page__tagline">
-              Lernen Sie Informatik interaktiv und spielerisch
+              Übernimm die Rolle eines Informatikers, stelle dich den Grundlagen der Technischen Informatik 
             </p>
           </div>
 
@@ -59,14 +65,7 @@ const AuthPage: React.FC = () => {
             )}
           </div>
 
-          <div className="auth-page__footer">
-            <p className="auth-page__info">
-              {mode === 'login' 
-                ? 'Noch kein Konto? Registrieren Sie sich kostenlos!'
-                : 'Bereits registriert? Melden Sie sich an!'
-              }
-            </p>
-          </div>
+         
         </div>
 
         <div className="auth-page__background">

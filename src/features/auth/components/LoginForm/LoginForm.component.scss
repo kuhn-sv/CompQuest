@@ -2,12 +2,10 @@
 
 .login-form {
   width: 100%;
-  max-width: 400px;
+  max-width: 33%;
   margin: 0 auto;
   padding: 2rem;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  border-radius: 10px;
 
   &__header {
     text-align: center;
@@ -21,7 +19,7 @@
   }
 
   &__subtitle {
-    color: var(--surface);
+    color: var(--text);
     margin: 0;
     font-size: 0.9rem;
   }
@@ -52,7 +50,7 @@
   &__label {
     display: block;
     font-weight: 500;
-    
+
     margin-bottom: 0.5rem;
     font-size: 0.9rem;
   }
@@ -60,7 +58,8 @@
   &__input {
     width: 100%;
     padding: 0.75rem;
-    border: 2px solid #e0e0e0;
+    background: var(--surface);
+    border: 1px solid var(--surface-border);
     border-radius: 8px;
     font-size: 1rem;
     transition: all 0.2s ease;
@@ -68,6 +67,7 @@
 
     &:focus {
       outline: none;
+      border: 1px solid var(--primary);
     }
 
     &:disabled {
@@ -78,7 +78,7 @@
 
     &--error {
       border-color: #ff4444;
-      
+
       &:focus {
         border-color: #ff4444;
         box-shadow: 0 0 0 3px rgba(255, 68, 68, 0.1);
@@ -104,7 +104,7 @@
   &__submit {
     width: 100%;
     background: var(--primary-btn-bg);
-    
+    color: var(--primary-btn-text);
     border: none;
     padding: 0.875rem;
     border-radius: 8px;
@@ -129,6 +129,7 @@
   }
 
   &__forgot-password {
+    color: var(--text-secondary);
     background: none;
     border: none;
     font-size: 0.9rem;
@@ -145,24 +146,25 @@
   &__footer {
     text-align: center;
     padding-top: 1.5rem;
-    border-top: 1px solid #eee;
+    border-top: 1px solid var(--surface-border);
   }
 
   &__switch {
     margin: 0;
-    color: var(--surface);
+    color: var(--text-secondary);
     font-size: 0.9rem;
   }
 
   &__switch-button {
+    color: var(--primary);
     background: none;
     border: none;
     font-weight: 500;
     cursor: pointer;
     text-decoration: underline;
-    padding: 0;
-    font-size: inherit;
-    transition: color 0.2s ease;
+    padding: clamp(0.6rem, 1.2vw, 0.75rem) clamp(0.8rem, 1.5vw, 1rem);
+    border-radius: clamp(6px, 1vw, 8px);
+    transition: all clamp(0.15s, 0.2s, 0.25s) ease;
 
     &:disabled {
       cursor: not-allowed;
@@ -176,7 +178,7 @@
     padding: 1.5rem;
     margin: 1rem;
     border-radius: 8px;
-    
+
     &__title {
       font-size: 1.5rem;
     }

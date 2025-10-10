@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '../../hooks/useAuth';
 import { RegisterData } from '../../interfaces/auth.interface';
 import './RegisterForm.component.scss';
@@ -21,6 +21,21 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 	});
 	const [formErrors, setFormErrors] = useState<Partial<RegisterData>>({});
 	const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
+	const slides = [
+    '/register-slide-1.png',
+    '/register-slide-2.png',
+    '/register-slide-3.png',
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [slides.length]);
 
 	const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const { name, value } = e.target;
@@ -93,11 +108,29 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 	};
 
 	return (
+		 <div className="register-form-overlay">
+  <div className="register-form__slider">
+  <div className="register-form__slide-frame">
+    <img
+      src={slides[currentSlide]}
+      alt={`Slide ${currentSlide + 1}`}
+      className="register-form__slide-image"
+    />
+    <div className="register-form__dots">
+      {slides.map((_, index) => (
+        <span
+          key={index}
+          className={`register-form__dot ${index === currentSlide ? 'active' : ''}`}
+        />
+      ))}
+    </div>
+  </div>
+</div>
 		<form className="register-form" onSubmit={handleSubmit}>
 			<div className="register-form__header">
 				<h2 className="register-form__title">Registrieren</h2>
 				<p className="register-form__subtitle">
-					Erstellen Sie ein Konto, um Ihren Fortschritt zu speichern
+					Erstelle ein Konto und lerne das Innere eines Computers kennen.
 				</p>
 			</div>
 
@@ -106,8 +139,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 					<h3>Registrierung erfolgreich!</h3>
 					<p>
 						Eine Bestätigungs-E-Mail wurde an <strong>{formData.email}</strong> gesendet.
-						Bitte überprüfen Sie Ihr Postfach und klicken Sie auf den Bestätigungslink,
-						bevor Sie sich anmelden.
+						Bitte überprüfe dein Postfach und klicken auf den Bestätigungslink,
+						bevor du dich anmeldest.
 					</p>
 					<button
 						type="button"
@@ -256,6 +289,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 				</>
 			)}
 		</form>
+	</div>
 	);
 };
 
