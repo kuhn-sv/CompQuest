@@ -7,6 +7,7 @@ import Model3D from './components/model3d/model3d.component';
 
 const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
+  const [is3DView, setIs3DView] = useState(true);
   const {user, signOut} = useAuth();
 
   const missions = [
@@ -83,6 +84,7 @@ const DashboardPage: React.FC = () => {
       {/* User Info & Logout */}
       <div className="dashboard__header">
         <div className="dashboard__user-info">
+          <img src="favicon.svg"></img>
           <span className="dashboard__welcome">
             Willkommen, {user?.displayName || user?.email}
           </span>
@@ -95,25 +97,48 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      {/* 3D Viewer Container */}
       <div className="dashboard__3d-container">
-        <Model3D
-          modelPath="/motherboard__components.glb"
-          onCpuClick={handleCpuClick}
-          className="dashboard__3d-viewer"
-        />
+        {is3DView ? (
+          <Model3D
+            modelPath="/motherboard__components.glb"
+            onCpuClick={handleCpuClick}
+            className="dashboard__3d-viewer"
+          />
+        ) : (
+          <div className="dashboard__2d-wrapper">
+            <img
+              src="/motherboard_components.png"
+              alt="Motherboard 2D Ansicht"
+              className="dashboard__2d-viewer"
+            />
+
+            {/* 🟩 Klickbarer Bereich über der CPU */}
+            <button
+              className="dashboard__cpu-hotspot"
+              onClick={handleCpuClick}
+              title="Klicke auf die CPU, um Übungen zu öffnen"></button>
+          </div>
+        )}
 
         {/* Instructions Overlay */}
         <div className="dashboard__instructions">
-          <h1 className="dashboard__title">CompQuest</h1>
-          <p className="dashboard__subtitle">
-            Klicken Sie auf die CPU um die Übungsaufgaben zu öffnen
-          </p>
+          <div className="dashboard__title-container">
+            <img src="favicon.svg"></img>
+            <h1 className="dashboard__title">CompQuest</h1>
+          </div>
+          <p className="dashboard__subtitle">Kurzanleitung</p>
           <div className="dashboard__controls">
-            <p>🖱️ Halten + Ziehen: Modell drehen</p>
             <p>🖱️ Klick auf CPU: Übungsaufgaben öffnen</p>
+            <p>🖱️ Klick auf 2D/3D: Perspektivenwechsel</p>
+            <p>🖱️ Halten + Ziehen in 3D: Modell drehen</p>
           </div>
         </div>
+        <button
+          className="dashboard__toggle-view-btn"
+          onClick={() => setIs3DView(!is3DView)}
+          title={is3DView ? 'Wechsle zu 2D Ansicht' : 'Wechsle zu 3D Ansicht'}>
+          {is3DView ? <span>2D</span> : <span>3D</span>}
+        </button>
       </div>
 
       <ExercisesModal
