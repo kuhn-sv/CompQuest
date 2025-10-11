@@ -47,6 +47,7 @@ export interface TaskHudState {
   progress: { current: number; total: number } | null;
   requestTimer?: 'start' | 'stop' | 'reset';
   subtitle?: string; // optional subtitle shown under title
+  isStartScreen?: boolean; // true when a start screen is currently shown
 }
 
 // Normalized summary payload for the container-level overlay
