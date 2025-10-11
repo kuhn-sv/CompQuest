@@ -4,10 +4,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { AuthProvider, ProtectedRoute } from './features/auth';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
-import TwosComplementPage from './features/tasks/twosComplement/twoscomplement.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
-import DataPackagePage from './features/tasks/dataPackage/datapackage.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 
 const App: React.FC = () => {
@@ -52,24 +50,6 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/tasks/data-package" 
-            element={
-              <ProtectedRoute>
-                <DataPackagePage />
-              </ProtectedRoute>
-            } 
-          />
-          
-          <Route 
-            path="/tasks/twos-complement" 
-            element={
-              <ProtectedRoute>
-                <TwosComplementPage />
               </ProtectedRoute>
             } 
           />

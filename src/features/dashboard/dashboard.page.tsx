@@ -23,12 +23,6 @@ const DashboardPage: React.FC = () => {
       description: 'Rechne mit Binärzahlen und trainiere Addition, Subtraktion und Überträge.',
       path: '/task/positive-arithmetic'
     },
-     {
-      id: 'twos-complement',
-      title: '1.3 Einer- & Zweierkomplement',
-      description: 'Lerne, wie negative Zahlen im Binärsystem dargestellt werden.',
-      path: '/tasks/twos-complement'
-    },
     {
       id: 'complements-direct',
       title: 'Einer- & Zweierkomplement – Übung 1.3 (Direkt)',
@@ -40,14 +34,7 @@ const DashboardPage: React.FC = () => {
       title: 'Übungsaufgabe 1.1',
       description: 'Zahlensystem-Konverter: Verbinde Zahlen mit ihren entsprechenden Darstellungen',
       path: '/practice-task-one'
-    },
-    {
-      id: 'data-package',
-      title: 'Data Package',
-      description: 'Übungsaufgabe zum Thema Datenverpackung und Binärdarstellung',
-      path: '/tasks/data-package'
-    },
-   
+    },   
   ];
 
   const handleCpuClick = () => {
