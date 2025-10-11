@@ -49,6 +49,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
+  taskMeta,
 }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [qIndex, setQIndex] = useState(0);
@@ -247,7 +248,8 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
             }
             taskCount={TOTAL}
             estimatedTime="~2 min"
-            bestAttempt={null}
+            fetchBestAttempt
+            taskId={taskMeta?.id}
             onStart={handleStart}
             startLabel="Mission starten"
           />

@@ -31,6 +31,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
+  taskMeta,
 }) => {
   // Staged progression: Easy → Medium → Hard
   const stages: Difficulty[] = useMemo(
@@ -506,7 +507,8 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
             }
             taskCount={4}
             estimatedTime="~5 min"
-            bestAttempt={null}
+            fetchBestAttempt
+            taskId={taskMeta?.id}
             onStart={handleInitialStart}
             startLabel="Mission starten"
           />

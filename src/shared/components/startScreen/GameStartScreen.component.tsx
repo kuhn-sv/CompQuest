@@ -1,6 +1,7 @@
 // filepath: c:\Users\Nutzer\Desktop\Uni\Neuer Ordner\CompQuest\src\shared\components\startScreen\GameStartScreen.component.tsx
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import './GameStartScreen.component.scss';
+import {trainingService} from '../../../services/supabase/training.service';
 
 export interface BestAttempt {
   timeMs: number;
@@ -21,6 +22,11 @@ export interface GameStartScreenProps {
 
   // Optional best attempt summary
   bestAttempt?: BestAttempt | null;
+
+  // Optional: When provided, the component will try to load the user's best attempt
+  // for this task from the database (ignored if bestAttempt is explicitly passed).
+  fetchBestAttempt?: boolean;
+  taskId?: string;
 
   // Start CTA
   onStart: () => void;
@@ -44,10 +50,58 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
   taskCount,
   estimatedTime,
   bestAttempt,
+  fetchBestAttempt = false,
+  taskId,
   onStart,
   startLabel = 'Mission starten',
   className,
 }) => {
+  const [loadedBest, setLoadedBest] = useState<BestAttempt | null | undefined>(
+    undefined,
+  );
+
+  useEffect(() => {
+    // If a bestAttempt prop is provided (even null), respect it and don't fetch
+    if (bestAttempt !== undefined) {
+      setLoadedBest(bestAttempt);
+      return;
+    }
+    if (!fetchBestAttempt || !taskId) {
+      setLoadedBest(null);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        const row = await trainingService.getStatsForTask(taskId);
+        if (cancelled) return;
+        if (
+          row &&
+          row.best_accuracy !== null &&
+          row.best_time_ms !== null &&
+          row.best_points !== null
+        ) {
+          setLoadedBest({
+            timeMs: row.best_time_ms,
+            accuracyPercent: Number(row.best_accuracy),
+            points: row.best_points,
+            date: row.last_attempt_at ?? undefined,
+          });
+        } else {
+          setLoadedBest(null);
+        }
+      } catch (err) {
+        // Non-blocking: if unauthenticated or RLS blocks, just show empty state
+        console.warn('Could not load best attempt:', err);
+        if (!cancelled) setLoadedBest(null);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [bestAttempt, fetchBestAttempt, taskId]);
+
+  const attemptToShow = bestAttempt !== undefined ? bestAttempt : loadedBest;
   return (
     <div className={`game-start-screen ${className ?? ''}`.trim()}>
       <div className="gss-card">
@@ -92,19 +146,19 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
               <img src="/trophy.svg" alt="" />
               Bester Versuch
             </div>
-            {bestAttempt ? (
+            {attemptToShow ? (
               <div className="gss-best-stats">
                 <div className="stat">
                   <span>Zeit</span>
-                  <strong>{formatDuration(bestAttempt.timeMs)}</strong>
+                  <strong>{formatDuration(attemptToShow.timeMs)}</strong>
                 </div>
                 <div className="stat">
                   <span>Genauigkeit</span>
-                  <strong>{Math.round(bestAttempt.accuracyPercent)}%</strong>
+                  <strong>{Math.round(attemptToShow.accuracyPercent)}%</strong>
                 </div>
                 <div className="stat">
                   <span>Punkte</span>
-                  <strong>{bestAttempt.points}</strong>
+                  <strong>{attemptToShow.points}</strong>
                 </div>
               </div>
             ) : (

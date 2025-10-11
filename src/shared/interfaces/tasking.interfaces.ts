@@ -6,6 +6,11 @@ export interface SubTaskComponentProps {
     current: number;
     total: number;
   };
+  // Optional metadata about the current subtask to enable progress reporting
+  taskMeta?: {
+    id: string;
+    title: string;
+  };
   // Allow a subtask to provide footer control handlers and visibility/disabled state to the parent
   onControlsChange?: (controls: TaskFooterControls | null) => void;
   // Allow a subtask to report HUD state (progress and timer control) to be shown in the container header

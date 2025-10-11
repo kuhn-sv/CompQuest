@@ -12,7 +12,7 @@ const DashboardPage: React.FC = () => {
 
   const missions = [
     {
-      id: 'number-system-direct',
+      id: 'number-system',
       title: 'Zahlensystem-Konverter',
       description: 'Konvertiere zwischen binär, oktal & hexadezimal um.',
       path: '/task/number-system',

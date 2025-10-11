@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useMemo, useState} from 'react';
 import {SubTaskType, SubTaskConfig, SubTaskComponentProps} from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
 import PositiveArithmeticComponent from './positive-arithmetic/PositiveArithmetic.component';
@@ -66,16 +66,26 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     task => task.id === currentSubTask,
   );
   const currentTask = subTaskConfigs[currentTaskIndex];
+  const taskMeta = useMemo(
+    () => ({
+      id: currentTask?.id ?? '',
+      title: currentTask?.title ?? '',
+    }),
+    [currentTask?.id, currentTask?.title],
+  );
 
   const CurrentTaskComponent = currentTask?.component;
+
   return (
     <TaskContainer
+      taskMeta={taskMeta}
       title={currentTask?.title ?? ''}
       description={currentTask?.description}>
       {({onControlsChange, onHudChange, onSummaryChange}) => (
         <>
           {CurrentTaskComponent && (
             <CurrentTaskComponent
+              taskMeta={taskMeta}
               onControlsChange={onControlsChange}
               onHudChange={onHudChange}
               onSummaryChange={onSummaryChange}
