@@ -39,6 +39,14 @@ const DashboardPage: React.FC = () => {
       path: '/task/twos-complement-arithmetic',
       progressPercent: 0,
     },
+    {
+      id: 'quiz',
+      title: 'Quiz',
+      description:
+        'Tim hat ein paar Fragen zu dem Thema. Kannst du sie beantworten?',
+      path: '/task/quiz',
+      progressPercent: 0,
+    },
   ];
 
   const helpers = [

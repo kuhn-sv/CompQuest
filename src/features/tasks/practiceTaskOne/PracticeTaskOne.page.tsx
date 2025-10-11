@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
-import { SubTaskType, SubTaskConfig, SubTaskComponentProps } from './interfaces';
+import React, {useState} from 'react';
+import {SubTaskType, SubTaskConfig, SubTaskComponentProps} from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
 import PositiveArithmeticComponent from './positive-arithmetic/PositiveArithmetic.component';
 import ComplementsComponent from './complements/Complements.component';
-import { TaskContainer } from '../../../shared/components';
+import Quiz from './quiz/Quiz.component';
+import {TaskContainer} from '../../../shared/components';
 
 interface PracticeTaskOnePageProps {
   initialSubTask?: SubTaskType;
@@ -53,6 +54,12 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
       component:
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,
     },
+    {
+      id: 'quiz',
+      title: 'Quiz',
+      description: 'Beweise dein Wissen. ',
+      component: Quiz as React.ComponentType<SubTaskComponentProps>,
+    },
   ];
 
   const currentTaskIndex = subTaskConfigs.findIndex(
@@ -62,8 +69,10 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
 
   const CurrentTaskComponent = currentTask?.component;
   return (
-    <TaskContainer title={currentTask?.title ?? ''} description={currentTask?.description}>
-      {({ onControlsChange, onHudChange, onSummaryChange }) => (
+    <TaskContainer
+      title={currentTask?.title ?? ''}
+      description={currentTask?.description}>
+      {({onControlsChange, onHudChange, onSummaryChange}) => (
         <>
           {CurrentTaskComponent && (
             <CurrentTaskComponent

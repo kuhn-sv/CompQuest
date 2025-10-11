@@ -1,5 +1,5 @@
 import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
-export type SubTaskType = 'number-system' | 'positive-arithmetic' | 'complements' | 'data-package' | 'twos-complement';
+export type SubTaskType = 'number-system' | 'positive-arithmetic' | 'complements' | 'quiz' | 'data-package' | 'twos-complement';
 
 export type ArithmeticMode = 'positive' | 'twos-complement';
 
