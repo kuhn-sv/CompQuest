@@ -33,6 +33,8 @@ export interface TaskHudState {
   progress: { current: number; total: number } | null;
   requestTimer?: 'start' | 'stop' | 'reset';
   subtitle?: string; // optional subtitle shown under title
+  // When true, a start screen is being shown by the child task and the footer should be hidden
+  isStartScreen?: boolean;
 }
 
 // Normalized summary payload for the container-level overlay

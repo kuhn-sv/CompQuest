@@ -141,29 +141,37 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
         </div>
 
         {/* Unified footer with task action buttons */}
-        {!summaryState && (
-          <div className="task-container__footer">
-            {footerControls && (
+        {(() => {
+          if (summaryState) return null;
+          const hasControls = !!footerControls;
+          const anyVisible = !!(
+            footerControls?.showReset ||
+            footerControls?.showEvaluate ||
+            footerControls?.showNext
+          );
+          const canShowFooter = hasControls && anyVisible && !hudState?.isStartScreen && !!hudState?.progress;
+          return canShowFooter ? (
+            <div className="task-container__footer">
               <TaskActionButtons
-                onReset={footerControls.onReset}
+                onReset={footerControls!.onReset}
                 onEvaluate={() => {
                   stop();
-                  footerControls.onEvaluate();
+                  footerControls!.onEvaluate();
                 }}
                 onNext={() => {
                   start();
-                  footerControls.onNext?.();
+                  footerControls!.onNext?.();
                 }}
-                showReset={footerControls.showReset}
-                showEvaluate={footerControls.showEvaluate}
-                showNext={footerControls.showNext}
-                disableReset={footerControls.disableReset}
-                disableEvaluate={footerControls.disableEvaluate}
-                disableNext={footerControls.disableNext}
+                showReset={footerControls!.showReset}
+                showEvaluate={footerControls!.showEvaluate}
+                showNext={footerControls!.showNext}
+                disableReset={footerControls!.disableReset}
+                disableEvaluate={footerControls!.disableEvaluate}
+                disableNext={footerControls!.disableNext}
               />
-            )}
-          </div>
-        )}
+            </div>
+          ) : null;
+        })()}
       </div>
     </div>
   );
