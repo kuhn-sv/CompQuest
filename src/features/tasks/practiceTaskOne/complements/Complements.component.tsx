@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
 import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow.tsx';
+import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 // Footer buttons rendered by parent
 import type { SubTaskComponentProps } from '../interfaces';
 import { useTimer } from '../../../../shared/hooks';
@@ -160,6 +161,15 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
     });
   }, [hasStarted, roundIndex, rounds.length, isRunning]);
 
+  // Inform parent HUD about start screen visibility before task starts
+  useEffect(() => {
+    if (hasStarted) return;
+    onHudChangeRef.current?.({
+      progress: null,
+      isStartScreen: true,
+    });
+  }, [hasStarted]);
+
   return (
     <div className="number-system-container complements-container">
       <div className="ns-header">
@@ -194,7 +204,22 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
 
       {!hasStarted && (
         <div className="ns-start-overlay">
-          <button className="ns-start-button" onClick={startTask} aria-label="Aufgabe starten">Start</button>
+          <GameStartScreen
+            statusTitle="Datenfluss gestört"
+            statusDescription={
+              <>
+                "Ein Fehler in der Systemkonvertierung hat den Informationsfluss unterbrochen."
+                <br />
+                <br />
+                <strong>Deine Mission:</strong> Bestimme für jede Ausgangszahl den passenden Einer- bzw. Zweierkomplement-Wert, um die Übertragung wieder zu stabilisieren.
+              </>
+            }
+            taskCount={rounds.length}
+            estimatedTime="~5 min"
+            bestAttempt={null}
+            onStart={startTask}
+            startLabel="Mission starten"
+          />
         </div>
       )}
 
