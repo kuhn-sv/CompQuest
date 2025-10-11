@@ -1,6 +1,6 @@
 @use '../../../styles/_variables' as *;
 
-.practice-task-one-page {
+.task-container {
   height: 100vh; // lock viewport height to avoid page scroll
   overflow: hidden; // disable page scrolling
   overflow-x: hidden;
@@ -15,12 +15,12 @@
     height: 80vh;
     max-width: none;
     background: var(--surface);
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: var(--surface-shadow);
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--surface-shadow);
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--surface-border);
   }
 
   &__header {
@@ -148,7 +148,7 @@
 
 // Responsive design
 @media (max-width: 768px) {
-  .practice-task-one-page {
+  .task-container {
     padding: 1rem;
 
     &__container {
@@ -170,7 +170,7 @@
 }
 
 @media (max-width: 480px) {
-  .practice-task-one-page {
+  .task-container {
     padding: 0.5rem;
 
     &__container {
