@@ -1,0 +1,56 @@
+@use '../../../styles/_variables' as *;
+
+.base-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+
+  /* Base UI NumberField structure */
+  .base-number-field,
+  .base-number-field-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .field {
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    padding: 0.35rem 0.5rem;
+    text-align: center;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    
+    /* Improve native spinner visibility on dark backgrounds */
+    color-scheme: dark;
+    
+    /* Ensure WebKit spin buttons are visible and high-contrast */
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      opacity: 1;
+      /* Make arrows lighter on dark backgrounds */
+      filter: invert(1) brightness(1.4);
+      margin: 0;
+    }
+  }
+
+  .inc-btn,
+  .dec-btn {
+    background: transparent;
+    color: #fff; /* white arrows/text */
+    border: 1px solid var(--surface-border);
+    border-radius: 6px;
+    width: 28px;
+    height: 28px;
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    cursor: pointer;
+    user-select: none;
+
+    &:hover { border-color: var(--primary); }
+  }
+}

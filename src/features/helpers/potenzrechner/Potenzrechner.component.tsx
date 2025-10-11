@@ -4,7 +4,7 @@ import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
 import { DigitsRow } from '../../../shared/components';
 import './Potenzrechner.scss';
 import ValueExpression from './components/PotenzValueExpression.component';
-import TabRow from '../../../shared/components/tabRow/TabRow';
+import TabRow from '../../../shared/components/tabRow/TabRow.component';
 
 type Mode = 'binary' | 'octal' | 'hex';
 
@@ -91,11 +91,17 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
   return (
     <div className="potenzrechner">
       <TabRow
-        mode={mode}
+        value={mode}
+        items={[
+          { value: 'binary', label: 'Binär' },
+          { value: 'octal', label: 'Oktal' },
+          { value: 'hex', label: 'Hexadezimal' },
+        ]}
         onSelect={(m) => {
           setMode(m);
           newTask(m);
         }}
+        ariaLabel="Darstellungsmodus"
       />
       <div className="potenzrechner__body">
         <div className="task-statement">

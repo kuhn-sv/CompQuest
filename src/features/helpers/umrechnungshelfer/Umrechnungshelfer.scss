@@ -23,7 +23,7 @@
 
   .uh-panel {
     border: 1px solid var(--surface-border);
-    background: rgba(0,0,0,0.2);
+    background: var(--surface);
     border-radius: 12px;
     padding: 1rem;
   }
@@ -67,16 +67,17 @@
     padding: 0.5rem;
     border: 1px solid var(--surface-border);
     border-radius: 10px;
-    &.ok { border-color: var(--success); }
     &.err { border-color: var(--error); }
     .uh-label { color: var(--text); }
-    .uh-input select {
+    .uh-input input[type='number'] {
       background: var(--surface);
       color: var(--text);
       border: 1px solid var(--surface-border);
       border-radius: 8px;
       padding: 0.35rem 0.5rem;
-      min-width: 64px;
+      width: 64px;
+      text-align: center;
+      /* Keep native spinners visible */
     }
   }
 
@@ -87,5 +88,6 @@
     gap: 8px;
     .uh-result-label { color: var(--text-secondary); }
     .uh-result-value { font-size: 1.1rem; font-weight: 600; }
+    .uh-result-value.ok { color: var(--success); }
   }
 }

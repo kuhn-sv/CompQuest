@@ -1,17 +1,19 @@
 @use '../../../styles/_variables' as *;
 
-// Hide arrows/spinners from number input
-input[type="number"] {
-  /* Chrome, Safari, Edge, Opera */
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
+// Hide arrows/spinners only within this component's container
+.number-input-container {
+  input[type="number"] {
+    /* Chrome, Safari, Edge, Opera */
+    &::-webkit-outer-spin-button,
+    &::-webkit-inner-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
 
-  /* Firefox */
-  -moz-appearance: textfield;
-  appearance: textfield;
+    /* Firefox */
+    -moz-appearance: textfield;
+    appearance: textfield;
+  }
 }
 
 .number-input-container {

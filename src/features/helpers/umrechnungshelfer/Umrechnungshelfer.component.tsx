@@ -1,35 +1,83 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import './Umrechnungshelfer.scss';
+import TabRow from '../../../shared/components/tabRow/TabRow.component';
+import '../../../shared/components/BaseValueSpinner/BaseValueSpinner.scss';
+import StepPanel from './components/StepPanel/StepPanel';
+import './components/StepPanel/StepPanel.scss';
+import './components/PlaceValueInputGrid/PlaceValueInputGrid.scss';
+import Step1Box from './components/Step1Box/Step1Box';
+import Step2Box from './components/Step2Box/Step2Box';
+import ResultLine from './components/ResultLine/ResultLine';
+import {useBaseConvert} from './hooks/useBaseConvert';
+import {useStepperExpanded} from './hooks/useStepperExpanded';
+// keep local ModeTab type below for clarity
+import {useOctalStep} from './hooks/useOctalStep';
+// UI helpers not used yet
 
 type ModeTab = 'binhex' | 'binoct' | 'octhex';
-
 const BITS = 8;
 
-const toBits = (n: number, width = BITS) =>
-  Array.from({ length: width }, (_, i) => (n >> (width - 1 - i)) & 1);
-
-const bitsToDecimal = (bits: number[]) =>
-  bits.reduce((sum, b, idx) => sum + b * (1 << (bits.length - 1 - idx)), 0);
-
-const decimalToHex = (n: number) => n.toString(16).toUpperCase();
-
-const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange }) => {
+const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({
+  onControlsChange,
+  onHudChange,
+}) => {
+  const {
+    toBits,
+    bitsToDecimal,
+    decimalToHex,
+    decimalToOct,
+    bitsToOctalDigits,
+    octalDigitsToString,
+  } = useBaseConvert();
   const [tab, setTab] = useState<ModeTab>('binhex');
   // targetDec optional for future steps; for now we derive expectedDec from bits
   const [targetBits, setTargetBits] = useState<number[]>(Array(BITS).fill(0));
-  const [entries, setEntries] = useState<Array<0 | 1 | null>>(Array(BITS).fill(null));
+  const [entries, setEntries] = useState<Array<0 | 1 | null>>(
+    Array(BITS).fill(null),
+  );
   const [evaluated, setEvaluated] = useState(false);
 
-  const expectedDec = useMemo(() => bitsToDecimal(targetBits), [targetBits]);
-  const expectedHex = useMemo(() => decimalToHex(expectedDec), [expectedDec]);
+  const expectedDec = useMemo(
+    () => bitsToDecimal(targetBits),
+    [bitsToDecimal, targetBits],
+  );
+  const expectedOctDigits = useMemo(
+    () => bitsToOctalDigits(targetBits),
+    [bitsToOctalDigits, targetBits],
+  );
+  const expectedOct = useMemo(
+    () => decimalToOct(expectedDec),
+    [decimalToOct, expectedDec],
+  );
+
+  // User-entered bits and derived values
+  const userBits = useMemo(
+    () => entries.map(v => (v === 1 ? 1 : 0)),
+    [entries],
+  );
+  const userDec = useMemo(
+    () => bitsToDecimal(userBits),
+    [bitsToDecimal, userBits],
+  );
+  const userHex = useMemo(() => decimalToHex(userDec), [decimalToHex, userDec]);
+  const isDecCorrect = userDec === expectedDec;
+
+  // Per-tab expand state via helper hook (needs to be declared before it's used in newTask)
+  const {
+    expanded,
+    toggle: toggleExpanded,
+    reset: resetExpanded,
+  } = useStepperExpanded();
 
   const newTask = useCallback(() => {
-  const n = Math.floor(Math.random() * 256); // 0..255
-    setTargetBits(toBits(n));
+    const n = Math.floor(Math.random() * 256); // 0..255
+    setTargetBits(toBits(n, BITS));
     setEntries(Array(BITS).fill(null));
+    // reset octal step state via hook below (if available later) and collapse panels
+    resetExpanded();
     setEvaluated(false);
-  }, []);
+  }, [toBits, resetExpanded]);
 
   // init and provide controls to container
   const initRef = useRef(false);
@@ -41,8 +89,14 @@ const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({ onControlsChange, 
   }, [newTask]);
 
   useEffect(() => {
+    const subtitle =
+      tab === 'binhex'
+        ? 'Modus: Binär ↔ Hexadezimal'
+        : tab === 'binoct'
+          ? 'Modus: Binär ↔ Oktal'
+          : 'Modus: Oktal ↔ Hexadezimal';
     onHudChange?.({
-      subtitle: 'Modus: Binär ↔ Hexadezimal',
+      subtitle,
       progress: null,
     });
     onControlsChange?.({
@@ -57,84 +111,205 @@ const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({ onControlsChange, 
       onHudChange?.(null);
       onControlsChange?.(null);
     };
-  }, [onControlsChange, onHudChange, newTask]);
+  }, [onControlsChange, onHudChange, newTask, tab]);
 
   const setEntry = (idx: number, val: 0 | 1 | null) =>
     setEntries(prev => prev.map((v, i) => (i === idx ? val : v)));
 
-  const renderBitRow = (idx: number) => {
-    const correct = targetBits[BITS - 1 - idx]; // map 2^idx to LSB-right on targetBits
-    const user = entries[BITS - 1 - idx];
-    const isCorrect = evaluated ? user === correct : false;
-    const hasValue = user !== null;
-    const stateClass = evaluated && hasValue ? (isCorrect ? 'ok' : 'err') : '';
-    return (
-      <div key={idx} className={`uh-row ${stateClass}`}>
-        <div className="uh-label">1×2^{idx} =</div>
-        <div className="uh-input">
-          <select
-            aria-label={`Bit 2^${idx}`}
-            value={user === null ? '' : user}
-            onChange={(e) => {
-              const v = e.target.value;
-              setEntry(BITS - 1 - idx, v === '' ? null : (Number(v) as 0 | 1));
-            }}
-          >
-            <option value="">-</option>
-            <option value="0">0</option>
-            <option value="1">1</option>
-          </select>
-        </div>
-      </div>
-    );
-  };
+  // input rows now handled by PlaceValueInputGrid component
 
   const binaryString = useMemo(() => targetBits.join(''), [targetBits]);
 
+  // Oktal ↔ Hex Step 1 encapsulated via hook
+  const {
+    octEntries,
+    expectedOctalDigitsPadded,
+    userOctDec,
+    isCorrect: isOctStep1Correct,
+    onChange: onChangeOct,
+  } = useOctalStep(expectedOctDigits, expectedDec);
+  const canProceedToStep2OctHex = isOctStep1Correct;
+
+  // Active tab config for rendering two-step flow
+  const activeConfig = useMemo(() => {
+    if (tab === 'binhex') {
+      return {
+        step1Title: 'Binär → Dezimal',
+        headerRight: (
+          <div className="uh-target">
+            {binaryString}
+            <span className="uh-base">₂</span>
+          </div>
+        ),
+        step1Node: (
+          <Step1Box
+            base={2}
+            width={BITS}
+            values={entries}
+            expected={targetBits}
+            evaluated={evaluated}
+            onChange={(idx, val) => setEntry(idx, val as 0 | 1 | null)}
+            decimalValue={userDec}
+            isCorrect={isDecCorrect}
+          />
+        ),
+        canProceed: isDecCorrect,
+        decimalValue: userDec,
+        step2Title: 'Dezimal → Hexadezimal',
+        step2Box: (
+          <Step2Box
+            base={16}
+            restMode="hex"
+            initialDecimal={userDec}
+            showContent={true}
+            expectedDigits={userHex}
+          />
+        ),
+      } as const;
+    }
+    if (tab === 'binoct') {
+      return {
+        step1Title: 'Binär → Dezimal',
+        headerRight: (
+          <div className="uh-target">
+            {binaryString}
+            <span className="uh-base">₂</span>
+          </div>
+        ),
+        step1Node: (
+          <Step1Box
+            base={2}
+            width={BITS}
+            values={entries}
+            expected={targetBits}
+            evaluated={evaluated}
+            onChange={(idx, val) => setEntry(idx, val as 0 | 1 | null)}
+            decimalValue={userDec}
+            isCorrect={isDecCorrect}
+          />
+        ),
+        canProceed: isDecCorrect,
+        decimalValue: userDec,
+        step2Title: 'Dezimal → Oktal',
+        step2Box: (
+          <Step2Box
+            base={8}
+            restMode="octal"
+            initialDecimal={userDec}
+            showContent={true}
+            expectedDigits={expectedOct}
+          />
+        ),
+      } as const;
+    }
+    // octhex
+    return {
+      step1Title: 'Oktal → Dezimal',
+      headerRight: (
+        <div className="uh-target">
+          {octalDigitsToString(expectedOctDigits)}
+          <span className="uh-base">₈</span>
+        </div>
+      ),
+      step1Node: (
+        <Step1Box
+          base={8}
+          width={BITS}
+          values={octEntries}
+          expected={expectedOctalDigitsPadded}
+          evaluated={evaluated}
+          onChange={(idx, val) => onChangeOct(idx, val as number | null)}
+          decimalValue={userOctDec}
+          isCorrect={isOctStep1Correct}
+        />
+      ),
+      canProceed: canProceedToStep2OctHex,
+      decimalValue: userOctDec,
+      step2Title: 'Dezimal → Hexadezimal',
+      step2Box: (
+        <Step2Box
+          base={16}
+          restMode="hex"
+          initialDecimal={userOctDec}
+          showContent={true}
+          expectedDigits={decimalToHex(userOctDec)}
+        />
+      ),
+    } as const;
+  }, [
+    tab,
+    binaryString,
+    entries,
+    evaluated,
+    expectedOct,
+    expectedOctDigits,
+    expectedOctalDigitsPadded,
+    isDecCorrect,
+    isOctStep1Correct,
+    octEntries,
+    octalDigitsToString,
+    targetBits,
+    userDec,
+    userHex,
+    userOctDec,
+    decimalToHex,
+    canProceedToStep2OctHex,
+    onChangeOct,
+  ]);
+
+  // Step 2: Decimal → Hex conversion via division by 16 steps
+  // Step 2 internal state handled by Step2Box now
+
   return (
     <div className="umrechnungshelfer">
-      <div className="tabs" role="tablist">
-        <button className={`tab ${tab === 'binhex' ? 'active' : ''}`} role="tab" aria-selected={tab === 'binhex'} onClick={() => setTab('binhex')}>Binär ⇆ Hexadezimal</button>
-        <button className={`tab ${tab === 'binoct' ? 'active' : ''}`} role="tab" aria-selected={tab === 'binoct'} disabled>Binär ⇆ Oktal</button>
-        <button className={`tab ${tab === 'octhex' ? 'active' : ''}`} role="tab" aria-selected={tab === 'octhex'} disabled>Oktal ⇆ Hexadezimal</button>
-      </div>
+      <TabRow
+        value={tab}
+        items={[
+          {value: 'binhex', label: 'Binär ⇆ Hexadezimal'},
+          {value: 'binoct', label: 'Binär ⇆ Oktal'},
+          {value: 'octhex', label: 'Oktal ⇆ Hexadezimal'},
+        ]}
+        onSelect={v => setTab(v)}
+        ariaLabel="Umrechnungsmodus"
+      />
 
-      {tab === 'binhex' && (
-        <div className="uh-panel">
-          <div className="uh-header">
-            <div className="uh-section-title">
-              <span className="badge">1</span> Binär → Dezimal
-            </div>
-            <div className="uh-target">{binaryString}<span className="uh-base">₂</span></div>
-          </div>
+      <StepPanel
+        step={1}
+        title={activeConfig.step1Title}
+        headerRight={activeConfig.headerRight}
+        expanded={!expanded[tab]}
+        onToggle={() => toggleExpanded(tab)}
+        ctaVisible={expanded[tab] || activeConfig.canProceed}
+        ctaDirection={expanded[tab] ? 'up' : 'down'}
+        ctaAriaLabel={
+          expanded[tab] ? 'Zu Schritt 1 wechseln' : 'Zu Schritt 2 wechseln'
+        }>
+        {activeConfig.step1Node}
+      </StepPanel>
 
-          <div className="uh-grid">
-            <div className="uh-col">
-              {[0,1,2,3].map(i => renderBitRow(i))}
-            </div>
-            <div className="uh-col">
-              {[4,5,6,7].map(i => renderBitRow(i))}
-            </div>
-          </div>
-
-          <div className="uh-result">
-            <div className="uh-result-label">Dezimal:</div>
-            <div className="uh-result-value">{expectedDec}<span className="uh-base">₁₀</span></div>
-          </div>
-        </div>
-      )}
-
-      {tab === 'binhex' && (
-        <div className="uh-panel">
-          <div className="uh-section-title">
-            <span className="badge">2</span> Dezimal → Hexadezimal
-          </div>
-          <div className="uh-result">
-            <div className="uh-result-label">Hexadezimal:</div>
-            <div className="uh-result-value">{expectedHex}<span className="uh-base">₁₆</span></div>
-          </div>
-        </div>
-      )}
+      <StepPanel
+        step={2}
+        title={activeConfig.step2Title}
+        expanded={expanded[tab]}
+        onToggle={() => toggleExpanded(tab)}
+        ctaVisible={activeConfig.canProceed || expanded[tab]}
+        ctaDirection={expanded[tab] ? 'up' : 'down'}
+        ctaAriaLabel={
+          expanded[tab] ? 'Zu Schritt 1 zurück' : 'Schritt 2 öffnen'
+        }>
+        {!activeConfig.canProceed ? (
+          <ResultLine label="Dezimal:" value={'—'} baseSuffix="₁₀" />
+        ) : (
+          <>
+            <ResultLine
+              label="Dezimal:"
+              value={activeConfig.decimalValue}
+              baseSuffix="₁₀"
+            />
+            {activeConfig.step2Box}
+          </>
+        )}
+      </StepPanel>
     </div>
   );
 };
