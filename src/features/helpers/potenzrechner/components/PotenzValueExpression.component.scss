@@ -1,0 +1,27 @@
+.potenz-value-expression {
+  font-size: 20px;
+  .term {
+    .value {
+      color: var(--text);
+      &.value--active {
+        color: var(--secondary);
+        font-weight: 600;
+      }
+    }
+    .operator {
+      margin: 0 4px;
+      color: var(--text-secondary);
+    }
+    .power {
+      color: var(--text);
+    }
+  }
+  .solution {
+    color: var(--primary);
+    font-size: 28px;
+    font-weight: 700;
+    &.solution--success {
+      color: var(--success);
+    }
+  }
+}

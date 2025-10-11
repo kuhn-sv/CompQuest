@@ -1,0 +1,13 @@
+.bit-toggle-row { display: grid; }
+
+.bit-grid { justify-items: center; }
+
+.bit-col {
+  display: grid;
+  grid-auto-rows: min-content;
+  align-items: center;
+  justify-items: center;
+  gap: 8px;
+}
+
+.power { text-align: center; color: var(--text-secondary); }

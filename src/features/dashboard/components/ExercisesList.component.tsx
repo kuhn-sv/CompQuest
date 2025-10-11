@@ -7,6 +7,7 @@ export interface Exercise {
   title: string;
   description: string;
   path: string;
+  progressPercent?: number;
 }
 
 interface ExercisesListProps {
@@ -21,6 +22,11 @@ const ExercisesList: React.FC<ExercisesListProps> = ({ exercises }) => (
         to={exercise.path}
         className="dashboard__exercise-card"
       >
+        {typeof exercise.progressPercent === 'number' && (
+          <div className="dashboard__exercise-progress" aria-label="Fortschritt">
+            {exercise.progressPercent}%
+          </div>
+        )}
         <h3 className="dashboard__exercise-title">{exercise.title}</h3>
         <p className="dashboard__exercise-description">
           {exercise.description}

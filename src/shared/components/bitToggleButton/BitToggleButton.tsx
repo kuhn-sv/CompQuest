@@ -1,4 +1,5 @@
 import React from 'react';
+import './BitToggleButton.scss';
 
 interface BitToggleButtonProps {
   value: 0 | 1 | number; // number to stay permissive with callers providing 0/1

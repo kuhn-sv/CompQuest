@@ -28,39 +28,6 @@
     .sub { font-size: 14px; color: var(--text-secondary); margin-top: $spacing-xs; }
   }
 
-  .bits-box {
-    display: flex;
-    gap: $spacing-md;
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-
-  .bit-button {
-    width: 52px;
-    height: 52px;
-    border-radius: 10px;
-    border: 2px solid var(--surface-border);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0;
-    color: var(--text-primary);
-    font-size: 20px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    &:hover { border-color: var(--primary); }
-    &.active {
-      border-color: var(--primary);
-      background: var(--primary10);
-    }
-    &.disabled,
-    &:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-  }
-
   .info-line {
     display: flex;
     gap: $spacing-lg;

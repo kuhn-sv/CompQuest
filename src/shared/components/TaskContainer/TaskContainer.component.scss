@@ -16,7 +16,8 @@
     max-width: none;
     background: var(--surface);
     border-radius: 12px;
-    overflow: hidden;
+  // Avoid clipping native UI like <select> dropdowns inside content; let them render outside if needed
+  overflow: visible;
     box-shadow: var(--surface-shadow);
     display: flex;
     flex-direction: column;
@@ -109,7 +110,8 @@
 
   &__task-content {
     flex: 1;
-    overflow: hidden; // ensure inner tasks layout within the container
+    // Important: allow native dropdowns/popovers to render outside the content box
+    overflow: visible;
     padding: 0; // Let the task component handle its own padding
     display: grid; // center inner task content
     place-items: center; // center on both axes

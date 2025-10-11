@@ -1,0 +1,28 @@
+.tabs {
+  display: flex;
+  gap: 0.8rem;
+  width: 100%;
+  margin-bottom: 20px;
+  padding-top: 12px;
+}
+
+.tab {
+  background: transparent;
+  border: 1px solid var(--surface-border);
+  color: var(--text);
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  opacity: 0.9;
+  flex: 1 1 0;
+  text-align: center;
+  height: 40px;
+  font-size: 20px;
+
+  &.active {
+    background: var(--primary30);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+  }
+}

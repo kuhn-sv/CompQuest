@@ -7,6 +7,7 @@ import DashboardPage from './features/dashboard/dashboard.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
+import HelperModulePage from './features/helpers/HelperModule.page';
 
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)
@@ -16,7 +17,6 @@ const App: React.FC = () => {
       <Router>
         {/* Theme toggle removed; app runs in dark mode */}
         <Routes>
-          {/* Public Routes - nur für nicht angemeldete Nutzer */}
           <Route 
             path="/auth/login" 
             element={
@@ -50,6 +50,16 @@ const App: React.FC = () => {
             element={
               <ProtectedRoute>
                 <DashboardPage />
+              </ProtectedRoute>
+            } 
+          />
+
+          {/* Helper modules */}
+          <Route 
+            path="/hilfsmodul/:module" 
+            element={
+              <ProtectedRoute>
+                <HelperModulePage />
               </ProtectedRoute>
             } 
           />

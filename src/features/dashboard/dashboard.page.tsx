@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 // import { Link } from 'react-router-dom';
-import ExercisesList from './components/ExercisesList.component';
 import ExercisesModal from './components/ExercisesModal.component';
 import { useAuth } from '../auth';
 import './dashboard.page.scss';
@@ -10,31 +9,43 @@ const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
   const { user, signOut } = useAuth();
 
-  const exercises = [
+  const missions = [
     {
       id: 'number-system-direct',
-      title: '1.1 Zahlensystem-Konverter',
+      title: 'Zahlensystem-Konverter',
       description: 'Wandeln zwischen verschiedenen Zahlensystemen um und festige dein Basiswissen.',
-      path: '/task/number-system'
+      path: '/task/number-system',
+      progressPercent: 100,
     },
     {
       id: 'positive-arithmetic-direct',
-      title: '1.2 Positive Arithmetik',
+      title: 'Binäre Arithmetik',
       description: 'Rechne mit Binärzahlen und trainiere Addition, Subtraktion und Überträge.',
-      path: '/task/positive-arithmetic'
+      path: '/task/positive-arithmetic',
+      progressPercent: 72,
     },
     {
       id: 'complements-direct',
-      title: 'Einer- & Zweierkomplement – Übung 1.3 (Direkt)',
+      title: 'Einer- & Zweierkomplement',
       description: 'Direkter Einstieg in Einer- & Zweierkomplement.',
-      path: '/task/complements'
+      path: '/task/complements',
+      progressPercent: 0,
+    },
+  ];
+
+  const helpers = [
+    {
+      id: 'helper-potenzrechner',
+      title: 'Hilfsmodul: Potenzrechner',
+      description: 'Stelle Zahlen in Binär/Octal/Hex dar – mit Potenzen als Hilfestellung.',
+      path: '/hilfsmodul/potenzrechner'
     },
     {
-      id: 'practice-task-one',
-      title: 'Übungsaufgabe 1.1',
-      description: 'Zahlensystem-Konverter: Verbinde Zahlen mit ihren entsprechenden Darstellungen',
-      path: '/practice-task-one'
-    },   
+      id: 'helper-umrechnungshelfer',
+      title: 'Hilfsmodul: Umrechnungshelfer',
+      description: 'Umrechnung Binär ⇆ Hexadezimal (Schritt für Schritt).',
+      path: '/hilfsmodul/umrechnungshelfer'
+    },
   ];
 
   const handleCpuClick = () => {
@@ -86,9 +97,13 @@ const DashboardPage: React.FC = () => {
         </div>
       </div>
 
-      <ExercisesModal show={showExercises} onClose={() => setShowExercises(false)}>
-        <ExercisesList exercises={exercises} />
-      </ExercisesModal>
+      <ExercisesModal 
+        show={showExercises} 
+        onClose={() => setShowExercises(false)}
+        missions={missions}
+        helpers={helpers}
+        topicTitle="1. Zahlendarstellung"
+      />
     </div>
   );
 };

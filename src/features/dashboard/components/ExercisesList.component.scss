@@ -44,6 +44,19 @@
   color: var(--text);
 }
 
+.dashboard__exercise-progress {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(3px);
+  border: 1px solid var(--surface-border);
+  color: var(--text-secondary);
+  padding: 0.25rem 0.5rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
 .dashboard__exercise-description {
   color: var(--text-secondary);
   line-height: 1.6;

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Timer } from '..';
 import TaskActionButtons from '../TaskActionButtons/TaskActionButtons.component';
 import SummaryOverlay from '../ResultSummary/ResultSummary';
 import { useTimer } from '../../hooks';
-import type { TaskFooterControls, TaskHudState, TaskSummaryState } from '../../../features/tasks/practiceTaskOne/interfaces';
+import type { TaskFooterControls, TaskHudState, TaskSummaryState } from '../../interfaces/tasking.interfaces';
 import './TaskContainer.component.scss';
 
 export interface TaskContainerInjectedProps {
@@ -34,22 +34,41 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
 
   const { time, isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
 
+  // Keep timer handlers in refs so injected callbacks can be stable
+  const startRef = useRef(start);
+  const stopRef = useRef(stop);
+  const resetRef = useRef(reset);
+  useEffect(() => { startRef.current = start; }, [start]);
+  useEffect(() => { stopRef.current = stop; }, [stop]);
+  useEffect(() => { resetRef.current = reset; }, [reset]);
+
   // Reset timer when summary opens/closes as requested by hud
   useEffect(() => {
     // No-op for now; timer is controlled via hudState and button handlers below
   }, [summaryState]);
 
-  const injected: TaskContainerInjectedProps = {
-    onControlsChange: setFooterControls,
-    onHudChange: (hud) => {
-      setHudState(hud);
-      if (!hud) return;
-      if (hud.requestTimer === 'start') start();
-      if (hud.requestTimer === 'stop') stop();
-      if (hud.requestTimer === 'reset') reset();
-    },
-    onSummaryChange: setSummaryState,
-  };
+  // Stable callbacks to avoid triggering child effects every render
+  const handleControlsChange = useCallback((controls: TaskFooterControls | null) => {
+    setFooterControls(controls);
+  }, []);
+
+  const handleHudChange = useCallback((hud: TaskHudState | null) => {
+    setHudState(hud);
+    if (!hud) return;
+    if (hud.requestTimer === 'start') startRef.current();
+    if (hud.requestTimer === 'stop') stopRef.current();
+    if (hud.requestTimer === 'reset') resetRef.current();
+  }, []);
+
+  const handleSummaryChange = useCallback((summary: TaskSummaryState | null) => {
+    setSummaryState(summary);
+  }, []);
+
+  const injected: TaskContainerInjectedProps = useMemo(() => ({
+    onControlsChange: handleControlsChange,
+    onHudChange: handleHudChange,
+    onSummaryChange: handleSummaryChange,
+  }), [handleControlsChange, handleHudChange, handleSummaryChange]);
 
   const progressPercent = hudState?.progress
     ? Math.round((hudState.progress.current / hudState.progress.total) * 100)

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
-import BitToggleRow from './components/BitToggleRow';
+import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow.tsx';
 // Footer buttons rendered by parent
 import type { SubTaskComponentProps } from '../interfaces';
 import { useTimer } from '../../../../shared/hooks';
@@ -177,7 +177,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
           </div>
         </div>
         <div className={`bits-frame ${evaluated ? (isCorrect ? 'success' : 'error') : ''} ${evaluated ? 'evaluated' : ''}`}>
-          <BitToggleRow bits={bits} onChange={setBits} className="bits-box" disabled={evaluated} />
+          <BitToggleRow bits={bits} onChange={setBits} className="bits-row" disabled={evaluated} />
           <div className="bits-frame__overlay" aria-hidden="true" />
         </div>
         {evaluated && (
