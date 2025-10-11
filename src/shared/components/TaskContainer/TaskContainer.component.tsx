@@ -1,9 +1,13 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Timer } from '..';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {Timer} from '..';
 import TaskActionButtons from '../TaskActionButtons/TaskActionButtons.component';
 import SummaryOverlay from '../ResultSummary/ResultSummary';
-import { useTimer } from '../../hooks';
-import type { TaskFooterControls, TaskHudState, TaskSummaryState } from '../../interfaces/tasking.interfaces';
+import {useTimer} from '../../hooks';
+import type {
+  TaskFooterControls,
+  TaskHudState,
+  TaskSummaryState,
+} from '../../interfaces/tasking.interfaces';
 import './TaskContainer.component.scss';
 
 export interface TaskContainerInjectedProps {
@@ -28,19 +32,29 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   endLabel = 'Beenden',
   children,
 }) => {
-  const [footerControls, setFooterControls] = useState<TaskFooterControls | null>(null);
+  const [footerControls, setFooterControls] =
+    useState<TaskFooterControls | null>(null);
   const [hudState, setHudState] = useState<TaskHudState | null>(null);
-  const [summaryState, setSummaryState] = useState<TaskSummaryState | null>(null);
+  const [summaryState, setSummaryState] = useState<TaskSummaryState | null>(
+    null,
+  );
 
-  const { time, isRunning, start, stop, reset, formatTime, getElapsed } = useTimer();
+  const {time, isRunning, start, stop, reset, formatTime, getElapsed} =
+    useTimer();
 
   // Keep timer handlers in refs so injected callbacks can be stable
   const startRef = useRef(start);
   const stopRef = useRef(stop);
   const resetRef = useRef(reset);
-  useEffect(() => { startRef.current = start; }, [start]);
-  useEffect(() => { stopRef.current = stop; }, [stop]);
-  useEffect(() => { resetRef.current = reset; }, [reset]);
+  useEffect(() => {
+    startRef.current = start;
+  }, [start]);
+  useEffect(() => {
+    stopRef.current = stop;
+  }, [stop]);
+  useEffect(() => {
+    resetRef.current = reset;
+  }, [reset]);
 
   // Reset timer when summary opens/closes as requested by hud
   useEffect(() => {
@@ -48,9 +62,12 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   }, [summaryState]);
 
   // Stable callbacks to avoid triggering child effects every render
-  const handleControlsChange = useCallback((controls: TaskFooterControls | null) => {
-    setFooterControls(controls);
-  }, []);
+  const handleControlsChange = useCallback(
+    (controls: TaskFooterControls | null) => {
+      setFooterControls(controls);
+    },
+    [],
+  );
 
   const handleHudChange = useCallback((hud: TaskHudState | null) => {
     setHudState(hud);
@@ -60,15 +77,21 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
     if (hud.requestTimer === 'reset') resetRef.current();
   }, []);
 
-  const handleSummaryChange = useCallback((summary: TaskSummaryState | null) => {
-    setSummaryState(summary);
-  }, []);
+  const handleSummaryChange = useCallback(
+    (summary: TaskSummaryState | null) => {
+      setSummaryState(summary);
+    },
+    [],
+  );
 
-  const injected: TaskContainerInjectedProps = useMemo(() => ({
-    onControlsChange: handleControlsChange,
-    onHudChange: handleHudChange,
-    onSummaryChange: handleSummaryChange,
-  }), [handleControlsChange, handleHudChange, handleSummaryChange]);
+  const injected: TaskContainerInjectedProps = useMemo(
+    () => ({
+      onControlsChange: handleControlsChange,
+      onHudChange: handleHudChange,
+      onSummaryChange: handleSummaryChange,
+    }),
+    [handleControlsChange, handleHudChange, handleSummaryChange],
+  );
 
   const progressPercent = hudState?.progress
     ? Math.round((hudState.progress.current / hudState.progress.total) * 100)
@@ -83,7 +106,9 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
             <div className="header-row header-row--top">
               <div className="task-info">
                 <h2 className="task-title">{title}</h2>
-                <p className="task-description">{hudState?.subtitle ?? description}</p>
+                <p className="task-description">
+                  {hudState?.subtitle ?? description}
+                </p>
               </div>
               <div className="task-hud">
                 <Timer
@@ -110,11 +135,12 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 role="progressbar"
                 aria-valuemin={0}
                 aria-valuemax={100}
-                aria-valuenow={hudState?.progress ? progressPercent : 0}
-              >
+                aria-valuenow={hudState?.progress ? progressPercent : 0}>
                 <div
                   className="task-progress__fill"
-                  style={{ width: hudState?.progress ? `${progressPercent}%` : '0%' }}
+                  style={{
+                    width: hudState?.progress ? `${progressPercent}%` : '0%',
+                  }}
                 />
               </div>
             </div>
@@ -122,7 +148,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
         )}
 
         {/* Task Content */}
-  <div className="task-container__task-content">
+        <div className="task-container__task-content">
           {!summaryState && children(injected)}
           {summaryState && (
             <SummaryOverlay
@@ -153,7 +179,11 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
             footerControls?.showEvaluate ||
             footerControls?.showNext
           );
-          const canShowFooter = hasControls && anyVisible && !hudState?.isStartScreen && !!hudState?.progress;
+          const canShowFooter =
+            hasControls &&
+            anyVisible &&
+            !hudState?.isStartScreen &&
+            !!hudState?.progress;
           return canShowFooter ? (
             <div className="task-container__footer">
               <TaskActionButtons
