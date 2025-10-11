@@ -1,0 +1,94 @@
+// filepath: c:\Users\Nutzer\Desktop\Uni\Neuer Ordner\CompQuest\src\features\tasks\practiceTaskOne\quiz\quiz.page.scss
+.quiz-container {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quiz-content {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  padding: 24px;
+}
+
+.quiz-left {
+  display: flex;
+}
+
+.quiz-illustration {
+  width: 100px;
+  height: auto;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.quiz-card {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  padding: 20px;
+  color: var(--text);
+}
+
+.quiz-question {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 14px;
+}
+
+.quiz-answers {
+  display: grid;
+  gap: 24px;
+}
+
+.quiz-answer {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  align-items: center;
+  gap: 12px;
+  border-radius: 10px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.quiz-answer .letter {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.quiz-answer.selected {
+  outline: 2px solid var(--primary);
+}
+
+.quiz-answer.correct {
+  border-color: var(--success);
+  background:
+    linear-gradient(0deg, rgba(110, 210, 193, 0.12), rgba(110, 210, 193, 0.12)),
+    #12181c;
+}
+
+.quiz-answer.wrong {
+  border-color: var(--error);
+  background:
+    linear-gradient(0deg, rgba(255, 107, 107, 0.1), rgba(255, 107, 107, 0.1)),
+    #12181c;
+}
+
+@media (max-width: 900px) {
+  .quiz-content {
+    grid-template-columns: 1fr;
+  }
+}

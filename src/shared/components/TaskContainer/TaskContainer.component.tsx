@@ -176,7 +176,11 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
               formatTime={formatTime}
               endHref={endHref}
               endLabel={endLabel}
-              onClose={() => setSummaryState(null)}
+              onClose={() => {
+                // Reset the task timer when closing the summary (e.g., on "Wiederholen")
+                reset();
+                setSummaryState(null);
+              }}
             />
           )}
         </div>
