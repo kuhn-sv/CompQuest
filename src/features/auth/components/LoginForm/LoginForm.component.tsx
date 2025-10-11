@@ -157,14 +157,13 @@ const LoginForm: React.FC<LoginFormProps> = ({
 			<div className="login-form__footer">
 				<p className="login-form__switch">
 					Noch kein Konto?{' '}
-					<button
+					<a
 						type="button"
 						className="login-form__switch-button"
 						onClick={onSwitchToRegister}
-						disabled={loading}
 					>
 						Registrieren
-					</button>
+					</a>
 				</p>
 			</div>
 		</form>

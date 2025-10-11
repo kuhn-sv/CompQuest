@@ -276,14 +276,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 			<div className="register-form__footer">
 				<p className="register-form__switch">
 					Bereits ein Konto?{' '}
-					<button
+					<a
 						type="button"
 						className="register-form__switch-button"
 						onClick={onSwitchToLogin}
-						disabled={loading}
 					>
 						Anmelden
-					</button>
+					</a>
 				</p>
 			</div>
 				</>
