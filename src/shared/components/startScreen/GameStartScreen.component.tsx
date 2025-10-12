@@ -126,15 +126,17 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
         <div className="gss-right">
           <div className="gss-facts">
             <div className="gss-fact">
-              <div className="gss-fact-icon">🎯 </div>
-              <div className="ggs-fact-text">
+              <div className="gss-fact-icon" aria-hidden>
+                🎯
+              </div>
+              <div className="gss-fact-text">
                 <div className="label">Aufgaben</div>
                 <div className="value">{taskCount}</div>
               </div>
             </div>
             <div className="gss-fact">
               <div className="gss-fact-icon">⏱️</div>
-              <div className="ggs-fact-text">
+              <div className="gss-fact-text">
                 <div className="label">Geschätzte Zeit</div>
                 <div className="value">{estimatedTime}</div>
               </div>

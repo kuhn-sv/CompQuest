@@ -10,12 +10,14 @@
 }
 
 .gss-card {
+  /* Use CSS Grid for more control on responsive breakpoints */
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 24px;
   width: min(100%, 1100px);
   padding: 24px;
   color: #e8f0f4;
+  align-items: start;
 }
 
 .gss-left {
@@ -26,8 +28,8 @@
   display: grid;
   grid-template-rows: auto 1fr;
   overflow: hidden;
-  /* justify-content: space-evenly; */
   justify-items: end;
+  max-width: 100%;
 }
 
 .gss-status {
@@ -69,11 +71,69 @@
 .gss-character {
   margin-top: 20px;
   border-radius: 12px;
+  /* keep character overlapping on wide screens, but reset on small */
   margin-bottom: -40px;
+  display: flex;
+  justify-content: center;
+  max-height: 320px;
+  transition: max-height .28s ease, opacity .28s ease, transform .28s ease, margin-bottom .28s ease;
 
   img {
     width: 200px;
+    max-width: 40vw;
+    height: auto;
     display: block;
+    transition: opacity .28s ease, transform .28s ease, width .28s ease;
+    will-change: opacity, transform;
+  }
+}
+
+/* If viewport height is small, reduce or hide the big character image to prevent .gss-left from overflowing */
+@media (max-height: 1000px) {
+  .gss-character img {
+    width: 140px;
+    max-width: 30vw;
+    opacity: 0.95;
+    transform: translateY(-4px) scale(.98);
+  }
+
+  /* allow left column to scroll if its content exceeds available height */
+  .gss-left {
+    overflow: auto;
+    padding-right: 12px; /* give space for scrollbar */
+    justify-items: center;
+  }
+}
+
+/* On even shorter viewports, collapse the character visually with a gentle fade/scale
+   instead of instantly removing it; this prevents layout jumps while still saving vertical space */
+@media (max-height: 850px) {
+  .gss-character {
+    max-height: 0;
+    margin-bottom: 0;
+    opacity: 0;
+    transform: translateY(-6px) scale(.95);
+    overflow: hidden;
+    pointer-events: none;
+  }
+
+  .gss-character img {
+    opacity: 0;
+    transform: scale(.85) translateY(-6px);
+    width: 0; /* helps collapse space visually; transition will animate */
+  }
+
+  .gss-left {
+    margin-bottom: 0;
+    padding-bottom: 12px;
+  }
+}
+
+/* Combine height and width constraints for narrow landscape devices */
+@media (max-height: 900px) and (max-width: 1000px) {
+  .gss-character img {
+    width: 120px;
+    max-width: 28vw;
   }
 }
 
@@ -93,11 +153,11 @@
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 24px;
+  gap: 16px;
   background: var(--surface);
   border: 1px solid var(--surface-border);
   border-radius: 12px;
-  padding: 14px 16px;
+  padding: 12px 14px;
 }
 
 .gss-fact-icon {
@@ -106,6 +166,9 @@
   align-items: center;
   justify-content: center;
   font-size: 24px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
 }
 
 .gss-fact .label {
@@ -118,6 +181,11 @@
   font-size: 20px;
   font-weight: 700;
   color: #eaf5f8;
+}
+
+.gss-fact-text {
+  display: flex;
+  flex-direction: column;
 }
 
 .gss-best {
@@ -168,7 +236,7 @@
 .gss-start-button {
   background: var(--primary-btn-bg);
   color: var(--primary-btn-text);
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 12px;
@@ -176,19 +244,17 @@
   padding: 0.75rem 1rem;
   border-radius: 0.5rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.18s ease;
   width: 100%;
-  &--primary {
-    background: var(--primary-btn-bg);
-  }
-
-  &--secondary {
-    background: #f5f5f5;
-
-    &:hover {
-      background: #eee;
-    }
-  }
+}
+.gss-start-button--primary {
+  background: var(--primary-btn-bg);
+}
+.gss-start-button--secondary {
+  background: #f5f5f5;
+}
+.gss-start-button--secondary:hover {
+  background: #eee;
 }
 .gss-start-button:hover {
   filter: brightness(1.05);
@@ -203,5 +269,61 @@
   }
   .gss-character {
     min-height: 180px;
+  }
+}
+
+/* Narrow screens: stack facts & best vertically, reduce paddings */
+@media (max-width: 600px) {
+  .gss-card {
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .gss-left {
+    padding: 16px;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .gss-status-title {
+    font-size: 18px;
+  }
+
+  .gss-status-desc {
+    font-size: 13px;
+  }
+
+  .gss-character {
+    margin-bottom: 0;
+    margin-top: 12px;
+  }
+
+  .gss-right {
+    align-items: stretch;
+  }
+
+  .gss-facts {
+    grid-template-columns: 1fr;
+  }
+
+  .gss-best-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+
+  .gss-actions {
+    height: auto;
+  }
+}
+
+/* Wide screens: slightly increase character size and card spacing */
+@media (min-width: 1200px) {
+  .gss-card {
+    gap: 32px;
+    padding: 32px;
+  }
+
+  .gss-character img {
+    width: 260px;
   }
 }
