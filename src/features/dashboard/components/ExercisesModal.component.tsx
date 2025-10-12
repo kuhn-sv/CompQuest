@@ -55,9 +55,33 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
         loadProgress(missions, true),
         loadProgress(helpers, false),
       ]);
+      // Inject two placeholder items (hard-coded) for upcoming content
+      const placeholderMissions: Exercise[] = [
+        {
+          id: 'placeholder-fest-gleitkomma',
+          title: 'Fest- Gleitkomma',
+          description: 'coming soon',
+          path: '#',
+          progressPercent: undefined,
+          disabled: true,
+        },
+      ];
+      const placeholderHelpers: Exercise[] = [
+        {
+          id: 'placeholder-uebertragshelfer',
+          title: 'Hilfsmodul: Übertragshelfer',
+          description: 'coming soon',
+          path: '#',
+          progressPercent: undefined,
+          disabled: true,
+        },
+      ];
+
+      const missionsWithPlaceholders = [...m, ...placeholderMissions];
+      const helpersWithPlaceholders = [...h, ...placeholderHelpers];
       if (!cancelled) {
-        setMissionsWithProgress(m);
-        setHelpersList(h);
+        setMissionsWithProgress(missionsWithPlaceholders);
+        setHelpersList(helpersWithPlaceholders);
       }
     })();
     return () => {
