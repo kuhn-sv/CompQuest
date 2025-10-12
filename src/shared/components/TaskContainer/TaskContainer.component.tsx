@@ -56,6 +56,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   const prevHudRef = useRef<TaskHudState | null>(null);
   const prevSummaryRef = useRef<TaskSummaryState | null>(null);
   const prevControlsRef = useRef<TaskFooterControls | null>(null);
+  const pendingSummaryRef = useRef<TaskSummaryState | null>(null);
 
   const hudShallowEqual = (a: TaskHudState | null, b: TaskHudState | null) => {
     if (a === b) return true;
@@ -100,9 +101,11 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
     if (a === b) return true;
     if (!a || !b) return false;
     return (
-      a.onReset === b.onReset &&
-      a.onEvaluate === b.onEvaluate &&
-      a.onNext === b.onNext &&
+      // Compare handler presence (not function identity) to avoid spurious
+      // updates when child re-creates stable callbacks with new references.
+      !!a.onReset === !!b.onReset &&
+      !!a.onEvaluate === !!b.onEvaluate &&
+      !!a.onNext === !!b.onNext &&
       a.showReset === b.showReset &&
       a.showEvaluate === b.showEvaluate &&
       a.showNext === b.showNext &&
@@ -165,6 +168,40 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
     (summary: TaskSummaryState | null) => {
       // Avoid redundant updates (can cause render loops if child resends same object)
       if (summaryShallowEqual(prevSummaryRef.current, summary)) return;
+
+      // If this is the last subtask, don't immediately show the SummaryOverlay.
+      // Instead, store it as pending and show a "Weiter" button so the user
+      // can view results after clicking Next. If we don't have progress info,
+      // fall back to the old behavior.
+      const isLastSubtask = !!(
+        hudState?.progress &&
+        hudState.progress.current === hudState.progress.total
+      );
+
+      if (summary && isLastSubtask) {
+        // Record attempt immediately even if we delay showing the overlay.
+        if (taskMeta?.id && taskMeta?.title) {
+          const accuracyPct =
+            summary.totalPossible > 0
+              ? Math.round((summary.totalCorrect / summary.totalPossible) * 100)
+              : 0;
+          trainingService
+            .recordAttempt(taskMeta.id, taskMeta.title, {
+              timeMs: Math.round(summary.elapsedMs),
+              accuracy: accuracyPct,
+              points: summary.totalPoints,
+            })
+            .catch(err => console.error('Failed to record attempt:', err));
+        }
+
+        // Store pending summary and avoid setting summaryState now
+        pendingSummaryRef.current = summary;
+        prevSummaryRef.current = summary;
+
+        // Do not setSummaryState yet; wait for user to click Next
+        return;
+      }
+
       setSummaryState(summary);
       prevSummaryRef.current = summary;
       if (summary && taskMeta?.id && taskMeta?.title) {
@@ -182,7 +219,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
           .catch(err => console.error('Failed to record attempt:', err));
       }
     },
-    [taskMeta],
+    [taskMeta, hudState],
   );
 
   const injected: TaskContainerInjectedProps = useMemo(
@@ -280,34 +317,69 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
             footerControls?.showEvaluate ||
             footerControls?.showNext
           );
+
+          // If we have a pending summary (reported on last subtask), we want to
+          // show a Next button so the user can view results after clicking it.
+          const hasPendingSummary = !!pendingSummaryRef.current;
+
           const canShowFooter = forceShowFooter
-            ? hasControls && anyVisible
-            : hasControls &&
-              anyVisible &&
-              !hudState?.isStartScreen &&
-              !!hudState?.progress;
-          return canShowFooter ? (
+            ? (hasControls && anyVisible) || hasPendingSummary
+            : (hasControls &&
+                anyVisible &&
+                !hudState?.isStartScreen &&
+                !!hudState?.progress) ||
+              hasPendingSummary;
+
+          if (!canShowFooter) return null;
+
+          // Provide fallback controls when child didn't supply them but we have a
+          // pending summary: show a Next button that reveals the summary.
+          const fallbackOnNext = () => {
+            // If there's a pending summary, reveal it; otherwise call provided handler
+            if (pendingSummaryRef.current) {
+              // stop timer and reveal summary overlay
+              stop();
+              setSummaryState(pendingSummaryRef.current);
+              pendingSummaryRef.current = null;
+            } else {
+              start();
+              footerControls!.onNext?.();
+            }
+          };
+
+          return (
             <div className="task-container__footer">
               <TaskActionButtons
-                onReset={footerControls!.onReset}
+                onReset={footerControls?.onReset}
                 onEvaluate={() => {
                   stop();
-                  footerControls!.onEvaluate();
+                  footerControls?.onEvaluate?.();
                 }}
-                onNext={() => {
-                  start();
-                  footerControls!.onNext?.();
-                }}
-                showReset={footerControls!.showReset}
-                showEvaluate={footerControls!.showEvaluate}
-                showNext={footerControls!.showNext}
-                disableReset={footerControls!.disableReset}
-                disableEvaluate={footerControls!.disableEvaluate}
-                disableNext={footerControls!.disableNext}
+                onNext={
+                  footerControls?.onNext
+                    ? () => {
+                        // If child provided onNext, prefer it, but also reveal pending summary if present
+                        if (pendingSummaryRef.current) {
+                          stop();
+                          setSummaryState(pendingSummaryRef.current);
+                          pendingSummaryRef.current = null;
+                        } else {
+                          start();
+                          footerControls!.onNext?.();
+                        }
+                      }
+                    : fallbackOnNext
+                }
+                showReset={footerControls?.showReset ?? false}
+                showEvaluate={footerControls?.showEvaluate ?? false}
+                showNext={footerControls?.showNext || hasPendingSummary}
+                disableReset={footerControls?.disableReset ?? false}
+                disableEvaluate={footerControls?.disableEvaluate ?? false}
+                disableNext={footerControls?.disableNext ?? false}
                 taskMeta={taskMeta}
               />
             </div>
-          ) : null;
+          );
         })()}
       </div>
     </div>

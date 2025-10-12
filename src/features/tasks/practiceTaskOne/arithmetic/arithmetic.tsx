@@ -169,20 +169,12 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     setEvaluated(false);
     setActiveTaskId(null);
     resetDragState();
-    reset();
-    if (tasks.length > 0) {
-      start();
-    }
-    // Reset and restart parent HUD timer
+    // Do not reset the shared timer here; only reset task-local state.
+    // Update HUD progress without sending timer control commands.
     onHudChangeRef.current?.({
       progress: {current: stageIndex + 1, total: stages.length},
-      requestTimer: 'reset',
     });
-    onHudChangeRef.current?.({
-      progress: {current: stageIndex + 1, total: stages.length},
-      requestTimer: 'start',
-    });
-  }, [reset, resetDragState, start, tasks, stageIndex, stages.length]);
+  }, [resetDragState, tasks, stageIndex, stages.length]);
 
   // Assignment logic
   const assignAnswer = useCallback(
