@@ -69,7 +69,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
       title: 'Quiz',
       description: 'Beweise dein Wissen. ',
       component: Quiz as React.ComponentType<SubTaskComponentProps>,
-      timeLimit: 5 * 60 * 1000,
+      timeLimit: 2 * 60 * 1000,
     },
   ];
 

@@ -70,7 +70,26 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     handleDrop,
     handleDragEnd,
     resetDragState,
-  } = useDragAndDrop<DragDropItem>(DRAG_DROP_PRESETS.NUMBER_SYSTEM);
+    handlePointerDown,
+  } = useDragAndDrop<DragDropItem>({
+    ...DRAG_DROP_PRESETS.NUMBER_SYSTEM,
+    onPointerDrop: (targetId: string, item: DragDropItem) => {
+      onDropAnswer(targetId, {value: item.value, base: item.base});
+    },
+  } as unknown as import('../../../../shared/hooks/useDragAndDrop').DragDropConfig<DragDropItem>);
+
+  const handlePointerDownAdapter = useCallback(
+    (e: React.PointerEvent | React.TouchEvent, answer: AnswerOptionBase) => {
+      const baseNum =
+        typeof answer.base === 'string'
+          ? parseInt(answer.base, 10)
+          : (answer.base as number | undefined);
+      if (baseNum == null || Number.isNaN(baseNum)) return;
+      if (handlePointerDown)
+        handlePointerDown(e, {value: answer.value, base: baseNum});
+    },
+    [handlePointerDown],
+  );
 
   // Map internal DnD item (requires base: number) to external AnswerOptionBase shape
   const draggedAnswer: AnswerOptionBase | null = draggedAnswerInternal
@@ -469,6 +488,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
               activeTaskId={activeTaskId}
               tasks={tasks}
               handleDragStart={handleDragStart}
+              handlePointerDown={handlePointerDownAdapter}
               handleDragEnd={handleDragEnd}
               assignAnswer={assignAnswer}
               evaluated={evaluated}

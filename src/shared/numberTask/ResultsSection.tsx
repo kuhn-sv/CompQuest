@@ -1,5 +1,9 @@
 import React from 'react';
-import type { NumberTaskBase, AnswerOptionBase, AssignmentMapBase } from './NumberTask.types';
+import type {
+  NumberTaskBase,
+  AnswerOptionBase,
+  AssignmentMapBase,
+} from './NumberTask.types';
 
 interface ResultsSectionProps {
   answerPool: AnswerOptionBase[];
@@ -10,6 +14,10 @@ interface ResultsSectionProps {
   activeTaskId: string | null;
   tasks: NumberTaskBase[];
   handleDragStart: (e: React.DragEvent, answer: AnswerOptionBase) => void;
+  handlePointerDown?: (
+    e: React.PointerEvent | React.TouchEvent,
+    answer: AnswerOptionBase,
+  ) => void;
   handleDragEnd: () => void;
   assignAnswer: (taskId: string, answer: AnswerOptionBase) => void;
   evaluated: boolean;
@@ -19,7 +27,7 @@ interface ResultsSectionProps {
   keyPrefix?: string;
 }
 
-export const ResultsSection: React.FC<ResultsSectionProps> = (props) => {
+export const ResultsSection: React.FC<ResultsSectionProps> = props => {
   const {
     answerPool,
     assignments,
@@ -27,6 +35,7 @@ export const ResultsSection: React.FC<ResultsSectionProps> = (props) => {
     activeTaskId,
     tasks,
     handleDragStart,
+    handlePointerDown,
     handleDragEnd,
     assignAnswer,
     evaluated,
@@ -58,10 +67,17 @@ export const ResultsSection: React.FC<ResultsSectionProps> = (props) => {
         let resultState = '';
         for (const t of tasks) {
           const assigned = assignments[t.id];
-          if (assigned && assigned.value === answer.value && assigned.base === answer.base) {
+          if (
+            assigned &&
+            assigned.value === answer.value &&
+            assigned.base === answer.base
+          ) {
             assignedToTask = t;
             if (evaluated) {
-              if (assigned.value === t.expectedValue && assigned.base === t.toBase) {
+              if (
+                assigned.value === t.expectedValue &&
+                assigned.base === t.toBase
+              ) {
                 resultState = 'success';
               } else {
                 resultState = 'error';
@@ -76,22 +92,58 @@ export const ResultsSection: React.FC<ResultsSectionProps> = (props) => {
           <div key={rowKey} className={`result-row row-${index}`}>
             {!used && (
               <div
+                data-answer-key={aKey}
                 className={`input-field result-field${assignedToTask ? ' assigned' : ''}${resultState ? ' ' + resultState : ''} ${draggedAnswer && draggedAnswer.value === answer.value && draggedAnswer.base === answer.base ? 'dragging' : ''}`}
-                draggable="true"
-                onDragStart={(e) => handleDragStart(e, answer)}
+                draggable={true}
+                style={{touchAction: 'none'}}
+                onDragStart={e => handleDragStart(e, answer)}
                 onDragEnd={handleDragEnd}
-                onClick={() => {
-                  const targetTaskId = activeTaskId ?? tasks.find(t => !assignments[t.id])?.id;
-                  if (targetTaskId) assignAnswer(targetTaskId, answer);
+                onPointerDown={(e: React.PointerEvent) => {
+                  // Prefer a provided pointer-aware handler from parent hook
+                  if (handlePointerDown) {
+                    handlePointerDown(e, answer);
+                    return;
+                  }
+                  // Fallback: call the mouse-drag handler with a minimal fake event
+                  const fakeEvent = {
+                    // copy useful properties but ensure methods exist
+                    ...e,
+                    dataTransfer: {
+                      setData: () => {},
+                      getData: () => '',
+                      effectAllowed: 'move',
+                      dropEffect: 'move',
+                    },
+                    stopPropagation: () => {},
+                    preventDefault: () => {},
+                  } as unknown as React.DragEvent;
+                  handleDragStart(fakeEvent, answer);
                 }}
-              >
-                <div style={{ userSelect: 'none' }}>
+                onTouchStart={(e: React.TouchEvent) => {
+                  if (handlePointerDown) {
+                    handlePointerDown(e, answer);
+                    return;
+                  }
+                  // fallback to click assignment
+                }}
+                onClick={() => {
+                  const targetTaskId =
+                    activeTaskId ?? tasks.find(t => !assignments[t.id])?.id;
+                  if (targetTaskId) assignAnswer(targetTaskId, answer);
+                }}>
+                <div style={{userSelect: 'none'}}>
                   {renderAnswer ? renderAnswer(answer) : answer.value}
                 </div>
               </div>
             )}
-            {used && <span className={`connector-line${resultState ? ' ' + resultState : ''}`} />}
-            <span className={`lead-line lead-line--trailing${used && resultState ? ' ' + resultState : ''}`} />
+            {used && (
+              <span
+                className={`connector-line${resultState ? ' ' + resultState : ''}`}
+              />
+            )}
+            <span
+              className={`lead-line lead-line--trailing${used && resultState ? ' ' + resultState : ''}`}
+            />
           </div>
         );
       })}

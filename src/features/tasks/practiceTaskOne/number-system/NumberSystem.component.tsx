@@ -72,7 +72,13 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     handleDrop,
     handleDragEnd,
     resetDragState,
-  } = useDragAndDrop<AnswerOption>(DRAG_DROP_PRESETS.NUMBER_SYSTEM);
+    handlePointerDown,
+  } = useDragAndDrop<AnswerOption>({
+    ...DRAG_DROP_PRESETS.NUMBER_SYSTEM,
+    onPointerDrop: (targetId: string, item: AnswerOption) => {
+      onDropAnswer(targetId, item);
+    },
+  } as unknown as import('../../../../shared/hooks/useDragAndDrop').DragDropConfig<AnswerOption>);
 
   // Connection lines calculation
   const getTaskIdCb = useCallback((task: NumberTask) => task.id, []);
@@ -204,6 +210,21 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       }
     },
     [handleDragStart],
+  );
+
+  const handlePointerDownAdapter = useCallback(
+    (
+      e: React.PointerEvent | React.TouchEvent,
+      answer: {value: string; base?: number | string},
+    ) => {
+      if (typeof answer.base === 'number' && handlePointerDown) {
+        handlePointerDown(e as React.PointerEvent | React.TouchEvent, {
+          value: answer.value,
+          base: answer.base as AnswerOption['base'],
+        });
+      }
+    },
+    [handlePointerDown],
   );
 
   const assignAnswerAdapter = useCallback(
@@ -419,6 +440,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
                     isActive={isActive}
                     isDragOver={dragOverTaskId === t.id}
                     onClick={() => setActiveTaskId(t.id)}
+                    dataTaskId={t.id}
                     onDragOver={e => handleDragOver(e, t.id)}
                     onDragEnter={e => handleDragEnter(e, t.id)}
                     onDragLeave={handleDragLeave}
@@ -437,6 +459,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
               activeTaskId={activeTaskId}
               tasks={tasks}
               handleDragStart={handleDragStartAdapter}
+              handlePointerDown={handlePointerDownAdapter}
               handleDragEnd={handleDragEnd}
               assignAnswer={assignAnswerAdapter}
               evaluated={evaluated}
