@@ -124,10 +124,6 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
       // finalize
       stop();
       const elapsedMs = getElapsed();
-      const timeBonusThresholdMs = 3 * 60 * 1000;
-      const timeBonusPoints = 1;
-      const withinThreshold = elapsedMs <= timeBonusThresholdMs;
-      const timeBonus = withinThreshold ? timeBonusPoints : 0;
       const filled = (() => {
         const base = [...scores];
         base[qIndex] = entry;
@@ -135,16 +131,11 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
       })();
       const totalCorrect = filled.reduce((s, x) => s + (x?.correct ?? 0), 0);
       const totalPossible = filled.reduce((s, x) => s + (x?.total ?? 0), 0);
-      const totalPoints = totalCorrect + timeBonus;
       onSummaryChangeRef.current?.({
         elapsedMs,
-        withinThreshold,
-        timeBonus,
         perStage: filled,
         totalCorrect,
         totalPossible,
-        totalPoints,
-        thresholdMs: timeBonusThresholdMs,
       });
     }
   }, [selected, qIndex, scores, stop, getElapsed]);

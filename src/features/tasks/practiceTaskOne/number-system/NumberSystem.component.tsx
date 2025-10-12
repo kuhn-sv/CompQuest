@@ -6,10 +6,7 @@ import type {
   NumberTask,
   AnswerOption,
 } from './interfaces/numberSystem.interface';
-import type {
-  StageScore,
-  EvaluationConfig,
-} from './interfaces/evaluation.interface';
+import type {StageScore} from './interfaces/evaluation.interface';
 import type {AssignmentMap} from './numberSystem.types';
 import {ResultsSection} from './components';
 import {EquationRow as SharedEquationRow} from '../../../../shared/components/equationrow/EquationRow';
@@ -51,11 +48,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   const [stageScores, setStageScores] = useState<StageScore[]>([]);
   // Final summary is reported to parent via onSummaryChange.
 
-  // Config: 3 minutes threshold = 180000 ms, 1 point bonus
-  const evalConfig: EvaluationConfig = useMemo(
-    () => ({timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1}),
-    [],
-  );
+  // Per-task threshold/bonus handled centrally by TaskContainer via taskMeta
 
   // Timer functionality
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
@@ -260,37 +253,18 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     // If this was the last stage, compute final result and emit to container
     if (stageIndex === stages.length - 1) {
       const elapsedMs = getElapsed();
-      const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
-      const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
       const perStage = (() => {
         const base = [...stageScores];
         base[stageIndex] = {difficulty, correct, total, points};
         return base;
       })();
-      const totalCorrect = perStage.reduce(
-        (sum, s) => sum + (s?.correct ?? 0),
-        0,
-      );
-      const totalPossible = perStage.reduce(
-        (sum, s) => sum + (s?.total ?? 0),
-        0,
-      );
-      const totalPoints = totalCorrect + timeBonus;
       onSummaryChange?.({
         elapsedMs,
-        withinThreshold,
-        timeBonus,
         perStage: perStage.map(s => ({...s})),
-        totalCorrect,
-        totalPossible,
-        totalPoints,
-        thresholdMs: evalConfig.timeBonusThresholdMs,
       });
     }
   }, [
     assignments,
-    evalConfig.timeBonusPoints,
-    evalConfig.timeBonusThresholdMs,
     getElapsed,
     onSummaryChange,
     stageIndex,

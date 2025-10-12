@@ -29,37 +29,46 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
       id: TaskId.NumberSystem,
       title: 'Zahlensystem-Konverter',
       description: 'Verbinde jede Zahl mit ihrem passenden Gegenstück rechts.',
+      chapters: [{title: '3.1 Zahlensysteme'}],
       component:
         NumberSystemComponent as React.ComponentType<SubTaskComponentProps>,
+      timeLimit: 5 * 60 * 1000,
     },
     {
       id: TaskId.PositiveArithmetic,
       title: 'Positive Arithmetik',
       description: 'Additionen und Subtraktionen mit positiven Zahlen.',
+      chapters: [{title: '3.1 Zahlensysteme'}],
       component:
         PositiveArithmeticComponent as React.ComponentType<SubTaskComponentProps>,
+      timeLimit: 5 * 60 * 1000,
     },
     {
       id: TaskId.Complements,
       title: 'Einer- & Zweierkomplement',
       description:
         'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
+      chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
       component:
         ComplementsComponent as React.ComponentType<SubTaskComponentProps>,
+      timeLimit: 5 * 60 * 1000,
     },
     {
       id: TaskId.TwosComplementArithmetic,
       title: 'Zweierkomplement-Arithmetik',
       description:
         'Additionen im Zweierkomplement mit fester Bitbreite (nur binär).',
+      chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
       component:
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,
+      timeLimit: 5 * 60 * 1000,
     },
     {
       id: TaskId.Quiz,
       title: 'Quiz',
       description: 'Beweise dein Wissen. ',
       component: Quiz as React.ComponentType<SubTaskComponentProps>,
+      timeLimit: 5 * 60 * 1000,
     },
   ];
 
@@ -71,8 +80,15 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     () => ({
       id: currentTask?.id ?? '',
       title: currentTask?.title ?? '',
+      chapters: currentTask?.chapters ?? [],
+      timeLimit: currentTask?.timeLimit ?? 0,
     }),
-    [currentTask?.id, currentTask?.title],
+    [
+      currentTask?.id,
+      currentTask?.title,
+      currentTask?.chapters,
+      currentTask?.timeLimit,
+    ],
   );
 
   const CurrentTaskComponent = currentTask?.component;

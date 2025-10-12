@@ -57,11 +57,6 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   const [stageScores, setStageScores] = useState<PAStageScore[]>([]);
   // final summary is lifted to container
 
-  // Config: 3 minutes threshold = 180000 ms, 1 point bonus
-  const evalConfig = useMemo(
-    () => ({timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1}),
-    [],
-  );
   const {start, stop, reset, getElapsed} = useTimer();
 
   // Drag and Drop logic
@@ -253,38 +248,22 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
         progress: {current: stages.length, total: stages.length},
         requestTimer: 'stop',
       });
+
       const elapsedMs = getElapsed();
-      const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
-      const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
       const perStage = (() => {
         const base = [...stageScores];
         base[stageIndex] = {difficulty, correct, total, points};
         return base;
       })();
-      const totalCorrect = perStage.reduce(
-        (sum, s) => sum + (s?.correct ?? 0),
-        0,
-      );
-      const totalPossible = perStage.reduce(
-        (sum, s) => sum + (s?.total ?? 0),
-        0,
-      );
-      const totalPoints = totalCorrect + timeBonus;
+
+      // Send minimal summary; TaskContainer computes bonuses/thresholds centrally
       onSummaryChange?.({
         elapsedMs,
-        withinThreshold,
-        timeBonus,
         perStage: perStage.map(s => ({...s, difficulty: s.difficulty})),
-        totalCorrect,
-        totalPossible,
-        totalPoints,
-        thresholdMs: evalConfig.timeBonusThresholdMs,
       });
     }
   }, [
     assignments,
-    evalConfig.timeBonusPoints,
-    evalConfig.timeBonusThresholdMs,
     getElapsed,
     onSummaryChange,
     stageIndex,

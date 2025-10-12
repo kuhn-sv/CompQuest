@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {Timer} from '..';
 import TaskActionButtons from '../TaskActionButtons/TaskActionButtons.component';
-import SummaryOverlay from '../ResultSummary/ResultSummary';
+import ResultSummary from '../ResultSummary/ResultSummary';
 import {useTimer} from '../../hooks';
 import {trainingService} from '../../../services/supabase/training.service';
 import type {
@@ -14,7 +14,8 @@ import './TaskContainer.component.scss';
 export interface TaskContainerInjectedProps {
   onControlsChange: (controls: TaskFooterControls | null) => void;
   onHudChange: (hud: TaskHudState | null) => void;
-  onSummaryChange: (summary: TaskSummaryState | null) => void;
+  // Subtasks may send partial summaries; container will normalize them
+  onSummaryChange: (summary: Partial<TaskSummaryState> | null) => void;
 }
 
 interface TaskContainerProps {
@@ -23,7 +24,12 @@ interface TaskContainerProps {
   endHref?: string;
   endLabel?: string;
   // Optional meta to record progress in DB on completion
-  taskMeta?: {id: string; title: string};
+  taskMeta?: {
+    id: string;
+    title: string;
+    chapters?: {title: string; content?: string}[];
+    timeLimit?: number;
+  };
   // When true, footer visibility ignores HUD gating (start screen/progress)
   forceShowFooter?: boolean;
   // When true, timer will start automatically on mount
@@ -165,11 +171,61 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   }, []);
 
   const handleSummaryChange = useCallback(
-    (summary: TaskSummaryState | null) => {
-      // Avoid redundant updates (can cause render loops if child resends same object)
-      if (summaryShallowEqual(prevSummaryRef.current, summary)) return;
+    (summary: Partial<TaskSummaryState> | null) => {
+      // If null, just clear
+      if (!summary) {
+        setSummaryState(null);
+        prevSummaryRef.current = null;
+        return;
+      }
 
-      // If this is the last subtask, don't immediately show the SummaryOverlay.
+      // Normalize incoming summary: allow subtasks to omit bonus-related fields
+      const DEFAULT_THRESHOLD_MS = 3 * 60 * 1000; // fallback if no taskMeta.timeLimit
+      const DEFAULT_TIME_BONUS_POINTS = 1;
+
+      const thresholdMs =
+        summary.thresholdMs ?? taskMeta?.timeLimit ?? DEFAULT_THRESHOLD_MS;
+      const elapsedMs =
+        typeof summary.elapsedMs === 'number' ? summary.elapsedMs : 0;
+      const withinThreshold =
+        typeof summary.withinThreshold === 'boolean'
+          ? summary.withinThreshold
+          : elapsedMs <= thresholdMs;
+      const timeBonus =
+        typeof summary.timeBonus === 'number'
+          ? summary.timeBonus
+          : withinThreshold
+            ? DEFAULT_TIME_BONUS_POINTS
+            : 0;
+      const totalCorrect =
+        typeof summary.totalCorrect === 'number'
+          ? summary.totalCorrect
+          : (summary.perStage?.reduce((s, x) => s + (x?.correct ?? 0), 0) ?? 0);
+      const totalPossible =
+        typeof summary.totalPossible === 'number'
+          ? summary.totalPossible
+          : (summary.perStage?.reduce((s, x) => s + (x?.total ?? 0), 0) ?? 0);
+      const totalPoints =
+        typeof summary.totalPoints === 'number'
+          ? summary.totalPoints
+          : totalCorrect + timeBonus;
+
+      const normalized: TaskSummaryState = {
+        // Ensure required fields are present
+        elapsedMs,
+        perStage: summary.perStage ?? [],
+        thresholdMs,
+        withinThreshold,
+        timeBonus,
+        totalCorrect,
+        totalPossible,
+        totalPoints,
+      };
+
+      // Avoid redundant updates (can cause render loops if child resends same object)
+      if (summaryShallowEqual(prevSummaryRef.current, normalized)) return;
+
+      // If this is the last subtask, don't immediately show the ResultSummary.
       // Instead, store it as pending and show a "Weiter" button so the user
       // can view results after clicking Next. If we don't have progress info,
       // fall back to the old behavior.
@@ -178,43 +234,47 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
         hudState.progress.current === hudState.progress.total
       );
 
-      if (summary && isLastSubtask) {
+      if (normalized && isLastSubtask) {
         // Record attempt immediately even if we delay showing the overlay.
         if (taskMeta?.id && taskMeta?.title) {
           const accuracyPct =
-            summary.totalPossible > 0
-              ? Math.round((summary.totalCorrect / summary.totalPossible) * 100)
+            normalized.totalPossible > 0
+              ? Math.round(
+                  (normalized.totalCorrect / normalized.totalPossible) * 100,
+                )
               : 0;
           trainingService
             .recordAttempt(taskMeta.id, taskMeta.title, {
-              timeMs: Math.round(summary.elapsedMs),
+              timeMs: Math.round(normalized.elapsedMs),
               accuracy: accuracyPct,
-              points: summary.totalPoints,
+              points: normalized.totalPoints,
             })
             .catch(err => console.error('Failed to record attempt:', err));
         }
 
         // Store pending summary and avoid setting summaryState now
-        pendingSummaryRef.current = summary;
-        prevSummaryRef.current = summary;
+        pendingSummaryRef.current = normalized;
+        prevSummaryRef.current = normalized;
 
         // Do not setSummaryState yet; wait for user to click Next
         return;
       }
 
-      setSummaryState(summary);
-      prevSummaryRef.current = summary;
-      if (summary && taskMeta?.id && taskMeta?.title) {
+      setSummaryState(normalized);
+      prevSummaryRef.current = normalized;
+      if (normalized && taskMeta?.id && taskMeta?.title) {
         const accuracyPct =
-          summary.totalPossible > 0
-            ? Math.round((summary.totalCorrect / summary.totalPossible) * 100)
+          normalized.totalPossible > 0
+            ? Math.round(
+                (normalized.totalCorrect / normalized.totalPossible) * 100,
+              )
             : 0;
         // Fire-and-forget; UI shouldn't block on persistence
         trainingService
           .recordAttempt(taskMeta.id, taskMeta.title, {
-            timeMs: Math.round(summary.elapsedMs),
+            timeMs: Math.round(normalized.elapsedMs),
             accuracy: accuracyPct,
-            points: summary.totalPoints,
+            points: normalized.totalPoints,
           })
           .catch(err => console.error('Failed to record attempt:', err));
       }
@@ -289,7 +349,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
         <div className="task-container__task-content">
           {!summaryState && children(injected)}
           {summaryState && (
-            <SummaryOverlay
+            <ResultSummary
               result={{
                 elapsedMs: summaryState.elapsedMs,
                 totalCorrect: summaryState.totalCorrect,
@@ -299,6 +359,10 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
               formatTime={formatTime}
               endHref={endHref}
               endLabel={endLabel}
+              taskId={taskMeta?.id}
+              title={taskMeta?.title}
+              chapters={taskMeta?.chapters}
+              timeLimit={taskMeta?.timeLimit}
               onClose={() => {
                 // Reset the task timer when closing the summary (e.g., on "Wiederholen")
                 reset();

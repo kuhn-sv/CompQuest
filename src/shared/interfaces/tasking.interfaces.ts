@@ -10,13 +10,16 @@ export interface SubTaskComponentProps {
   taskMeta?: {
     id: string;
     title: string;
+    chapters?: { title: string; content?: string }[];
+    timeLimit?: number;
   };
   // Allow a subtask to provide footer control handlers and visibility/disabled state to the parent
   onControlsChange?: (controls: TaskFooterControls | null) => void;
   // Allow a subtask to report HUD state (progress and timer control) to be shown in the container header
   onHudChange?: (hud: TaskHudState | null) => void;
   // Allow a subtask to report final summary up to container for unified overlay rendering
-  onSummaryChange?: (summary: TaskSummaryState | null) => void;
+  // Child may send partial summary; container will normalize it
+  onSummaryChange?: (summary: Partial<TaskSummaryState> | null) => void;
   // Optional arithmetic mode used by some subtasks (e.g., positive vs twos-complement arithmetic)
   arithmeticMode?: ArithmeticMode;
 }

@@ -36,12 +36,6 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
-  // Shared evaluation config like other tasks
-  const evalConfig = useMemo(
-    () => ({timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1}),
-    [],
-  );
-
   // Accumulate per-round scores and final summary
   const [stageScores, setStageScores] = useState<
     Array<{
@@ -91,41 +85,22 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       return next;
     });
 
-    // If last round, compute final summary
+    // If last round, compute final result and emit to container
     if (roundIndex === rounds.length - 1) {
       const elapsedMs = getElapsed();
-      const withinThreshold = elapsedMs <= evalConfig.timeBonusThresholdMs;
-      const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
       const baseScores = (() => {
         const base = [...stageScores];
         base[roundIndex] = {difficulty, correct, total, points};
         return base;
       })();
-      const totalCorrect = baseScores.reduce(
-        (sum, s) => sum + (s?.correct ?? 0),
-        0,
-      );
-      const totalPossible = baseScores.reduce(
-        (sum, s) => sum + (s?.total ?? 0),
-        0,
-      );
-      const totalPoints = totalCorrect + timeBonus;
       onSummaryChange?.({
         elapsedMs,
-        withinThreshold,
-        timeBonus,
         perStage: baseScores.map(s => ({...s, difficulty: s.difficulty})),
-        totalCorrect,
-        totalPossible,
-        totalPoints,
-        thresholdMs: evalConfig.timeBonusThresholdMs,
       });
     }
   }, [
     bits,
     expectedBits,
-    evalConfig.timeBonusPoints,
-    evalConfig.timeBonusThresholdMs,
     getElapsed,
     onSummaryChange,
     roundIndex,

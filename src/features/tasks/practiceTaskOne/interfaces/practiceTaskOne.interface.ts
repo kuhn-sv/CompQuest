@@ -8,10 +8,17 @@ export interface SubTaskConfig {
   title: string;
   description: string;
   component: React.ComponentType<SubTaskComponentProps>;
+  chapters?: IChapter[];
+  timeLimit?: number; // milliseconds
 }
 
 export interface TaskProgress {
   taskId: TaskId;
   completed: boolean;
   score?: number;
+}
+
+export interface IChapter {
+  title: string;
+  content?: string;
 }
