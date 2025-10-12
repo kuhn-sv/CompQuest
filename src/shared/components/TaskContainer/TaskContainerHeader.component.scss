@@ -1,0 +1,28 @@
+.task-container__header {
+  /* Reuse existing task-container header styles from TaskContainer.component.scss */
+  padding-bottom: 0.25rem;
+}
+
+.task-container__header .header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.task-container__header .header-row--bottom {
+  margin-top: 0.5rem;
+}
+
+.task-progress__bar {
+  width: 100%;
+  background: rgba(0,0,0,0.05);
+  border-radius: 4px;
+  height: 8px;
+  overflow: hidden;
+}
+
+.task-progress__fill {
+  height: 100%;
+  background: var(--accent, #4caf50);
+  transition: width 220ms ease;
+}
