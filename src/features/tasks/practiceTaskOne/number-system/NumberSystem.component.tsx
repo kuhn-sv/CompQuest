@@ -465,7 +465,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       {!hasStarted && (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Datenfluss gestört"
+            statusTitle="Datenfluss gestört!"
             statusDescription={
               <>
                 "Ein Fehler in der Systemkonvertierung hat den Informationsfluss

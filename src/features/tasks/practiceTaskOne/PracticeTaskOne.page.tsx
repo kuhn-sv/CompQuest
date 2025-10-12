@@ -37,7 +37,8 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.PositiveArithmetic,
       title: 'Positive Arithmetik',
-      description: 'Additionen und Subtraktionen mit positiven Zahlen.',
+      description:
+        'Additionen von positiven Zahlen in binär, oktal und hexadezimal.',
       chapters: [{title: '3.1 Zahlensysteme'}],
       component:
         PositiveArithmeticComponent as React.ComponentType<SubTaskComponentProps>,
@@ -46,8 +47,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.Complements,
       title: 'Einer- & Zweierkomplement',
-      description:
-        'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
+      description: 'Erzeuge zu einer Binärzahl ihr Einer-/Zweierkomplement.',
       chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
       component:
         ComplementsComponent as React.ComponentType<SubTaskComponentProps>,
@@ -56,8 +56,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.TwosComplementArithmetic,
       title: 'Zweierkomplement-Arithmetik',
-      description:
-        'Additionen im Zweierkomplement mit fester Bitbreite (nur binär).',
+      description: 'Verbinde die Zweierkomplement Addition mit ihrem Ergebnis.',
       chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
       component:
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,

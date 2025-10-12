@@ -256,16 +256,17 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       {!hasStarted && (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Datenfluss gestört"
+            statusTitle="Bit-Inversion erforderlich!"
             statusDescription={
               <>
-                "Ein Fehler in der Systemkonvertierung hat den Informationsfluss
-                unterbrochen."
+                Einige Speicherzellen enthalten defekte oder invertierte Werte.
+                Um die Signale wieder korrekt zu interpretieren, musst du ihre
+                Komplementdarstellungen erzeugen.
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Bestimme für jede Ausgangszahl
-                den passenden Einer- bzw. Zweierkomplement-Wert, um die
-                Übertragung wieder zu stabilisieren.
+                <strong>Deine Mission:</strong> Entsprechend dem Modus erzeuge
+                die Einer-/ Zweierkomplement, um den Speicher wieder
+                funktionsfähig zu machen.
               </>
             }
             taskCount={rounds.length}

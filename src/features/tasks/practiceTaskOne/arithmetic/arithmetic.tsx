@@ -493,12 +493,36 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       {!hasStarted && (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Datenfluss wiederherstellen"
+            statusTitle={
+              arithmeticMode === 'twos-complement'
+                ? 'Rechenfehler erkannt!'
+                : 'Rechenmodul offline!'
+            }
             statusDescription={
-              <>
-                Addiere die Zahlen in ihrem jeweiligen Zahlensystem und verbinde
-                jede Aufgabe mit dem korrekten Ergebnis.
-              </>
+              arithmeticMode === 'twos-complement' ? (
+                <>
+                  Beim Addieren negativer Zahlen im Zweierkomplement wurde der
+                  Datenfluss gesprengt. Der Prozessor kann nicht mehr korrekt
+                  mit negativen Zahlen umgehen.
+                  <strong>Deine Mission: </strong> Verbinde zusammengehörige
+                  Operationen im Zweierkomplement präzise und erkenne, wann ein
+                  Überlauf entsteht. So stellst du sicher, dass der Datenfluss
+                  wiederhergestellt wird und der Prozessor fehlerfrei rechnen
+                  kann.
+                </>
+              ) : (
+                <>
+                  Der zentrale Rechenkern ist abgestürzt, weil Zahlen
+                  unterschiedlicher Systeme nicht mehr korrekt miteinander
+                  interagieren.
+                  <strong>Deine Mission: </strong>Führe die
+                  Grundrechenoperationen in Binär-, Oktal- und
+                  Hexadezimaldarstellung korrekt durch, indem du jeder Rechnung
+                  das passende Gegenstück zuordnest. Stelle sicher, dass alle
+                  Zahlensysteme wieder synchron rechnen – nur dann kann der
+                  Rechenkern neu starten.
+                </>
+              )
             }
             taskCount={4}
             estimatedTime="~5 min"

@@ -234,7 +234,8 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
             statusTitle="Timothy braucht deine Hilfe!"
             statusDescription={
               <>
-                Tim hat ein paar Fragen zu dem Thema. Kannst du sie beantworten?
+                Beantworte Tims Fragen korrekt und hilf ihm, sein Wissen über
+                Zahlendarstellung zu festigen.
               </>
             }
             taskCount={TOTAL}
