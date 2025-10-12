@@ -28,7 +28,8 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.NumberSystem,
       title: 'Zahlensystem-Konverter',
-      description: 'Verbinde jede Zahl mit ihrem passenden Gegenstück rechts.',
+      description:
+        'Verbinde Zahlen mit ihren Äquivalenten in verschiedenen Zahlensystemen.',
       chapters: [{title: '3.1 Zahlensysteme'}],
       component:
         NumberSystemComponent as React.ComponentType<SubTaskComponentProps>,
@@ -37,8 +38,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.PositiveArithmetic,
       title: 'Positive Arithmetik',
-      description:
-        'Additionen von positiven Zahlen in binär, oktal und hexadezimal.',
+      description: 'Additionen und Subtraktionen mit positiven Zahlen.',
       chapters: [{title: '3.1 Zahlensysteme'}],
       component:
         PositiveArithmeticComponent as React.ComponentType<SubTaskComponentProps>,
@@ -47,7 +47,8 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.Complements,
       title: 'Einer- & Zweierkomplement',
-      description: 'Erzeuge zu einer Binärzahl ihr Einer-/Zweierkomplement.',
+      description:
+        'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
       chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
       component:
         ComplementsComponent as React.ComponentType<SubTaskComponentProps>,
@@ -56,7 +57,8 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: TaskId.TwosComplementArithmetic,
       title: 'Zweierkomplement-Arithmetik',
-      description: 'Verbinde die Zweierkomplement Addition mit ihrem Ergebnis.',
+      description:
+        'Verbinde Operationen im Zweierkomplement und erkenne Überläufe.',
       chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
       component:
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,
