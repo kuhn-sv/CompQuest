@@ -304,6 +304,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 disableReset={footerControls!.disableReset}
                 disableEvaluate={footerControls!.disableEvaluate}
                 disableNext={footerControls!.disableNext}
+                taskMeta={taskMeta}
               />
             </div>
           ) : null;

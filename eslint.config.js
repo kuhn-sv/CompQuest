@@ -7,7 +7,7 @@ import tseslint from '@typescript-eslint/eslint-plugin'
 import parser from '@typescript-eslint/parser'
 
 export default defineConfig([
-  globalIgnores(['dist']),
+  globalIgnores(['dist', 'netlify/**']),
   // TypeScript/TSX files only
   {
     files: ['**/*.{ts,tsx}'],

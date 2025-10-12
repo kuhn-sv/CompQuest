@@ -1,0 +1,101 @@
+// Netlify Function (TypeScript): Ask Tim
+// Uses fetch to call OpenAI Chat Completions API. Requires env var OPENAI_API_KEY.
+
+// Minimal types to avoid importing @netlify/functions
+type HeadersLike = { [key: string]: string };
+type NetlifyHandler = (event: { httpMethod: string; body?: string | null }) => Promise<{
+	statusCode: number;
+	body?: string;
+	headers?: HeadersLike;
+}>;
+
+const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
+
+export const handler: NetlifyHandler = async (event) => {
+	if (event.httpMethod !== 'POST') {
+			return {
+				statusCode: 405,
+				body: 'Method Not Allowed',
+				headers: { Allow: 'POST' } as HeadersLike,
+			};
+	}
+
+	try {
+		const apiKey = process.env.OPENAI_API_KEY;
+		if (!apiKey) {
+			return {
+				statusCode: 500,
+				body: JSON.stringify({ error: 'Server API key missing.' }),
+				headers: { 'Content-Type': 'application/json' },
+			};
+		}
+
+		const body = event.body ? (JSON.parse(event.body) as { question?: string }) : {};
+		const question = (body.question ?? '').toString().trim();
+		if (!question) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({ error: 'Frage fehlt.' }),
+				headers: { 'Content-Type': 'application/json' },
+			};
+		}
+		if (question.length > 250) {
+			return {
+				statusCode: 400,
+				body: JSON.stringify({ error: 'Frage ist zu lang (max. 250 Zeichen).' }),
+				headers: { 'Content-Type': 'application/json' },
+			};
+		}
+
+		const systemPrompt = `Du bist Tim, ein NPC welcher in dieser Anwendung als Arbeitskollege im Gebiet der Informatik auftritt. Aber deine Funktion ist hier ein didaktisch geschulter Tutor-NPC für das Fach Technische Informatik (nach Hoffmann, Grundlagen der Technischen Informatik, Kap. 3) zu sein.
+Dein Ziel ist, Studierenden beim Verstehen von Zahlendarstellung, Zahlensystemen und Rechner-internen Formaten zu helfen, ohne Ergebnisse vorzugeben.
+Verwende sokratisches Fragen, Scaffolding und positive Verstärkung.
+Antworte stets in 2–4 kurzen, klaren Sätzen plus einer Abschlussfrage.
+Passe deine Antworten an die Kategorien normal_question, wrong_answer, right_answer oder dont_know an.
+Bleibe immer freundlich, fachlich korrekt, und im thematischen Rahmen von Hoffmann, Kap. 3.`;
+
+		const resp = await fetch(OPENAI_API_URL, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Authorization: `Bearer ${apiKey}`,
+			},
+			body: JSON.stringify({
+				model: 'gpt-3.5-turbo',
+				messages: [
+					{ role: 'system', content: systemPrompt },
+					{ role: 'user', content: question },
+				],
+				temperature: 0.2,
+				max_tokens: 350,
+			}),
+		});
+
+		if (!resp.ok) {
+			const text = await resp.text();
+			return {
+				statusCode: 500,
+				body: JSON.stringify({ error: 'Fehler von OpenAI: ' + text.substring(0, 500) }),
+				headers: { 'Content-Type': 'application/json' },
+			};
+		}
+
+		const data = (await resp.json()) as any;
+		const answer: string | undefined = data?.choices?.[0]?.message?.content?.trim();
+
+		return {
+			statusCode: 200,
+			body: JSON.stringify({ answer: answer ?? 'Keine Antwort erhalten.' }),
+			headers: { 'Content-Type': 'application/json' },
+		};
+	} catch (err: unknown) {
+		const message = err instanceof Error ? err.message : 'Unbekannter Fehler';
+		return {
+			statusCode: 500,
+			body: JSON.stringify({ error: message }),
+			headers: { 'Content-Type': 'application/json' },
+		};
+	}
+};
+
+export default handler;
