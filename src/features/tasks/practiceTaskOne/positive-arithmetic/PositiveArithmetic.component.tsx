@@ -521,11 +521,20 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       {!hasStarted && (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Datenfluss wiederherstellen"
+            statusTitle="Rechenmodul offline"
             statusDescription={
               <>
-                Addiere die Zahlen in ihrem jeweiligen Zahlensystem und verbinde
-                jede Aufgabe mit dem korrekten Ergebnis.
+                Der zentrale Rechenkern ist abgestürzt, weil Zahlen
+                unterschiedlicher Systeme nicht mehr korrekt miteinander
+                interagieren.
+                <br />
+                <br />
+                <strong>Deine Mission: </strong> Führe die
+                Grundrechenoperationen in Binär-, Oktal- und
+                Hexadezimaldarstellung korrekt durch, indem du jeder Rechnung
+                das passende Gegenstück zuordnest. Stelle sicher, dass alle
+                Zahlensysteme wieder synchron rechnen – nur dann kann der
+                Rechenkern neu starten.
               </>
             }
             taskCount={4}

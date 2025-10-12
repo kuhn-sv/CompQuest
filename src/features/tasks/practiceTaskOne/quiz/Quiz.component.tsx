@@ -78,7 +78,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
       onHudChangeRef.current?.({
         progress: null,
         isStartScreen: true,
-        subtitle: 'Beweise dein Wissen. ',
+        subtitle: 'Beantworte Tims Fragen zum Thema Zahlendarstellung. ',
       });
     }
   }, [hasStarted]);
@@ -94,7 +94,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
     onHudChangeRef.current?.({
       progress: {current: 1, total: TOTAL},
       requestTimer: 'start',
-      subtitle: 'Beweise dein Wissen. ',
+      subtitle: 'Beantworte Tims Fragen zum Thema Zahlendarstellung. ',
       isStartScreen: false,
     });
   }, [reset, start]);
@@ -242,7 +242,13 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
             statusTitle="Timothy braucht deine Hilfe!"
             statusDescription={
               <>
-                Tim hat ein paar Fragen zu dem Thema. Kannst du sie beantworten?
+                Timothy ist unsicher, ob er alle Prinzipien der digitalen
+                Zahlensysteme richtig verstanden hat.
+                <br />
+                <br />
+                <strong>Deine Mission:</strong> Beantworte Timothys Fragen
+                korrekt und hilf ihm, sein Wissen zum Thema{' '}
+                <i>Zahlendarstellung</i> zu festigen.
               </>
             }
             taskCount={TOTAL}

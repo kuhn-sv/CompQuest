@@ -1,32 +1,55 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
 import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow.tsx';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 // Footer buttons rendered by parent
-import type { SubTaskComponentProps } from '../interfaces';
-import { useTimer } from '../../../../shared/hooks';
-import { generateRounds, ComplementRound, invertBits, twosComplement, bitsToString } from './complements.helper.ts';
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import type {SubTaskComponentProps} from '../interfaces';
+import {useTimer} from '../../../../shared/hooks';
+import {
+  generateRounds,
+  ComplementRound,
+  invertBits,
+  twosComplement,
+  bitsToString,
+} from './complements.helper.ts';
+import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 
 type Round = ComplementRound;
 
 const DEFAULT_BIT_COUNT = 8;
 
-const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange, onSummaryChange }) => {
-  const rounds: Round[] = useMemo(() => generateRounds(4, DEFAULT_BIT_COUNT), []);
+const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
+  onControlsChange,
+  onHudChange,
+  onSummaryChange,
+}) => {
+  const rounds: Round[] = useMemo(
+    () => generateRounds(4, DEFAULT_BIT_COUNT),
+    [],
+  );
   const [roundIndex, setRoundIndex] = useState<number>(0);
   const [bits, setBits] = useState<number[]>(Array(DEFAULT_BIT_COUNT).fill(0));
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
 
-  const { isRunning, start, stop, reset, getElapsed } = useTimer();
+  const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
   // Shared evaluation config like other tasks
-  const evalConfig = useMemo(() => ({ timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1 }), []);
+  const evalConfig = useMemo(
+    () => ({timeBonusThresholdMs: 3 * 60 * 1000, timeBonusPoints: 1}),
+    [],
+  );
 
   // Accumulate per-round scores and final summary
-  const [stageScores, setStageScores] = useState<Array<{ difficulty: Difficulty; correct: number; total: number; points: number }>>([]);
+  const [stageScores, setStageScores] = useState<
+    Array<{
+      difficulty: Difficulty;
+      correct: number;
+      total: number;
+      points: number;
+    }>
+  >([]);
 
   const current = rounds[roundIndex];
 
@@ -35,7 +58,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
     return twosComplement(current.sourceBits);
   }, [current]);
 
-  const isCorrect = evaluated && bitsToString(bits) === bitsToString(expectedBits);
+  const isCorrect =
+    evaluated && bitsToString(bits) === bitsToString(expectedBits);
 
   const startTask = React.useCallback(() => {
     setHasStarted(true);
@@ -62,7 +86,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
 
     setStageScores(prev => {
       const next = [...prev];
-      next[roundIndex] = { difficulty, correct, total, points };
+      next[roundIndex] = {difficulty, correct, total, points};
       return next;
     });
 
@@ -73,30 +97,47 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
       const timeBonus = withinThreshold ? evalConfig.timeBonusPoints : 0;
       const baseScores = (() => {
         const base = [...stageScores];
-        base[roundIndex] = { difficulty, correct, total, points };
+        base[roundIndex] = {difficulty, correct, total, points};
         return base;
       })();
-      const totalCorrect = baseScores.reduce((sum, s) => sum + (s?.correct ?? 0), 0);
-      const totalPossible = baseScores.reduce((sum, s) => sum + (s?.total ?? 0), 0);
+      const totalCorrect = baseScores.reduce(
+        (sum, s) => sum + (s?.correct ?? 0),
+        0,
+      );
+      const totalPossible = baseScores.reduce(
+        (sum, s) => sum + (s?.total ?? 0),
+        0,
+      );
       const totalPoints = totalCorrect + timeBonus;
       onSummaryChange?.({
         elapsedMs,
         withinThreshold,
         timeBonus,
-        perStage: baseScores.map(s => ({ ...s, difficulty: s.difficulty })),
+        perStage: baseScores.map(s => ({...s, difficulty: s.difficulty})),
         totalCorrect,
         totalPossible,
         totalPoints,
         thresholdMs: evalConfig.timeBonusThresholdMs,
       });
     }
-  }, [bits, expectedBits, evalConfig.timeBonusPoints, evalConfig.timeBonusThresholdMs, getElapsed, onSummaryChange, roundIndex, rounds.length, stageScores, stop]);
+  }, [
+    bits,
+    expectedBits,
+    evalConfig.timeBonusPoints,
+    evalConfig.timeBonusThresholdMs,
+    getElapsed,
+    onSummaryChange,
+    roundIndex,
+    rounds.length,
+    stageScores,
+    stop,
+  ]);
 
   const next = React.useCallback(() => {
     if (roundIndex < rounds.length - 1) {
       const nextIndex = roundIndex + 1;
       setRoundIndex(nextIndex);
-  setBits(Array(rounds[nextIndex].bitCount).fill(0));
+      setBits(Array(rounds[nextIndex].bitCount).fill(0));
       setEvaluated(false);
       start();
     }
@@ -107,13 +148,25 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
   const evaluateRef = useRef(evaluate);
   const nextRef = useRef(next);
 
-  useEffect(() => { resetRef.current = resetTask; }, [resetTask]);
-  useEffect(() => { evaluateRef.current = evaluate; }, [evaluate]);
-  useEffect(() => { nextRef.current = next; }, [next]);
+  useEffect(() => {
+    resetRef.current = resetTask;
+  }, [resetTask]);
+  useEffect(() => {
+    evaluateRef.current = evaluate;
+  }, [evaluate]);
+  useEffect(() => {
+    nextRef.current = next;
+  }, [next]);
 
-  const onResetStable = useCallback(() => { resetRef.current(); }, []);
-  const onEvaluateStable = useCallback(() => { evaluateRef.current(); }, []);
-  const onNextStable = useCallback(() => { nextRef.current(); }, []);
+  const onResetStable = useCallback(() => {
+    resetRef.current();
+  }, []);
+  const onEvaluateStable = useCallback(() => {
+    evaluateRef.current();
+  }, []);
+  const onNextStable = useCallback(() => {
+    nextRef.current();
+  }, []);
 
   const controls = useMemo(() => {
     if (!hasStarted) return null;
@@ -128,13 +181,25 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
       disableEvaluate: evaluated,
       disableNext: !evaluated,
     };
-  }, [hasStarted, evaluated, roundIndex, rounds.length, onResetStable, onEvaluateStable, onNextStable]);
+  }, [
+    hasStarted,
+    evaluated,
+    roundIndex,
+    rounds.length,
+    onResetStable,
+    onEvaluateStable,
+    onNextStable,
+  ]);
 
   const prevControlsRef = useRef<typeof controls>(null);
   const onControlsChangeRef = useRef(onControlsChange);
   const onHudChangeRef = useRef(onHudChange);
-  useEffect(() => { onControlsChangeRef.current = onControlsChange; }, [onControlsChange]);
-  useEffect(() => { onHudChangeRef.current = onHudChange; }, [onHudChange]);
+  useEffect(() => {
+    onControlsChangeRef.current = onControlsChange;
+  }, [onControlsChange]);
+  useEffect(() => {
+    onHudChangeRef.current = onHudChange;
+  }, [onHudChange]);
   useEffect(() => {
     if (!onControlsChangeRef.current) return;
     if (prevControlsRef.current !== controls) {
@@ -156,7 +221,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
     if (!hasStarted) return;
     onHudChangeRef.current?.({
       subtitle: 'Datenfluss wiederherstellen',
-      progress: { current: roundIndex + 1, total: rounds.length },
+      progress: {current: roundIndex + 1, total: rounds.length},
       requestTimer: isRunning ? 'start' : undefined,
     });
   }, [hasStarted, roundIndex, rounds.length, isRunning]);
@@ -179,25 +244,35 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
       {/* Header timer/progress moved to container */}
 
       {hasStarted && (
-      <div className="complements-content">
-        <div className="target-box" aria-label="Ziel Binärzahl">
-          Ausgang: <strong className="mono">{bitsToString(current.sourceBits)}</strong>
-          <div className="sub">
-            Modus: {current.mode === 'ones' ? 'Einerkomplement' : 'Zweierkomplement'}
+        <div className="complements-content">
+          <div className="target-box" aria-label="Ziel Binärzahl">
+            Ausgang:{' '}
+            <strong className="mono">{bitsToString(current.sourceBits)}</strong>
+            <div className="sub">
+              Modus:{' '}
+              {current.mode === 'ones' ? 'Einerkomplement' : 'Zweierkomplement'}
+            </div>
           </div>
-        </div>
-        <div className={`bits-frame ${evaluated ? (isCorrect ? 'success' : 'error') : ''} ${evaluated ? 'evaluated' : ''}`}>
-          <BitToggleRow bits={bits} onChange={setBits} className="bits-row" disabled={evaluated} />
-          <div className="bits-frame__overlay" aria-hidden="true" />
-        </div>
-        {evaluated && (
-          <div className="info-line">
-            <span className={`expected ${isCorrect ? 'correct' : 'wrong'}`}>
-              {isCorrect ? '✓ richtig' : `✗ erwartet: ${bitsToString(expectedBits)}`}
-            </span>
+          <div
+            className={`bits-frame ${evaluated ? (isCorrect ? 'success' : 'error') : ''} ${evaluated ? 'evaluated' : ''}`}>
+            <BitToggleRow
+              bits={bits}
+              onChange={setBits}
+              className="bits-row"
+              disabled={evaluated}
+            />
+            <div className="bits-frame__overlay" aria-hidden="true" />
           </div>
-        )}
-      </div>
+          {evaluated && (
+            <div className="info-line">
+              <span className={`expected ${isCorrect ? 'correct' : 'wrong'}`}>
+                {isCorrect
+                  ? '✓ richtig'
+                  : `✗ erwartet: ${bitsToString(expectedBits)}`}
+              </span>
+            </div>
+          )}
+        </div>
       )}
 
       {/* Controls moved to parent footer */}
@@ -205,13 +280,18 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({ onControlsChang
       {!hasStarted && (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Datenfluss gestört"
+            statusTitle="Bit-Inversion erforderlich!"
             statusDescription={
               <>
-                "Ein Fehler in der Systemkonvertierung hat den Informationsfluss unterbrochen."
+                "Einige Speicherzellen enthalten defekte oder invertierte Werte.
+                Um die Signale wieder korrekt zu interpretieren, musst du ihre
+                Komplementdarstellungen erzeugen. "
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Bestimme für jede Ausgangszahl den passenden Einer- bzw. Zweierkomplement-Wert, um die Übertragung wieder zu stabilisieren.
+                <strong>Deine Mission:</strong> Entsprechend dem Modus musst du
+                das Einer- oder Zweierkomplement bilden, um den Speicher wieder
+                zu stabilisieren. Nur korrekt invertierte Daten bringen die
+                Bitlogik zurück ins Gleichgewicht.
               </>
             }
             taskCount={rounds.length}
