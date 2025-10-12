@@ -48,7 +48,7 @@ const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
       setError(null);
       setLoading(true);
       setAnswer(null);
-      const res = await fetch('/api/ask-tim', {
+      const res = await fetch('/.netlify/functions/ask-tim', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({question: question.trim()}),
