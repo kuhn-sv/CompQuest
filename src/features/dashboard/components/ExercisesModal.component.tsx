@@ -20,12 +20,18 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 }) => {
   const [missionsWithProgress, setMissionsWithProgress] =
     useState<Exercise[]>(missions);
-  const [helpersWithProgress, setHelpersWithProgress] =
-    useState<Exercise[]>(helpers);
+  const [helpersList, setHelpersList] = useState<Exercise[]>(helpers);
 
   useEffect(() => {
     let cancelled = false;
-    const loadProgress = async (items: Exercise[]): Promise<Exercise[]> => {
+    const loadProgress = async (
+      items: Exercise[],
+      showProgress: boolean,
+    ): Promise<Exercise[]> => {
+      if (!showProgress) {
+        // Helper-Module: progressPercent immer undefined
+        return items.map(ex => ({...ex, progressPercent: undefined}));
+      }
       const results = await Promise.all(
         items.map(async ex => {
           try {
@@ -46,12 +52,12 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
     if (!show) return; // avoid work when modal hidden
     (async () => {
       const [m, h] = await Promise.all([
-        loadProgress(missions),
-        loadProgress(helpers),
+        loadProgress(missions, true),
+        loadProgress(helpers, false),
       ]);
       if (!cancelled) {
         setMissionsWithProgress(m);
-        setHelpersWithProgress(h);
+        setHelpersList(h);
       }
     })();
     return () => {
@@ -82,7 +88,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
         <div className="dashboard__section">
           <div className="dashboard__section-title">Hilfsmodule</div>
-          <ExercisesList exercises={helpersWithProgress} />
+          <ExercisesList exercises={helpersList} />
         </div>
       </div>
     </div>

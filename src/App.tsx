@@ -13,6 +13,7 @@ import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 import HelperModulePage from './features/helpers/HelperModule.page';
+import {TaskId} from './shared/enums/taskId.enum';
 
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)
@@ -83,7 +84,7 @@ const App: React.FC = () => {
             path="/task/number-system"
             element={
               <ProtectedRoute>
-                <PracticeTaskOnePage initialSubTask="number-system" />
+                <PracticeTaskOnePage initialSubTask={TaskId.NumberSystem} />
               </ProtectedRoute>
             }
           />
@@ -92,7 +93,9 @@ const App: React.FC = () => {
             path="/task/positive-arithmetic"
             element={
               <ProtectedRoute>
-                <PracticeTaskOnePage initialSubTask="positive-arithmetic" />
+                <PracticeTaskOnePage
+                  initialSubTask={TaskId.PositiveArithmetic}
+                />
               </ProtectedRoute>
             }
           />
@@ -101,7 +104,9 @@ const App: React.FC = () => {
             path="/task/twos-complement-arithmetic"
             element={
               <ProtectedRoute>
-                <PracticeTaskOnePage initialSubTask="twos-complement" />
+                <PracticeTaskOnePage
+                  initialSubTask={TaskId.TwosComplementArithmetic}
+                />
               </ProtectedRoute>
             }
           />
@@ -110,7 +115,7 @@ const App: React.FC = () => {
             path="/task/complements"
             element={
               <ProtectedRoute>
-                <PracticeTaskOnePage initialSubTask="complements" />
+                <PracticeTaskOnePage initialSubTask={TaskId.Complements} />
               </ProtectedRoute>
             }
           />
@@ -119,23 +124,9 @@ const App: React.FC = () => {
             path="/task/quiz"
             element={
               <ProtectedRoute>
-                <PracticeTaskOnePage initialSubTask="quiz" />
+                <PracticeTaskOnePage initialSubTask={TaskId.Quiz} />
               </ProtectedRoute>
             }
-          />
-
-          {/* Compatibility redirects for pluralized paths */}
-          <Route
-            path="/tasks/number-system"
-            element={<Navigate to="/task/number-system" replace />}
-          />
-          <Route
-            path="/tasks/complements"
-            element={<Navigate to="/task/complements" replace />}
-          />
-          <Route
-            path="/tasks/twos-complement-arithmetic"
-            element={<Navigate to="/task/twos-complement-arithmetic" replace />}
           />
 
           {/* Root Route - Redirect basierend auf Auth Status */}

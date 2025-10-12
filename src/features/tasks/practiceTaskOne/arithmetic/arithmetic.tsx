@@ -22,6 +22,7 @@ import type {AnswerOptionBase} from '../../../../shared/numberTask/NumberTask.ty
 import {generateAdditionSet, AdditionTask} from './addition.helper';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import type {ArithmeticMode} from '../interfaces';
+import {TaskId} from '../../../../shared/enums/taskId.enum';
 
 interface PAStageScore {
   difficulty: Difficulty;
@@ -530,14 +531,17 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
             }
             taskCount={4}
             estimatedTime="~5 min"
-            bestAttempt={null}
+            fetchBestAttempt
+            taskId={
+              arithmeticMode === 'twos-complement'
+                ? TaskId.TwosComplementArithmetic
+                : TaskId.PositiveArithmetic
+            }
             onStart={handleInitialStart}
             startLabel="Mission starten"
           />
         </div>
       )}
-
-      {/* Summary overlay moved to container */}
     </div>
   );
 };

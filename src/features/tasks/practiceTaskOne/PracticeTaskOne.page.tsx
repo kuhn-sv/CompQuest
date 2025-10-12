@@ -1,13 +1,14 @@
 import React, {useMemo, useState} from 'react';
-import {SubTaskType, SubTaskConfig, SubTaskComponentProps} from './interfaces';
+import {SubTaskConfig, SubTaskComponentProps} from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
-import PositiveArithmeticComponent from './positive-arithmetic/PositiveArithmetic.component';
+import PositiveArithmeticComponent from './arithmetic/arithmetic';
 import ComplementsComponent from './complements/Complements.component';
 import Quiz from './quiz/Quiz.component';
 import {TaskContainer} from '../../../shared/components';
+import {TaskId} from '../../../shared/enums/taskId.enum';
 
 interface PracticeTaskOnePageProps {
-  initialSubTask?: SubTaskType;
+  initialSubTask?: TaskId;
 }
 
 // Stable wrapper to inject arithmeticMode without recreating component identity on each render
@@ -18,28 +19,28 @@ const TwosComplementArithmeticSubtask: React.FC<
 );
 
 const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
-  initialSubTask = 'number-system',
+  initialSubTask = TaskId.NumberSystem,
 }) => {
-  const [currentSubTask] = useState<SubTaskType>(initialSubTask);
+  const [currentSubTask] = useState<TaskId>(initialSubTask);
 
   // Configuration for all subtasks
   const subTaskConfigs: SubTaskConfig[] = [
     {
-      id: 'number-system',
+      id: TaskId.NumberSystem,
       title: 'Zahlensystem-Konverter',
       description: 'Verbinde jede Zahl mit ihrem passenden Gegenstück rechts.',
       component:
         NumberSystemComponent as React.ComponentType<SubTaskComponentProps>,
     },
     {
-      id: 'positive-arithmetic',
+      id: TaskId.PositiveArithmetic,
       title: 'Positive Arithmetik',
       description: 'Additionen und Subtraktionen mit positiven Zahlen.',
       component:
         PositiveArithmeticComponent as React.ComponentType<SubTaskComponentProps>,
     },
     {
-      id: 'complements',
+      id: TaskId.Complements,
       title: 'Einer- & Zweierkomplement',
       description:
         'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
@@ -47,7 +48,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
         ComplementsComponent as React.ComponentType<SubTaskComponentProps>,
     },
     {
-      id: 'twos-complement',
+      id: TaskId.TwosComplementArithmetic,
       title: 'Zweierkomplement-Arithmetik',
       description:
         'Additionen im Zweierkomplement mit fester Bitbreite (nur binär).',
@@ -55,7 +56,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,
     },
     {
-      id: 'quiz',
+      id: TaskId.Quiz,
       title: 'Quiz',
       description: 'Beweise dein Wissen. ',
       component: Quiz as React.ComponentType<SubTaskComponentProps>,

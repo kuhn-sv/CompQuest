@@ -4,6 +4,7 @@ import ExercisesModal from './components/ExercisesModal.component';
 import {useAuth} from '../auth';
 import './dashboard.page.scss';
 import Model3D from './components/model3d/model3d.component';
+import {TaskId} from '../../shared/enums/taskId.enum';
 
 const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
@@ -12,28 +13,28 @@ const DashboardPage: React.FC = () => {
 
   const missions = [
     {
-      id: 'number-system',
+      id: TaskId.NumberSystem,
       title: 'Zahlensystem-Konverter',
       description: 'Konvertiere zwischen binär, oktal & hexadezimal um.',
       path: '/task/number-system',
       progressPercent: 100,
     },
     {
-      id: 'positive-arithmetic-direct',
+      id: TaskId.PositiveArithmetic,
       title: 'Positive Arithmetik',
       description: 'Addiere in binär, oktal & hexadezimal.',
       path: '/task/positive-arithmetic',
       progressPercent: 72,
     },
     {
-      id: 'complements-direct',
+      id: TaskId.Complements,
       title: 'Einer- & Zweierkomplement',
       description: 'Stelle negative Zahlen im Binärsystem dar.',
       path: '/task/complements',
       progressPercent: 0,
     },
     {
-      id: 'twos-complement-arithmetic',
+      id: TaskId.TwosComplementArithmetic,
       title: 'Zweierkomplement-Arithmetik',
       description:
         'Wende das Zweierkomplement in Rechnungen an und verstehe Vorzeichenoperationen.',
@@ -41,7 +42,7 @@ const DashboardPage: React.FC = () => {
       progressPercent: 0,
     },
     {
-      id: 'quiz',
+      id: TaskId.Quiz,
       title: 'Quiz',
       description:
         'Tim hat ein paar Fragen zu dem Thema. Kannst du sie beantworten?',
@@ -52,14 +53,14 @@ const DashboardPage: React.FC = () => {
 
   const helpers = [
     {
-      id: 'helper-potenzrechner',
+      id: TaskId.HelperPotenzrechner,
       title: 'Hilfsmodul: Potenzrechner',
       description:
         'Stelle Zahlen in Binär/Oktal/Hexadezimal dar – mit Potenzen als Hilfestellung.',
       path: '/hilfsmodul/potenzrechner',
     },
     {
-      id: 'helper-umrechnungshelfer',
+      id: TaskId.HelperUmrechnungshelfer,
       title: 'Hilfsmodul: Umrechnungshelfer',
       description:
         'Umrechnung zwischen Binär ⇆ Oktal ⇆ Hexadezimal (Schritt für Schritt).',
