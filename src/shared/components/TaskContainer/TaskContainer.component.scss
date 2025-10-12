@@ -7,7 +7,7 @@
   padding: 0; // avoid adding to 100vh which would force scroll
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center;;
 
   &__container {
     position: relative; // provide positioning context for overlays
@@ -112,7 +112,7 @@
     flex: 1;
     // Important: allow native dropdowns/popovers to render outside the content box
     overflow: visible;
-    padding: 0; // Let the task component handle its own padding
+    padding-top: 20px;
     display: grid; // center inner task content
     place-items: center; // center on both axes
     min-height: 0; // allow the grid to size within the container
@@ -177,6 +177,16 @@
 
     &__container {
       min-height: calc(100vh - 1rem);
+    }
+  }
+}
+
+/* Add responsive behavior for medium screens <= 1200px */
+@media (max-width: 1200px) {
+  .task-container {
+    &__container {
+      width: 95vw;
+      overflow: hidden;
     }
   }
 }
