@@ -27,37 +27,37 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     {
       id: 'number-system',
       title: 'Zahlensystem-Konverter',
-      description: 'Verbinde jede Zahl mit ihrem passenden Gegenstück rechts.',
+      description:
+        'Konvertierung zwischen binär ↔ oktal ↔ dezimal ↔ hexadezimal.',
       component:
         NumberSystemComponent as React.ComponentType<SubTaskComponentProps>,
     },
     {
       id: 'positive-arithmetic',
       title: 'Positive Arithmetik',
-      description: 'Additionen und Subtraktionen mit positiven Zahlen.',
+      description:
+        'Additionen von positiven Zahlen in binär, oktal und hexadezimal.',
       component:
         PositiveArithmeticComponent as React.ComponentType<SubTaskComponentProps>,
     },
     {
       id: 'complements',
       title: 'Einer- & Zweierkomplement',
-      description:
-        'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
+      description: 'Erzeuge das Einer-/ Zweierkomplement einer binären Zahl.',
       component:
         ComplementsComponent as React.ComponentType<SubTaskComponentProps>,
     },
     {
       id: 'twos-complement',
       title: 'Zweierkomplement-Arithmetik',
-      description:
-        'Additionen im Zweierkomplement mit fester Bitbreite (nur binär).',
+      description: 'Führe die Subtraktion im Addierwerk durch.',
       component:
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,
     },
     {
       id: 'quiz',
       title: 'Quiz',
-      description: 'Beweise dein Wissen. ',
+      description: 'Beantworte Tims Fragen zum Thema Zahlendarstellung.',
       component: Quiz as React.ComponentType<SubTaskComponentProps>,
     },
   ];

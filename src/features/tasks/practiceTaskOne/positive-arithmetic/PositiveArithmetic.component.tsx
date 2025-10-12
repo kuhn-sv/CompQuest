@@ -520,20 +520,53 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
 
       {!hasStarted && (
         <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Datenfluss wiederherstellen"
-            statusDescription={
-              <>
-                Addiere die Zahlen in ihrem jeweiligen Zahlensystem und verbinde
-                jede Aufgabe mit dem korrekten Ergebnis.
-              </>
-            }
-            taskCount={4}
-            estimatedTime="~5 min"
-            bestAttempt={null}
-            onStart={handleInitialStart}
-            startLabel="Mission starten"
-          />
+          {arithmeticMode === 'positive' && (
+            <GameStartScreen
+              statusTitle="Rechenmodul offline!"
+              statusDescription={
+                <>
+                  Der zentrale Rechenkern ist abgestürzt, weil Zahlen
+                  unterschiedlicher Systeme nicht mehr korrekt miteinander
+                  interagieren.
+                  <br />
+                  <br />
+                  <strong>Deine Mission: </strong> Führe die
+                  Grundrechenoperationen in Binär-, Oktal- und
+                  Hexadezimaldarstellung korrekt durch, indem du jeder Rechnung
+                  das passende Gegenstück zuordnest. Stelle sicher, dass alle
+                  Zahlensysteme wieder synchron rechnen – nur dann kann der
+                  Rechenkern neu starten.
+                </>
+              }
+              taskCount={4}
+              estimatedTime="~5 min"
+              bestAttempt={null}
+              onStart={handleInitialStart}
+              startLabel="Mission starten"
+            />
+          )}
+          {arithmeticMode === 'twos-complement' && (
+            <GameStartScreen
+              statusTitle="Rechenfehler erkannt!"
+              statusDescription={
+                <>
+                  Ein Rechenfehler hat den gesamten Datenfluss gesprengt. Jetzt
+                  kann der Prozessor nicht mit den negativen Zahlen umgehen.
+                  <br />
+                  <br />
+                  <strong>Deine Mission: </strong>Berechne alle Operationen im
+                  Zweierkomplement präzise und erkenne, wann ein Überlauf
+                  entsteht. Kalibriere dafür alle Rechenpfade neu, damit der
+                  Prozessor wieder korrekt mit negativen Zahlen arbeiten kann.
+                </>
+              }
+              taskCount={4}
+              estimatedTime="~5 min"
+              bestAttempt={null}
+              onStart={handleInitialStart}
+              startLabel="Mission starten"
+            />
+          )}
         </div>
       )}
 

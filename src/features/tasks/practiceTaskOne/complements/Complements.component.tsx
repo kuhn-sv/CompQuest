@@ -284,13 +284,15 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
             statusTitle="Datenfluss gestört"
             statusDescription={
               <>
-                "Ein Fehler in der Systemkonvertierung hat den Informationsfluss
-                unterbrochen."
+                "Einige Speicherzellen enthalten defekte oder invertierte Werte.
+                Um die Signale wieder korrekt zu interpretieren, musst du ihre
+                Komplementdarstellungen erzeugen. "
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Bestimme für jede Ausgangszahl
-                den passenden Einer- bzw. Zweierkomplement-Wert, um die
-                Übertragung wieder zu stabilisieren.
+                <strong>Deine Mission:</strong> Entsprechend dem Modus musst du
+                das Einer- oder Zweierkomplement bilden, um den Speicher wieder
+                zu stabilisieren. Nur korrekt invertierte Daten bringen die
+                Bitlogik zurück ins Gleichgewicht.
               </>
             }
             taskCount={rounds.length}
