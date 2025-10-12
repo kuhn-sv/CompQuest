@@ -187,12 +187,15 @@
   object-fit: contain;
   display: block;
 }
+
 .dashboard__cpu-hotspot {
   position: absolute;
-  top: 31%; /* y-Position relativ zum Bild */
-  left: 47.5%; /* x-Position relativ zum Bild */
-  width: 6%;
-  height: 10%;
+  top: 32vh; /* y-Position relativ zum Bild */
+  left: 45vw; /* x-Position relativ zum Bild */
+  width: 7vw;
+  height: 7vh;
+  max-height: 110px;
+  max-width: 110px;
   border: none;
   cursor: pointer;
   z-index: 2;

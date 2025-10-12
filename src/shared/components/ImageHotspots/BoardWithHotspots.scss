@@ -1,0 +1,81 @@
+.board-with-hotspots { 
+  width: 100%;
+  max-width: 900px; /* optional constraint, adjust where used */
+  margin: 0 auto;
+}
+.board-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.hotspot-group { 
+  cursor: pointer;
+  outline: none;
+}
+.hotspot {
+  /* Use CSS primary color if provided, fallback to tomato */
+  fill: var(--primary, rgba(255, 99, 71, 0.95));
+  stroke: #fff;
+  stroke-width: 3px;
+  transition: stroke-width 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
+  transform-origin: center center;
+}
+.hotspot-ring {
+  fill: none;
+  stroke: color-mix(in srgb, var(--primary, rgba(255,99,71,0.95)) 60%, transparent);
+  stroke-width: 2px;
+  opacity: 0.75;
+  transition: opacity 0.2s ease;
+}
+/* Remove size-transform on hover to avoid mouse jitter/evade issues. */
+.hotspot-group:hover .hotspot,
+.hotspot-group:focus .hotspot {
+  /* keep position stable; visually emphasize using shadow and slightly thicker stroke */
+  filter: drop-shadow(0 0 6px var(--primary, rgba(255,99,71,0.95)));
+  stroke-width: 4px;
+}
+.hotspot-group:hover .hotspot-ring,
+.hotspot-group:focus .hotspot-ring {
+  opacity: 1;
+}
+
+/* focus-visible keyboard outline */
+.hotspot-group:focus {
+  /* add an accessible focus ring using drop-shadow */
+  filter: drop-shadow(0 0 6px rgba(255,99,71,0.85));
+}
+
+/* simple modal for hotspot details */
+.bw-hotspot-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1200;
+}
+.bw-hotspot-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+}
+.bw-hotspot-modal__content {
+  position: relative;
+  background: #fff;
+  color: #111;
+  padding: 18px;
+  border-radius: 8px;
+  width: min(520px, 90%);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  z-index: 2;
+}
+.bw-hotspot-modal__close {
+  position: absolute;
+  right: 10px;
+  top: 8px;
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+}

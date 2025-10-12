@@ -1,15 +1,26 @@
-import React, {useState} from 'react';
+import React, {useState, useEffect, Suspense} from 'react';
 // import { Link } from 'react-router-dom';
 import ExercisesModal from './components/ExercisesModal.component';
 import {useAuth} from '../auth';
 import './dashboard.page.scss';
-import Model3D from './components/model3d/model3d.component';
+const Model3D = React.lazy(
+  () => import('./components/model3d/model3d.component'),
+);
+import useDeviceType from '../../shared/hooks/useDeviceType';
+import {BoardWithHotspots} from '../../shared/components';
 import {TaskId} from '../../shared/enums/taskId.enum';
 
 const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
-  const [is3DView, setIs3DView] = useState(true);
+  // Default to 2D to avoid heavy 3D loading on lower-end devices
+  const [is3DView, setIs3DView] = useState(false);
   const {user, signOut} = useAuth();
+  const {isTablet} = useDeviceType();
+
+  useEffect(() => {
+    // On tablets we prefer a lightweight 2D fallback to avoid crashes
+    if (isTablet) setIs3DView(false);
+  }, [isTablet]);
 
   const missions = [
     {
@@ -100,24 +111,18 @@ const DashboardPage: React.FC = () => {
 
       <div className="dashboard__3d-container">
         {is3DView ? (
-          <Model3D
-            modelPath="/motherboard__components.glb"
-            onCpuClick={handleCpuClick}
-            className="dashboard__3d-viewer"
-          />
+          /* Load 3D viewer lazily to avoid downloading heavy chunk on tablets */
+          <Suspense
+            fallback={<div className="dashboard__3d-loading">Lade 3D...</div>}>
+            <Model3D
+              modelPath="/motherboard__components.glb"
+              onCpuClick={handleCpuClick}
+              className="dashboard__3d-viewer"
+            />
+          </Suspense>
         ) : (
           <div className="dashboard__2d-wrapper">
-            <img
-              src="/motherboard_components.png"
-              alt="Motherboard 2D Ansicht"
-              className="dashboard__2d-viewer"
-            />
-
-            {/* 🟩 Klickbarer Bereich über der CPU */}
-            <button
-              className="dashboard__cpu-hotspot"
-              onClick={handleCpuClick}
-              title="Klicke auf die CPU, um Übungen zu öffnen"></button>
+            <BoardWithHotspots onCpuClick={handleCpuClick} />
           </div>
         )}
 
@@ -134,12 +139,16 @@ const DashboardPage: React.FC = () => {
             <p>🖱️ Halten + Ziehen in 3D: Modell drehen</p>
           </div>
         </div>
-        <button
-          className="dashboard__toggle-view-btn"
-          onClick={() => setIs3DView(!is3DView)}
-          title={is3DView ? 'Wechsle zu 2D Ansicht' : 'Wechsle zu 3D Ansicht'}>
-          {is3DView ? <span>2D</span> : <span>3D</span>}
-        </button>
+        {!isTablet && (
+          <button
+            className="dashboard__toggle-view-btn"
+            onClick={() => setIs3DView(!is3DView)}
+            title={
+              is3DView ? 'Wechsle zu 2D Ansicht' : 'Wechsle zu 3D Ansicht'
+            }>
+            {is3DView ? <span>2D</span> : <span>3D</span>}
+          </button>
+        )}
       </div>
 
       <ExercisesModal
