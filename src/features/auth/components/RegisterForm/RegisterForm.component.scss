@@ -114,7 +114,7 @@
   }
 
   &__success {
-    background: rgba(34, 197, 94, 0.1);
+    background: var(--surface);
     border: 1px solid rgba(34, 197, 94, 0.2);
     border-radius: clamp(10px, 1.5vw, 12px);
     padding: clamp(1.5rem, 2.5vw, 2rem);
@@ -123,12 +123,10 @@
 
     h3 {
       margin: 0 0 clamp(0.6rem, 1.2vw, 0.75rem) 0;
-      color: #16a34a;
       font-size: clamp(1rem, 1.8vw, 1.1rem);
     }
 
     p {
-      color: var(--surface);
       margin: 0 0 clamp(0.8rem, 1.5vw, 1rem) 0;
     }
   }
