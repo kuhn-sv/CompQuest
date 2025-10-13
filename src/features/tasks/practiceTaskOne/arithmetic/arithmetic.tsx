@@ -8,13 +8,10 @@ import {
 // Footer buttons are rendered in parent; we expose controls upwards
 import type {SubTaskComponentProps} from '../interfaces';
 import {
-  useDragAndDrop,
   useConnectionLines,
   useTimer,
   CONNECTION_LINE_PRESETS,
-  DRAG_DROP_PRESETS,
 } from '../../../../shared/hooks';
-import type {DragDropItem} from '../../../../shared/hooks/useDragAndDrop';
 import {EquationRow as SharedEquationRow} from '../../../../shared/components/equationrow/EquationRow';
 import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
 import {ResultsSection} from '../../../../shared/numberTask/ResultsSection';
@@ -23,6 +20,8 @@ import {generateAdditionSet, AdditionTask} from './addition.helper';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import type {ArithmeticMode} from '../interfaces';
 import {TaskId} from '../../../../shared/enums/taskId.enum';
+import DndProvider from '../../../../shared/components/DndProvider';
+import {DragOverlay} from '@dnd-kit/core';
 
 interface PAStageScore {
   difficulty: Difficulty;
@@ -59,53 +58,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
 
   const {start, stop, reset, getElapsed} = useTimer();
 
-  // Drag and Drop logic
-  const {
-    draggedItem: draggedAnswerInternal,
-    dragOverTargetId: dragOverTaskId,
-    handleDragStart: handleDragStartInternal,
-    handleDragOver,
-    handleDragEnter,
-    handleDragLeave,
-    handleDrop,
-    handleDragEnd,
-    resetDragState,
-    handlePointerDown,
-  } = useDragAndDrop<DragDropItem>({
-    ...DRAG_DROP_PRESETS.NUMBER_SYSTEM,
-    onPointerDrop: (targetId: string, item: DragDropItem) => {
-      onDropAnswer(targetId, {value: item.value, base: item.base});
-    },
-  } as unknown as import('../../../../shared/hooks/useDragAndDrop').DragDropConfig<DragDropItem>);
-
-  const handlePointerDownAdapter = useCallback(
-    (e: React.PointerEvent | React.TouchEvent, answer: AnswerOptionBase) => {
-      const baseNum =
-        typeof answer.base === 'string'
-          ? parseInt(answer.base, 10)
-          : (answer.base as number | undefined);
-      if (baseNum == null || Number.isNaN(baseNum)) return;
-      if (handlePointerDown)
-        handlePointerDown(e, {value: answer.value, base: baseNum});
-    },
-    [handlePointerDown],
-  );
-
-  // Map internal DnD item (requires base: number) to external AnswerOptionBase shape
-  const draggedAnswer: AnswerOptionBase | null = draggedAnswerInternal
-    ? {value: draggedAnswerInternal.value, base: draggedAnswerInternal.base}
-    : null;
-  const handleDragStart = useCallback(
-    (e: React.DragEvent, answer: AnswerOptionBase) => {
-      const baseNum =
-        typeof answer.base === 'string'
-          ? parseInt(answer.base, 10)
-          : (answer.base as number | undefined);
-      if (baseNum == null || Number.isNaN(baseNum)) return; // ignore invalid drag
-      handleDragStartInternal(e, {value: answer.value, base: baseNum});
-    },
-    [handleDragStartInternal],
-  );
+  // dnd-kit PoC state/handlers are used; ResultsSection and DndProvider handle draggables
 
   // Connection lines calculation
   const getTaskIdCb = useCallback((task: AdditionTask) => task.id, []);
@@ -182,13 +135,15 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
     setEvaluated(false);
     setActiveTaskId(null);
-    resetDragState();
+    // Clear any dnd-kit transient state
+    setDndDraggedAnswer(null);
+    setDndDragOverTaskId(null);
     // Do not reset the shared timer here; only reset task-local state.
     // Update HUD progress without sending timer control commands.
     onHudChangeRef.current?.({
       progress: {current: stageIndex + 1, total: stages.length},
     });
-  }, [resetDragState, tasks, stageIndex, stages.length]);
+  }, [tasks, stageIndex, stages.length]);
 
   // Assignment logic
   const assignAnswer = useCallback(
@@ -224,9 +179,68 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     [answerPool],
   );
 
-  const onDropAnswer = useCallback(
-    (taskId: string, answer: AnswerOptionBase) => {
-      assignAnswer(taskId, answer);
+  // dnd-kit local drag state (PoC) — keeps HTML5 fallback via useDragAndDrop
+  const [dndDraggedAnswer, setDndDraggedAnswer] =
+    useState<AnswerOptionBase | null>(null);
+  const [dndDragOverTaskId, setDndDragOverTaskId] = useState<string | null>(
+    null,
+  );
+
+  const handleDndKitDragStart = useCallback(
+    (event: import('@dnd-kit/core').DragStartEvent) => {
+      const {active} = event;
+      if (!active || typeof active.id !== 'string') return;
+      const parts = active.id.split(':');
+      const last = parts[parts.length - 1]; // VALUE|BASE
+      const [value, baseStr] = last.split('|');
+      const base = parseInt(baseStr, 10);
+      if (value && !Number.isNaN(base)) {
+        setDndDraggedAnswer({value, base});
+      }
+    },
+    [],
+  );
+
+  const handleDndKitDragOver = useCallback(
+    (event: import('@dnd-kit/core').DragOverEvent) => {
+      const {over} = event;
+      if (!over || typeof over.id !== 'string') {
+        setDndDragOverTaskId(null);
+        return;
+      }
+      if (over.id.startsWith('task:')) {
+        setDndDragOverTaskId(over.id.replace(/^task:/, ''));
+      } else {
+        setDndDragOverTaskId(null);
+      }
+    },
+    [],
+  );
+
+  const handleDndKitDragEnd = useCallback(
+    (event: import('@dnd-kit/core').DragEndEvent) => {
+      const {active, over} = event;
+      if (
+        !over ||
+        typeof active.id !== 'string' ||
+        typeof over.id !== 'string'
+      ) {
+        setDndDraggedAnswer(null);
+        setDndDragOverTaskId(null);
+        return;
+      }
+      if (active.id.includes('answer') && over.id.startsWith('task:')) {
+        const parts = (active.id as string).split(':');
+        const last = parts[parts.length - 1]; // VALUE|BASE
+        const [value, baseStr] = last.split('|');
+        const base = parseInt(baseStr, 10);
+        const taskId = over.id.replace(/^task:/, '');
+        if (taskId && value && !Number.isNaN(base)) {
+          assignAnswer(taskId, {value, base});
+        }
+      }
+      setDndDraggedAnswer(null);
+      setDndDragOverTaskId(null);
     },
     [assignAnswer],
   );
@@ -407,107 +421,126 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       </div>
 
       {hasStarted && tasks.length > 0 && (
-        <div
-          className={`ns-content ${activeTaskId ? 'has-active' : ''}`}
-          ref={containerRef}>
-          <div className="equations-and-results">
-            <div className="equations-section">
-              {tasks.map(t => {
-                const assigned = assignments[t.id];
-                const assignedBase =
-                  typeof assigned?.base === 'string'
-                    ? parseInt(assigned.base, 10)
-                    : assigned?.base;
-                const isCorrect =
-                  evaluated &&
-                  !!assigned &&
-                  assigned.value === t.expected &&
-                  assignedBase === t.base;
-                const isWrong =
-                  evaluated &&
-                  !!assigned &&
-                  !(assigned.value === t.expected && assignedBase === t.base);
-                const isActive = activeTaskId === t.id;
-                const [zahl1, zahl2] = t.left.split(' + ');
-                const baseSub =
-                  t.base === 2
-                    ? '₂'
-                    : t.base === 8
-                      ? '₈'
-                      : t.base === 16
-                        ? '₁₆'
-                        : '';
-                return (
-                  <SharedEquationRow
-                    key={`pa-task:${t.id}`}
-                    hasAssignment={!!assigned}
-                    sourceContent={
-                      <div
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'flex-end',
-                          lineHeight: 1.2,
-                        }}>
-                        <span>
-                          {zahl1}
-                          <sub style={{marginLeft: 2}}>{baseSub}</sub>
-                        </span>
-                        <span>
-                          + {zahl2}
-                          <sub style={{marginLeft: 2}}>{baseSub}</sub>
-                        </span>
-                      </div>
-                    }
-                    assignedContent={
-                      assigned && assignedBase ? (
-                        <NumberWithBase
-                          value={assigned.value}
-                          base={assignedBase as 2 | 8 | 10 | 16}
-                        />
-                      ) : null
-                    }
-                    isCorrect={isCorrect}
-                    isWrong={isWrong}
-                    isActive={isActive}
-                    isDragOver={dragOverTaskId === t.id}
-                    onClick={() => setActiveTaskId(t.id)}
-                    onDragOver={e => handleDragOver(e, t.id)}
-                    onDragEnter={e => handleDragEnter(e, t.id)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={e => handleDrop(e, t.id, onDropAnswer)}
-                  />
-                );
-              })}
+        <DndProvider
+          onDragStart={handleDndKitDragStart}
+          onDragOver={handleDndKitDragOver}
+          onDragEnd={handleDndKitDragEnd}>
+          <div
+            className={`ns-content ${activeTaskId ? 'has-active' : ''}`}
+            ref={containerRef}>
+            <div className="equations-and-results">
+              <div className="equations-section">
+                {tasks.map(t => {
+                  const assigned = assignments[t.id];
+                  const assignedBase =
+                    typeof assigned?.base === 'string'
+                      ? parseInt(assigned.base, 10)
+                      : assigned?.base;
+                  const isCorrect =
+                    evaluated &&
+                    !!assigned &&
+                    assigned.value === t.expected &&
+                    assignedBase === t.base;
+                  const isWrong =
+                    evaluated &&
+                    !!assigned &&
+                    !(assigned.value === t.expected && assignedBase === t.base);
+                  const isActive = activeTaskId === t.id;
+                  const [zahl1, zahl2] = t.left.split(' + ');
+                  const baseSub =
+                    t.base === 2
+                      ? '₂'
+                      : t.base === 8
+                        ? '₈'
+                        : t.base === 16
+                          ? '₁₆'
+                          : '';
+                  return (
+                    <SharedEquationRow
+                      key={`pa-task:${t.id}`}
+                      hasAssignment={!!assigned}
+                      sourceContent={
+                        <div
+                          style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'flex-end',
+                            lineHeight: 1.2,
+                          }}>
+                          <span>
+                            {zahl1}
+                            <sub style={{marginLeft: 2}}>{baseSub}</sub>
+                          </span>
+                          <span>
+                            + {zahl2}
+                            <sub style={{marginLeft: 2}}>{baseSub}</sub>
+                          </span>
+                        </div>
+                      }
+                      assignedContent={
+                        assigned && assignedBase ? (
+                          <NumberWithBase
+                            value={assigned.value}
+                            base={assignedBase as 2 | 8 | 10 | 16}
+                          />
+                        ) : null
+                      }
+                      isCorrect={isCorrect}
+                      isWrong={isWrong}
+                      isActive={isActive}
+                      isDragOver={dndDragOverTaskId === t.id}
+                      onClick={() => setActiveTaskId(t.id)}
+                      enableDndKit={true}
+                      droppableId={`task:${t.id}`}
+                    />
+                  );
+                })}
+              </div>
+              <ResultsSection
+                answerPool={answerPool}
+                usedAnswerKeys={usedAnswerKeys}
+                assignments={assignments}
+                draggedAnswer={dndDraggedAnswer}
+                activeTaskId={activeTaskId}
+                tasks={tasks}
+                assignAnswer={assignAnswer}
+                evaluated={evaluated}
+                keyPrefix={
+                  arithmeticMode === 'twos-complement' ? 'tc-pa' : 'pa'
+                }
+                renderAnswer={a =>
+                  typeof a.base === 'number' ? (
+                    <NumberWithBase
+                      value={a.value}
+                      base={a.base as 2 | 8 | 10 | 16}
+                    />
+                  ) : (
+                    a.value
+                  )
+                }
+                enableDndKit={true}
+              />
             </div>
-            <ResultsSection
-              answerPool={answerPool}
-              usedAnswerKeys={usedAnswerKeys}
-              assignments={assignments}
-              draggedAnswer={draggedAnswer}
-              activeTaskId={activeTaskId}
-              tasks={tasks}
-              handleDragStart={handleDragStart}
-              handlePointerDown={handlePointerDownAdapter}
-              handleDragEnd={handleDragEnd}
-              assignAnswer={assignAnswer}
-              evaluated={evaluated}
-              keyPrefix={arithmeticMode === 'twos-complement' ? 'tc-pa' : 'pa'}
-              renderAnswer={a =>
-                typeof a.base === 'number' ? (
-                  <NumberWithBase
-                    value={a.value}
-                    base={a.base as 2 | 8 | 10 | 16}
-                  />
+            <ConnectionOverlay connectionLines={connectionLines} />
+            <DragOverlay>
+              {dndDraggedAnswer ? (
+                typeof dndDraggedAnswer.base === 'number' ? (
+                  <div className="ns-drag-overlay">
+                    <NumberWithBase
+                      value={dndDraggedAnswer.value}
+                      base={dndDraggedAnswer.base as 2 | 8 | 10 | 16}
+                    />
+                  </div>
                 ) : (
-                  a.value
+                  <div className="ns-drag-overlay">
+                    {dndDraggedAnswer.value}
+                  </div>
                 )
-              }
-            />
+              ) : null}
+            </DragOverlay>
+            {/* Controls moved to parent footer */}
           </div>
-          <ConnectionOverlay connectionLines={connectionLines} />
-          {/* Controls moved to parent footer */}
-        </div>
+        </DndProvider>
       )}
 
       {!hasStarted && (

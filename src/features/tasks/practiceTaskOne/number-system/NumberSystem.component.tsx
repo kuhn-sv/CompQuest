@@ -15,14 +15,15 @@ import {
   ConnectionOverlay,
   GameStartScreen,
 } from '../../../../shared/components';
+import {DragOverlay} from '@dnd-kit/core';
 import type {SubTaskComponentProps} from '../interfaces';
 import {
-  useDragAndDrop,
   useConnectionLines,
   useTimer,
   CONNECTION_LINE_PRESETS,
-  DRAG_DROP_PRESETS,
 } from '../../../../shared/hooks';
+// dnd-kit event types are referenced inline where needed; no top-level type import
+import DndProvider from '../../../../shared/components/DndProvider';
 
 const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
@@ -61,24 +62,13 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     }
   }, [hasStarted, onHudChange]);
 
-  // Drag and Drop logic
-  const {
-    draggedItem: draggedAnswer,
-    dragOverTargetId: dragOverTaskId,
-    handleDragStart,
-    handleDragOver,
-    handleDragEnter,
-    handleDragLeave,
-    handleDrop,
-    handleDragEnd,
-    resetDragState,
-    handlePointerDown,
-  } = useDragAndDrop<AnswerOption>({
-    ...DRAG_DROP_PRESETS.NUMBER_SYSTEM,
-    onPointerDrop: (targetId: string, item: AnswerOption) => {
-      onDropAnswer(targetId, item);
-    },
-  } as unknown as import('../../../../shared/hooks/useDragAndDrop').DragDropConfig<AnswerOption>);
+  // dnd-kit local drag state (replaces useDragAndDrop in this component)
+  const [dndDraggedAnswer, setDndDraggedAnswer] = useState<AnswerOption | null>(
+    null,
+  );
+  const [dndDragOverTaskId, setDndDragOverTaskId] = useState<string | null>(
+    null,
+  );
 
   // Connection lines calculation
   const getTaskIdCb = useCallback((task: NumberTask) => task.id, []);
@@ -152,13 +142,15 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
     setEvaluated(false);
     setActiveTaskId(null);
-    resetDragState();
+    // clear dnd-kit local state
+    setDndDraggedAnswer(null);
+    setDndDragOverTaskId(null);
     // Reset and restart timer
     reset();
     if (tasks.length > 0) {
       start();
     }
-  }, [reset, resetDragState, start, tasks]);
+  }, [reset, start, tasks]);
 
   // Wrapper function for assignment logic
   const assignAnswer = useCallback(
@@ -194,39 +186,6 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     [answerPool],
   );
 
-  // Drop handler for the hook
-  const onDropAnswer = (taskId: string, answer: AnswerOption) => {
-    assignAnswer(taskId, answer);
-  };
-
-  // Adapters to use shared ResultsSection (accepts broader AnswerOptionBase)
-  const handleDragStartAdapter = useCallback(
-    (e: React.DragEvent, answer: {value: string; base?: number | string}) => {
-      if (typeof answer.base === 'number') {
-        handleDragStart(e, {
-          value: answer.value,
-          base: answer.base as AnswerOption['base'],
-        });
-      }
-    },
-    [handleDragStart],
-  );
-
-  const handlePointerDownAdapter = useCallback(
-    (
-      e: React.PointerEvent | React.TouchEvent,
-      answer: {value: string; base?: number | string},
-    ) => {
-      if (typeof answer.base === 'number' && handlePointerDown) {
-        handlePointerDown(e as React.PointerEvent | React.TouchEvent, {
-          value: answer.value,
-          base: answer.base as AnswerOption['base'],
-        });
-      }
-    },
-    [handlePointerDown],
-  );
-
   const assignAnswerAdapter = useCallback(
     (taskId: string, answer: {value: string; base?: number | string}) => {
       if (typeof answer.base === 'number') {
@@ -235,6 +194,66 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
           base: answer.base as AnswerOption['base'],
         });
       }
+    },
+    [assignAnswer],
+  );
+
+  // dnd-kit handlers (use assignAnswer which is defined above)
+  const handleDndKitDragStart = useCallback(
+    (event: import('@dnd-kit/core').DragStartEvent) => {
+      const {active} = event;
+      if (!active || typeof active.id !== 'string') return;
+      const parts = active.id.split(':');
+      const last = parts[parts.length - 1]; // VALUE|BASE
+      const [value, baseStr] = last.split('|');
+      const base = parseInt(baseStr, 10);
+      if (value && !Number.isNaN(base)) {
+        setDndDraggedAnswer({value, base: base as AnswerOption['base']});
+      }
+    },
+    [],
+  );
+
+  const handleDndKitDragOver = useCallback(
+    (event: import('@dnd-kit/core').DragOverEvent) => {
+      const {over} = event;
+      if (!over || typeof over.id !== 'string') {
+        setDndDragOverTaskId(null);
+        return;
+      }
+      if (over.id.startsWith('task:')) {
+        setDndDragOverTaskId(over.id.replace(/^task:/, ''));
+      } else {
+        setDndDragOverTaskId(null);
+      }
+    },
+    [],
+  );
+
+  const handleDndKitDragEnd = useCallback(
+    (event: import('@dnd-kit/core').DragEndEvent) => {
+      const {active, over} = event;
+      if (
+        !over ||
+        typeof active.id !== 'string' ||
+        typeof over.id !== 'string'
+      ) {
+        setDndDraggedAnswer(null);
+        setDndDragOverTaskId(null);
+        return;
+      }
+      if (active.id.includes('answer') && over.id.startsWith('task:')) {
+        const parts = (active.id as string).split(':');
+        const last = parts[parts.length - 1]; // VALUE|BASE
+        const [value, baseStr] = last.split('|');
+        const base = parseInt(baseStr, 10);
+        const taskId = over.id.replace(/^task:/, '');
+        if (taskId && value && !Number.isNaN(base)) {
+          assignAnswer(taskId, {value, base: base as AnswerOption['base']});
+        }
+      }
+      setDndDraggedAnswer(null);
+      setDndDragOverTaskId(null);
     },
     [assignAnswer],
   );
@@ -399,89 +418,111 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       {/* Header timer/progress moved to container */}
 
       {hasStarted && tasks.length > 0 && (
-        <div
-          className={`ns-content ${activeTaskId ? 'has-active' : ''}`}
-          ref={containerRef}>
-          <div className="equations-and-results">
-            {/* Left side: Equation rows */}
-            <div className="equations-section">
-              {tasks.map(t => {
-                const assigned = assignments[t.id];
-                const isCorrect =
-                  evaluated &&
-                  !!assigned &&
-                  assigned.value === t.expectedValue &&
-                  assigned.base === t.toBase;
-                const isWrong =
-                  evaluated &&
-                  !!assigned &&
-                  !(
+        <DndProvider
+          onDragStart={handleDndKitDragStart}
+          onDragOver={handleDndKitDragOver}
+          onDragEnd={handleDndKitDragEnd}>
+          <div
+            className={`ns-content ${activeTaskId ? 'has-active' : ''}`}
+            ref={containerRef}>
+            <div className="equations-and-results">
+              {/* Left side: Equation rows */}
+              <div className="equations-section">
+                {tasks.map(t => {
+                  const assigned = assignments[t.id];
+                  const isCorrect =
+                    evaluated &&
+                    !!assigned &&
                     assigned.value === t.expectedValue &&
-                    assigned.base === t.toBase
-                  );
-                const isActive = activeTaskId === t.id;
-                return (
-                  <SharedEquationRow
-                    key={`ns-task:${t.id}`}
-                    hasAssignment={!!assigned}
-                    sourceContent={
-                      <NumberWithBase value={t.sourceValue} base={t.fromBase} />
-                    }
-                    assignedContent={
-                      assigned ? (
+                    assigned.base === t.toBase;
+                  const isWrong =
+                    evaluated &&
+                    !!assigned &&
+                    !(
+                      assigned.value === t.expectedValue &&
+                      assigned.base === t.toBase
+                    );
+                  const isActive = activeTaskId === t.id;
+                  return (
+                    <SharedEquationRow
+                      key={`ns-task:${t.id}`}
+                      hasAssignment={!!assigned}
+                      sourceContent={
                         <NumberWithBase
-                          value={assigned.value}
-                          base={assigned.base}
+                          value={t.sourceValue}
+                          base={t.fromBase}
                         />
-                      ) : null
-                    }
-                    isCorrect={isCorrect}
-                    isWrong={isWrong}
-                    isActive={isActive}
-                    isDragOver={dragOverTaskId === t.id}
-                    onClick={() => setActiveTaskId(t.id)}
-                    dataTaskId={t.id}
-                    onDragOver={e => handleDragOver(e, t.id)}
-                    onDragEnter={e => handleDragEnter(e, t.id)}
-                    onDragLeave={handleDragLeave}
-                    onDrop={e => handleDrop(e, t.id, onDropAnswer)}
-                  />
-                );
-              })}
+                      }
+                      assignedContent={
+                        assigned ? (
+                          <NumberWithBase
+                            value={assigned.value}
+                            base={assigned.base}
+                          />
+                        ) : null
+                      }
+                      isCorrect={isCorrect}
+                      isWrong={isWrong}
+                      isActive={isActive}
+                      isDragOver={dndDragOverTaskId === t.id}
+                      onClick={() => setActiveTaskId(t.id)}
+                      dataTaskId={t.id}
+                      enableDndKit={true}
+                      droppableId={`task:${t.id}`}
+                    />
+                  );
+                })}
+              </div>
+
+              {/* Right side: Available results */}
+              <ResultsSection
+                answerPool={answerPool}
+                usedAnswerKeys={usedAnswerKeys}
+                assignments={assignments}
+                draggedAnswer={dndDraggedAnswer}
+                activeTaskId={activeTaskId}
+                tasks={tasks}
+                assignAnswer={assignAnswerAdapter}
+                enableDndKit={true}
+                evaluated={evaluated}
+                keyPrefix="ns"
+                renderAnswer={a =>
+                  typeof a.base === 'number' ? (
+                    <NumberWithBase
+                      value={a.value}
+                      base={a.base as 2 | 8 | 10 | 16}
+                    />
+                  ) : (
+                    a.value
+                  )
+                }
+              />
             </div>
 
-            {/* Right side: Available results */}
-            <ResultsSection
-              answerPool={answerPool}
-              usedAnswerKeys={usedAnswerKeys}
-              assignments={assignments}
-              draggedAnswer={draggedAnswer}
-              activeTaskId={activeTaskId}
-              tasks={tasks}
-              handleDragStart={handleDragStartAdapter}
-              handlePointerDown={handlePointerDownAdapter}
-              handleDragEnd={handleDragEnd}
-              assignAnswer={assignAnswerAdapter}
-              evaluated={evaluated}
-              keyPrefix="ns"
-              renderAnswer={a =>
-                typeof a.base === 'number' ? (
-                  <NumberWithBase
-                    value={a.value}
-                    base={a.base as 2 | 8 | 10 | 16}
-                  />
+            {/* SVG overlay for connection lines */}
+            <ConnectionOverlay connectionLines={connectionLines} />
+
+            {/* Visual clone for the dragged item so users see it under the pointer */}
+            <DragOverlay>
+              {dndDraggedAnswer ? (
+                typeof dndDraggedAnswer.base === 'number' ? (
+                  <div className="ns-drag-overlay">
+                    <NumberWithBase
+                      value={dndDraggedAnswer.value}
+                      base={dndDraggedAnswer.base as 2 | 8 | 10 | 16}
+                    />
+                  </div>
                 ) : (
-                  a.value
+                  <div className="ns-drag-overlay">
+                    {dndDraggedAnswer.value}
+                  </div>
                 )
-              }
-            />
+              ) : null}
+            </DragOverlay>
+
+            {/* Controls moved to parent footer */}
           </div>
-
-          {/* SVG overlay for connection lines */}
-          <ConnectionOverlay connectionLines={connectionLines} />
-
-          {/* Controls moved to parent footer */}
-        </div>
+        </DndProvider>
       )}
 
       {/* Initial start overlay with a large round button */}

@@ -1,4 +1,5 @@
 import React from 'react';
+import {useDroppable} from '@dnd-kit/core';
 
 interface EquationRowProps {
   hasAssignment: boolean;
@@ -6,13 +7,17 @@ interface EquationRowProps {
   isWrong: boolean;
   isActive: boolean;
   isDragOver: boolean;
-  onClick: () => void;
-  onDragOver: (e: React.DragEvent) => void;
-  onDragEnter: (e: React.DragEvent) => void;
-  onDragLeave: (e: React.DragEvent) => void;
-  onDrop: (e: React.DragEvent) => void;
+  // Event handlers are optional because components can opt into dnd-kit
+  onClick?: () => void;
+  onDragOver?: (e: React.DragEvent) => void;
+  onDragEnter?: (e: React.DragEvent) => void;
+  onDragLeave?: (e: React.DragEvent) => void;
+  onDrop?: (e: React.DragEvent) => void;
   // Optional data attribute used for pointer-based hit testing
   dataTaskId?: string;
+  // Enable dnd-kit droppable behavior when present
+  enableDndKit?: boolean;
+  droppableId?: string;
   sourceContent: React.ReactNode;
   assignedContent?: React.ReactNode;
 }
@@ -29,13 +34,18 @@ export const EquationRow: React.FC<EquationRowProps> = ({
   onDragLeave,
   onDrop,
   dataTaskId,
+  enableDndKit = false,
+  droppableId,
   sourceContent,
   assignedContent,
 }) => {
+  // dnd-kit droppable hook - only active when enabled and a droppableId is provided
+  const {setNodeRef: setDroppableRef} = useDroppable({id: droppableId ?? ''});
   const resultState = isCorrect ? 'success' : isWrong ? 'error' : '';
   return (
     <div
       data-task-id={dataTaskId}
+      ref={enableDndKit && droppableId ? setDroppableRef : undefined}
       className={`equation-row ${isCorrect ? 'correct' : ''} ${isWrong ? 'incorrect' : ''} ${isActive ? 'active' : ''} ${hasAssignment ? 'has-result' : ''} ${isDragOver ? 'drag-over' : ''}`}
       onClick={onClick}
       onDragOver={onDragOver}

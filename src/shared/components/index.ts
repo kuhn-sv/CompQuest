@@ -7,3 +7,4 @@ export { default as DigitsRow } from './digitsRow/DigitsRow';
 export { default as BaseValueSpinner } from './BaseValueSpinner/BaseValueSpinner';
 export { default as BoardWithHotspots } from './ImageHotspots/BoardWithHotspots';
 export { default as TopNavbar } from './TopNavbar/TopNavbar.component';
+export { default as DndProvider } from './DndProvider';

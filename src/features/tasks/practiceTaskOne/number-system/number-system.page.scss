@@ -185,16 +185,26 @@ $ns-field-height: 40px; // Fixed field height
 	}
 }
 
+/* Drag overlay styling shown while an item is being dragged */
+.ns-drag-overlay {
+	padding: 6px 10px;
+	background: var(--surface);
+	width: 120px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 6px;
+	pointer-events: none;
+	z-index: 60; // above connection overlay
+}
+
 // Improve drop zone visibility
 .equation-row.drag-over .result-placeholder {
 	background: var(--surface);
 	border: 2px dashed var(--primary);
 	border-radius: $border-radius-sm;
 }
-
-// Success/Error coloring for evaluation results
-
-// success/error variants provided by shared styles
 
 // Responsive design for timer section
 @media (max-width: 768px) {
