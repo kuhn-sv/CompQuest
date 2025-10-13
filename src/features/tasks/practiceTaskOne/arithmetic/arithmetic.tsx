@@ -35,6 +35,8 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   onHudChange,
   arithmeticMode = 'positive',
+  onTaskContextChange,
+  taskMeta,
 }) => {
   // 3-stage flow: Easy, Medium, Hard
   const stages: Difficulty[] = useMemo(
@@ -130,6 +132,43 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
           : 'Positive Additionen und Subtraktionen (3 Stufen)',
     });
   }, [startSetForStage, arithmeticMode, stages.length]);
+
+  // Provide compact context for AskTim: which stage and a sample task
+  useEffect(() => {
+    if (!onTaskContextChange) return;
+    if (!hasStarted) {
+      onTaskContextChange(null);
+      return;
+    }
+    const sample = tasks[0];
+    const ctx = {
+      title:
+        taskMeta?.title ??
+        (arithmeticMode === 'twos-complement'
+          ? 'Zweierkomplement-Arithmetik'
+          : 'Positive Arithmetik'),
+      stage: stageIndex + 1,
+      totalStages: stages.length,
+      sampleTask: sample
+        ? {
+            id: sample.id,
+            left: sample.left,
+            expected: sample.expected,
+            base: sample.base,
+          }
+        : null,
+    } as const;
+    onTaskContextChange(ctx);
+    return () => onTaskContextChange(null);
+  }, [
+    onTaskContextChange,
+    hasStarted,
+    stageIndex,
+    tasks,
+    taskMeta,
+    arithmeticMode,
+    stages.length,
+  ]);
 
   const resetSet = useCallback(() => {
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));

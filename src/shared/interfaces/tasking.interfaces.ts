@@ -20,6 +20,10 @@ export interface SubTaskComponentProps {
   // Allow a subtask to report final summary up to container for unified overlay rendering
   // Child may send partial summary; container will normalize it
   onSummaryChange?: (summary: Partial<TaskSummaryState> | null) => void;
+  // Optional: allow a subtask to provide the current visible task context
+  // (human-readable prompt, variables). This will be forwarded to the
+  // AskTim modal so the assistant can use the exact task statement.
+  onTaskContextChange?: (context: unknown | null) => void;
   // Optional arithmetic mode used by some subtasks (e.g., positive vs twos-complement arithmetic)
   arithmeticMode?: ArithmeticMode;
 }

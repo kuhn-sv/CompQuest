@@ -24,6 +24,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   onHudChange,
   onSummaryChange,
   taskMeta,
+  onTaskContextChange,
 }) => {
   const rounds: Round[] = useMemo(
     () => generateRounds(4, DEFAULT_BIT_COUNT),
@@ -210,6 +211,32 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       isStartScreen: true,
     });
   }, [hasStarted]);
+
+  // Provide current round context to AskTim
+  useEffect(() => {
+    if (!onTaskContextChange) return;
+    if (!hasStarted) {
+      onTaskContextChange(null);
+      return;
+    }
+    const ctx = {
+      title: taskMeta?.title ?? 'Einer-/Zweierkomplement',
+      round: roundIndex + 1,
+      totalRounds: rounds.length,
+      mode: current.mode,
+      sourceBits: bitsToString(current.sourceBits),
+      bitCount: current.bitCount,
+    } as const;
+    onTaskContextChange(ctx);
+    return () => onTaskContextChange(null);
+  }, [
+    onTaskContextChange,
+    hasStarted,
+    roundIndex,
+    current,
+    taskMeta,
+    rounds.length,
+  ]);
 
   return (
     <div className="number-system-container complements-container">

@@ -30,8 +30,12 @@ export const handler: NetlifyHandler = async (event) => {
 			};
 		}
 
-		const body = event.body ? (JSON.parse(event.body) as { question?: string }) : {};
+		const body = event.body ? (JSON.parse(event.body) as { question?: string; taskMeta?: any; taskContext?: any; contextPreview?: string; messages?: Array<{role: string; content: string}> }) : {};
 		const question = (body.question ?? '').toString().trim();
+		const taskMeta = body.taskMeta ?? null;
+		const taskContext = body.taskContext ?? null;
+		const contextPreview = (body.contextPreview ?? null) as string | null;
+		const priorMessages = Array.isArray(body.messages) ? body.messages.slice(-20).map(m => ({role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content ?? '')})) : [];
 		if (!question) {
 			return {
 				statusCode: 400,
@@ -54,6 +58,40 @@ Antworte stets in 2–4 kurzen, klaren Sätzen plus einer Abschlussfrage.
 Passe deine Antworten an die Kategorien normal_question, wrong_answer, right_answer oder dont_know an.
 Bleibe immer freundlich, fachlich korrekt, und im thematischen Rahmen von Hoffmann, Kap. 3.`;
 
+		// Build messages. If the client provided a taskContext, include a
+		// concise representation as an extra user message so the assistant can
+		// ground its answer in the current task. Limit the length to avoid
+		// consuming too many tokens.
+		const contextMsgParts: string[] = [];
+		if (taskMeta && (taskMeta.id || taskMeta.title)) {
+			contextMsgParts.push(`Task: ${taskMeta.title ?? taskMeta.id}`);
+		}
+		if (contextPreview) {
+			contextMsgParts.push(`Context: ${contextPreview}`);
+		} else if (taskContext) {
+			try {
+				const s = JSON.stringify(taskContext);
+				contextMsgParts.push(
+					`Context: ${s.length > 1000 ? s.slice(0, 1000) + '…' : s}`,
+				);
+			} catch {
+				contextMsgParts.push('Context: [unserializable]');
+			}
+		}
+
+		// messages sequence: system -> (context) -> prior chat messages -> current user question
+		const messages: any[] = [];
+		messages.push({ role: 'system', content: systemPrompt });
+		if (contextMsgParts.length > 0) {
+			messages.push({ role: 'user', content: contextMsgParts.join('\n') });
+		}
+		// include prior messages (up to a small cap)
+		for (const m of priorMessages) {
+			messages.push({ role: m.role, content: m.content });
+		}
+		// finally add the newest user question
+		messages.push({ role: 'user', content: question });
+
 		const resp = await fetch(OPENAI_API_URL, {
 			method: 'POST',
 			headers: {
@@ -62,10 +100,7 @@ Bleibe immer freundlich, fachlich korrekt, und im thematischen Rahmen von Hoffma
 			},
 			body: JSON.stringify({
 				model: 'gpt-3.5-turbo',
-				messages: [
-					{ role: 'system', content: systemPrompt },
-					{ role: 'user', content: question },
-				],
+				messages,
 				temperature: 0.2,
 				max_tokens: 350,
 			}),

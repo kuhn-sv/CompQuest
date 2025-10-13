@@ -30,6 +30,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   onHudChange,
   onSummaryChange,
   taskMeta,
+  onTaskContextChange,
 }) => {
   // Staged progression: Easy → Medium → Hard
   const stages: Difficulty[] = useMemo(
@@ -61,6 +62,41 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       onHudChange({progress: null, isStartScreen: true});
     }
   }, [hasStarted, onHudChange]);
+
+  // Provide a compact context describing the visible task set to AskTim
+  useEffect(() => {
+    if (!onTaskContextChange) return;
+    if (!hasStarted) {
+      onTaskContextChange(null);
+      return;
+    }
+    // Send an overview: stage, number of tasks, and a sample task (first)
+    const sample = tasks[0];
+    const ctx = {
+      title: taskMeta?.title ?? 'Zahlensystem',
+      stage: stageIndex + 1,
+      totalStages: stages.length,
+      taskCount: tasks.length,
+      sampleTask: sample
+        ? {
+            id: sample.id,
+            fromValue: sample.sourceValue,
+            fromBase: sample.fromBase,
+            toBase: sample.toBase,
+            expected: sample.expectedValue,
+          }
+        : null,
+    } as const;
+    onTaskContextChange(ctx);
+    return () => onTaskContextChange(null);
+  }, [
+    onTaskContextChange,
+    hasStarted,
+    stageIndex,
+    tasks,
+    taskMeta,
+    stages.length,
+  ]);
 
   // dnd-kit local drag state (replaces useDragAndDrop in this component)
   const [dndDraggedAnswer, setDndDraggedAnswer] = useState<AnswerOption | null>(

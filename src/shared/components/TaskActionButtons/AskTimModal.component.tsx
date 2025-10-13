@@ -10,17 +10,30 @@ interface AskTimModalProps {
     title: string;
     level?: string;
   };
+  // Optional structured context describing the currently visible task.
+  // Each task component can supply whatever shape is useful (title, prompt,
+  // variables). The object will be forwarded to the server and included in
+  // the system/user prompt sent to the assistant.
+  taskContext?: unknown;
 }
 
 const MAX_LEN = 250;
 
 const TIM_VERSION = '0.1';
 
-const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
+const AskTimModal: React.FC<AskTimModalProps> = ({
+  open,
+  onClose,
+  taskMeta,
+  taskContext,
+}) => {
   const [question, setQuestion] = useState('');
   const [answer, setAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [messages, setMessages] = useState<
+    Array<{role: 'user' | 'assistant'; content: string}>
+  >([]);
 
   useEffect(() => {
     if (!open) {
@@ -48,10 +61,28 @@ const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
       setError(null);
       setLoading(true);
       setAnswer(null);
+      // Prepare a lightweight stringified context for debugging/logging.
+      const contextPreview = (() => {
+        try {
+          if (!taskContext) return null;
+          const s = JSON.stringify(taskContext);
+          return s.length > 1000 ? s.slice(0, 1000) + '…' : s;
+        } catch {
+          return '[unserializable context]';
+        }
+      })();
+
+      // include prior messages so the assistant receives the chat history
       const res = await fetch('/api/ask-tim', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({question: question.trim()}),
+        body: JSON.stringify({
+          question: question.trim(),
+          taskMeta: taskMeta ?? null,
+          taskContext: taskContext ?? null,
+          contextPreview,
+          messages,
+        }),
       });
       if (!res.ok) {
         const msg = await res.text();
@@ -59,7 +90,16 @@ const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
       }
       const data = (await res.json()) as {answer?: string; error?: string};
       if (data.error) throw new Error(data.error);
-      setAnswer(data.answer ?? 'Ich konnte leider keine Antwort erzeugen.');
+      const got = data.answer ?? 'Ich konnte leider keine Antwort erzeugen.';
+      // append both user and assistant messages to local history
+      setMessages(prev => [
+        ...prev,
+        {role: 'user', content: question.trim()},
+        {role: 'assistant', content: got},
+      ]);
+      setAnswer(got);
+      // clear the input field after successful send
+      setQuestion('');
 
       console.log('task meta', taskMeta);
       // Save request/response to Supabase
@@ -103,6 +143,24 @@ const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
 
         <div className="asktim-content">
           <div className="asktim-panel">
+            <div className="asktim-conversation">
+              {messages.length === 0 && !answer && !loading && (
+                <div className="asktim-empty">
+                  Keine Unterhaltung vorhanden.
+                </div>
+              )}
+              {messages.map((m, idx) => (
+                <div
+                  key={`msg:${idx}`}
+                  className={`asktim-bubble ${m.role === 'assistant' ? 'assistant' : 'user'}`}>
+                  <div className="asktim-bubble-title">
+                    {m.role === 'assistant' ? 'Tim' : 'Du'}
+                  </div>
+                  <div className="asktim-bubble-content">{m.content}</div>
+                </div>
+              ))}
+            </div>
+
             <form onSubmit={askTim} className="asktim-body">
               <label htmlFor="asktim-text" className="asktim-label">
                 Stell deine Frage (max. {MAX_LEN} Zeichen)
@@ -133,16 +191,8 @@ const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
             </form>
           </div>
 
-          <div
-            className="asktim-illustration"
-            aria-hidden={!(answer && !loading)}>
-            {answer && !loading && (
-              <div className="asktim-bubble">
-                <div className="asktim-bubble-title">Tim</div>
-                <div className="asktim-bubble-content">{answer}</div>
-              </div>
-            )}
-            <img src="/timothy.svg" alt="" />
+          <div className="asktim-illustration">
+            <img src="/timothy.svg" alt="Tim" className="asktim-avatar" />
           </div>
         </div>
       </div>

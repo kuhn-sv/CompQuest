@@ -50,6 +50,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   onHudChange,
   onSummaryChange,
   taskMeta,
+  onTaskContextChange,
 }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [qIndex, setQIndex] = useState(0);
@@ -190,6 +191,30 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   }, [controls]);
 
   const current = QUESTIONS[qIndex];
+
+  // Inform parent about the visible question so AskTim can incorporate it.
+  useEffect(() => {
+    if (!onTaskContextChange) return;
+    if (!hasStarted) {
+      onTaskContextChange(null);
+      return;
+    }
+    const ctx = {
+      id: current.id,
+      title: taskMeta?.title ?? 'Quiz',
+      prompt: current.text,
+      answers: current.answers,
+      correctIndex: current.correctIndex,
+      index: qIndex,
+      total: TOTAL,
+    } as const;
+    onTaskContextChange(ctx);
+    return () => onTaskContextChange(null);
+  }, [onTaskContextChange, hasStarted, qIndex, current, taskMeta]);
+  // Keep controls/HUD stable (this effect intentionally minimal)
+  useEffect(() => {
+    onControlsChangeRef.current?.(controls ?? null);
+  }, [controls]);
 
   return (
     <div className="quiz-container">

@@ -36,12 +36,8 @@
 }
 
 .asktim-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-2, #fff);
-  object-fit: cover;
+  margin-bottom: -40px;
+  max-height: 400px;
 }
 
 .asktim-close {
@@ -156,43 +152,71 @@
   }
 }
 
-/* Speech bubble next to Tim */
+/* Conversation container (stacked bubbles) */
+.asktim-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  /* make the conversation take available space but cap it so the form stays visible */
+  flex: 1 1 auto;
+  max-height: 300px; /* explicit cap for chat history */
+  min-height: 80px;
+  overflow-y: auto;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
 .asktim-bubble {
-  position: absolute;
-  right: 100%;
-  bottom: 62%; /* ungefähr Kopfhöhe */
-  transform: translateX(-16px);
-  width: clamp(260px, 40vw, 480px);
-  min-width: 260px;
-  max-width: 480px;
+  position: relative;
+  display: inline-block;
+  max-width: 84%;
   background: var(--surface);
   color: var(--text-color);
   border: 1px solid var(--surface-border);
-  border-radius: 10px;
-  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-  padding: 0.75rem 0.9rem;
-  z-index: 2;
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.08);
+  word-wrap: break-word;
+  line-height: 1.35;
 }
 
-.asktim-bubble::after {
+.asktim-bubble-title { font-weight: 700; margin-bottom: 0.25rem; }
+
+.asktim-bubble.assistant { align-self: flex-start; background: var(--surface); color: var(--text-color); }
+.asktim-bubble.user { align-self: flex-end; background: var(--primary, #48AEE2);   color: var(--primary-btn-text);
+; border-color: rgba(0,0,0,0.06); }
+
+/* subtle custom scrollbar for better visibility */
+.asktim-conversation::-webkit-scrollbar {
+  width: 10px;
+}
+.asktim-conversation::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.08);
+  border-radius: 8px;
+}
+.asktim-conversation::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* small triangle tails */
+.asktim-bubble.assistant::after,
+.asktim-bubble.user::after {
   content: '';
   position: absolute;
-  left: 100%;
-  bottom: 18%;
-  border-width: 10px;
+  bottom: 6px;
+  width: 0;
+  height: 0;
   border-style: solid;
-  border-color: transparent transparent transparent var(--surface);
-  filter: drop-shadow(-1px 0 0 var(--surface-border));
 }
-
-.asktim-bubble-title {
-  font-weight: 700;
-  margin-bottom: 0.25rem;
+.asktim-bubble.assistant::after {
+  left: 8px;
+  border-width: 6px 6px 0 0;
+  border-color: var(--surface) transparent transparent transparent;
 }
-
-.asktim-bubble-content {
-  white-space: pre-wrap;
-  word-wrap: break-word;
-  overflow-wrap: anywhere;
-  line-height: 1.35;
+.asktim-bubble.user::after {
+  right: 8px;
+  border-width: 6px 0 0 6px;
+  border-color: var(--primary, #48AEE2) transparent transparent transparent;
 }

@@ -14,6 +14,10 @@ import './TaskContainer.component.scss';
 export interface TaskContainerInjectedProps {
   onControlsChange: (controls: TaskFooterControls | null) => void;
   onHudChange: (hud: TaskHudState | null) => void;
+  // Subtasks can provide the current visible task context (prompt, values, etc.)
+  // This will be forwarded to the "Ask Tim" modal so the assistant can use
+  // the exact task statement when answering.
+  onTaskContextChange: (context: unknown | null) => void;
   // Subtasks may send partial summaries; container will normalize them
   onSummaryChange: (summary: Partial<TaskSummaryState> | null) => void;
 }
@@ -54,6 +58,8 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   const [summaryState, setSummaryState] = useState<TaskSummaryState | null>(
     null,
   );
+  // Current task context that child can update (will be passed to AskTim)
+  const [taskContext, setTaskContext] = useState<unknown | null>(null);
 
   const {time, isRunning, start, stop, reset, formatTime, getElapsed} =
     useTimer();
@@ -286,6 +292,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
     () => ({
       onControlsChange: handleControlsChange,
       onHudChange: handleHudChange,
+      onTaskContextChange: (ctx: unknown | null) => setTaskContext(ctx),
       onSummaryChange: handleSummaryChange,
     }),
     [handleControlsChange, handleHudChange, handleSummaryChange],
@@ -405,6 +412,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 disableEvaluate={footerControls?.disableEvaluate ?? false}
                 disableNext={footerControls?.disableNext ?? false}
                 taskMeta={taskMeta}
+                taskContext={taskContext}
               />
             </div>
           );
