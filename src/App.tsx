@@ -161,6 +161,15 @@ const AppWithNavbar: React.FC = () => {
           }
         />
 
+        <Route
+          path="/task/read-assembly"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage initialSubTask={TaskId.ReadAssembly} />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Root Route - Redirect basierend auf Auth Status */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 

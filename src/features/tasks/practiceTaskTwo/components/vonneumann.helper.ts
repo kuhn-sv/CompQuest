@@ -16,6 +16,11 @@ export interface VonNeumannRound {
   buses?: string[];
 }
 
+// Common type for drag-and-drop placements
+export interface Placements {
+  [dropZoneId: string]: string | null;
+}
+
 // Items for quiz rounds
 export const QUIZ_ITEMS = [
   {id: 'cpu', label: 'CPU (Central Processing Unit)', isCore: true},

@@ -10,8 +10,8 @@
 }
 
 .vn-functions__cols {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 2rem;
   align-items: start;
   padding: 1.25rem 1rem; /* move padding to inner element */
@@ -19,6 +19,8 @@
 }
 
 .vn-functions__col {
+  flex: 1 1 calc(50% - 1rem);
+  min-width: 280px;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;

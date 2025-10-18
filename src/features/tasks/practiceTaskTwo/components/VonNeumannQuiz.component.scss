@@ -17,14 +17,16 @@
   list-style: none;
   padding: 1rem 12px;
   margin: 0 0 1rem 0;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
   width: 90%;
   align-self: center;
 }
 
 .von-quizz__item {
+  flex: 1 1 calc(50% - 0.5rem);
+  min-width: 220px;
   display: flex;
   align-items: center;
   border: 1px solid var(--surface-border);

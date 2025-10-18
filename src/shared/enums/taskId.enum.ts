@@ -8,6 +8,7 @@ export enum TaskId {
   TwosComplementArithmetic = 'twos-complement-arithmetic',
   Quiz = 'quiz',
   VonNeumann = 'von-neumann',
+  ReadAssembly = 'read-assembly',
   HelperPotenzrechner = 'helper-potenzrechner',
   HelperUmrechnungshelfer = 'helper-umrechnungshelfer',
 }

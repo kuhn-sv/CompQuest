@@ -1,15 +1,11 @@
 import { TaskId } from '../../../../shared/enums/taskId.enum';
-import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
+import type { SubTaskComponentProps, SubTaskConfig as BaseSubTaskConfig } from '../../../../shared/interfaces/tasking.interfaces';
 
 export type ArithmeticMode = 'positive' | 'twos-complement';
 
-export interface SubTaskConfig {
+// Task-specific SubTaskConfig with TaskId enum constraint
+export interface SubTaskConfig extends Omit<BaseSubTaskConfig, 'id'> {
   id: TaskId;
-  title: string;
-  description: string;
-  component: React.ComponentType<SubTaskComponentProps>;
-  chapters?: IChapter[];
-  timeLimit?: number; // milliseconds
 }
 
 export interface TaskProgress {

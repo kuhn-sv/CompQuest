@@ -37,13 +37,21 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
     }
   }, [show]);
 
-  // Micro missions (local list) - include VonNeumannQuiz
+  // Micro missions (local list) - include VonNeumannQuiz and ReadAssembly
   const defaultMicroMissions: Exercise[] = [
     {
-      id: 'VonNeumannQuiz',
-      title: 'VonNeumannQuiz',
+      id: 'von-neumann',
+      title: 'Von-Neumann-Architektur',
       description: 'Quiz zur Von-Neumann-Architektur',
       path: '/task/von-neumann',
+      progressPercent: undefined,
+      disabled: false,
+    },
+    {
+      id: 'read-assembly',
+      title: 'Assembler-Programm lesen',
+      description: 'Lies den Assembler-Code und beantworte die Fragen',
+      path: '/task/read-assembly',
       progressPercent: undefined,
       disabled: false,
     },

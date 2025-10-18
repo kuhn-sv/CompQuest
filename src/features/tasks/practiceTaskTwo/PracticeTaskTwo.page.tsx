@@ -1,8 +1,8 @@
 import React, {useMemo, useState} from 'react';
 import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
-import {SubTaskConfig, SubTaskComponentProps} from '../practiceTaskOne';
-import {VonNeumann} from './components';
+import type {SubTaskConfig, SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
+import {VonNeumann, ReadAssembly} from './components';
 
 interface PracticeTaskTwoPageProps {
   initialSubTask?: TaskId;
@@ -21,6 +21,15 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur.',
       component: VonNeumann as React.ComponentType<SubTaskComponentProps>,
+      chapters: [],
+      timeLimit: 8 * 60 * 1000,
+    },
+    {
+      id: TaskId.ReadAssembly,
+      title: 'Assembler‑Programm lesen',
+      description:
+        'Lies den Assembler-Code und beantworte die Fragen korrekt.',
+      component: ReadAssembly as React.ComponentType<SubTaskComponentProps>,
       chapters: [],
       timeLimit: 8 * 60 * 1000,
     },

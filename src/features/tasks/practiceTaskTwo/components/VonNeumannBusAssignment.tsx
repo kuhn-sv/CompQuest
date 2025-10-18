@@ -3,15 +3,12 @@ import './VonNeumannBusAssignment.scss';
 import {DndContext, DragEndEvent, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
 import {useDndSensors} from '../../../../shared/hooks/dndSensors';
 import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
+import type {Placements} from './vonneumann.helper';
 
 interface Props {
   buses: string[];
   onChange?: (score: TaskStageScore | null) => void;
   evaluated?: boolean;
-}
-
-interface Placements {
-  [dropZoneId: string]: string | null;
 }
 
 // Drop zone IDs for the bus connections
