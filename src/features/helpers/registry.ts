@@ -11,6 +11,7 @@ export interface HelperModuleConfig {
 
 import Potenzrechner from './potenzrechner/Potenzrechner.component';
 import Umrechnungshelfer from './umrechnungshelfer/Umrechnungshelfer.component';
+import Befehlhelfer from './befehlhelfer/Befehlhelfer.component';
 
 export const helperModules: Record<string, HelperModuleConfig> = {
   potenzrechner: {
@@ -24,5 +25,11 @@ export const helperModules: Record<string, HelperModuleConfig> = {
     title: 'Umrechnungshelfer',
     description: 'Leitfaden zur Umrechnung zwischen Binär, Oktal, Hex – Schritt für Schritt.',
     component: Umrechnungshelfer,
+  },
+  befehlhelfer: {
+    slug: 'befehlhelfer',
+    title: 'Befehlhelfer',
+    description: 'Ordne Assembler-Begriffe ihren Beschreibungen zu',
+    component: Befehlhelfer,
   },
 };

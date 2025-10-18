@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 import './ExercisesModal.component.scss';
 import ExercisesList, {type Exercise} from './ExercisesList.component';
 import {trainingService} from '../../../services/supabase/training.service';
+import {helperModules} from '../../helpers/registry';
 
 interface ExercisesModalProps {
   show: boolean;
@@ -217,7 +218,16 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
               <div className="dashboard__section">
                 <div className="dashboard__section-title">Hilfsmodule</div>
-                <ExercisesList exercises={[] /* no helpers yet */} />
+                <ExercisesList
+                  exercises={Object.values(helperModules).map(module => ({
+                    id: module.slug,
+                    title: `Hilfsmodul: ${module.title}`,
+                    description: module.description,
+                    path: `/hilfsmodul/${module.slug}`,
+                    progressPercent: undefined,
+                    disabled: false,
+                  }))}
+                />
               </div>
             </div>
           </div>
