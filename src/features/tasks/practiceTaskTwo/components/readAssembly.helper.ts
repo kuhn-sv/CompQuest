@@ -73,7 +73,7 @@ export const ASSEMBLY_TASKS: AssemblyTask[] = [
     question: 'Was macht dieses Programm?',
     program: [
       {addr: '0000', op: 'LDA', arg: '(13)'},
-      {addr: '0001', op: 'BRN', arg: '0004'},
+      {addr: '0001', op: 'BRN', arg: '0100'},
       {addr: '0010', op: 'STA', arg: '15'},
       {addr: '0011', op: 'END', arg: ''},
       {addr: '0100', op: 'LDA', arg: '#0'},
@@ -91,7 +91,7 @@ export const ASSEMBLY_TASKS: AssemblyTask[] = [
     program: [
       {addr: '0000', op: 'LDA', arg: '(13)'},
       {addr: '0001', op: 'SUB', arg: '(14)'},
-      {addr: '0010', op: 'BRN', arg: '0014'},
+      {addr: '0010', op: 'BRN', arg: '0110'},
       {addr: '0011', op: 'LDA', arg: '(14)'},
       {addr: '0100', op: 'STA', arg: '15'},
       {addr: '0101', op: 'END', arg: ''},
@@ -109,7 +109,7 @@ export const ASSEMBLY_TASKS: AssemblyTask[] = [
     program: [
       {addr: '0000', op: 'LDA', arg: '(13)'},
       {addr: '0001', op: 'SUB', arg: '(14)'},
-      {addr: '0010', op: 'BRN', arg: '0014'},
+      {addr: '0010', op: 'BRN', arg: '0110'},
       {addr: '0011', op: 'LDA', arg: '(13)'},
       {addr: '0100', op: 'STA', arg: '15'},
       {addr: '0101', op: 'END', arg: ''},
@@ -182,7 +182,7 @@ export const ASSEMBLY_TASKS: AssemblyTask[] = [
     initial_values: {'13': -6},
     program: [
       {addr: '0000', op: 'LDA', arg: '(13)'},
-      {addr: '0001', op: 'BRN', arg: '0004'},
+      {addr: '0001', op: 'BRN', arg: '0100'},
       {addr: '0010', op: 'STA', arg: '15'},
       {addr: '0011', op: 'END', arg: ''},
       {addr: '0100', op: 'LDA', arg: '#0'},
@@ -201,7 +201,7 @@ export const ASSEMBLY_TASKS: AssemblyTask[] = [
     program: [
       {addr: '0000', op: 'LDA', arg: '(13)'},
       {addr: '0001', op: 'SUB', arg: '(14)'},
-      {addr: '0010', op: 'BRN', arg: '0014'},
+      {addr: '0010', op: 'BRN', arg: '0110'},
       {addr: '0011', op: 'LDA', arg: '(14)'},
       {addr: '0100', op: 'STA', arg: '15'},
       {addr: '0101', op: 'END', arg: ''},
@@ -220,7 +220,7 @@ export const ASSEMBLY_TASKS: AssemblyTask[] = [
     program: [
       {addr: '0000', op: 'LDA', arg: '(13)'},
       {addr: '0001', op: 'SUB', arg: '(14)'},
-      {addr: '0010', op: 'BRN', arg: '0014'},
+      {addr: '0010', op: 'BRN', arg: '0110'},
       {addr: '0011', op: 'LDA', arg: '(13)'},
       {addr: '0100', op: 'STA', arg: '15'},
       {addr: '0101', op: 'END', arg: ''},
@@ -241,7 +241,7 @@ export const generateRounds = (): AssemblyTask[] => {
   const variant2Tasks = ASSEMBLY_TASKS.filter(t => t.variant === 2);
 
   // Shuffle helper
-  const shuffle = <T,>(array: T[]): T[] => {
+  const shuffle = <T>(array: T[]): T[] => {
     const arr = [...array];
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
@@ -261,4 +261,3 @@ export const generateRounds = (): AssemblyTask[] => {
   const allSelected = [...selected1, ...selected2];
   return shuffle(allSelected);
 };
-
