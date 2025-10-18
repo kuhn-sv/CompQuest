@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
 import type {SubTaskConfig, SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
-import {VonNeumann, ReadAssembly, WriteAssembly} from './components';
+import {VonNeumann, ReadAssembly, WriteAssembly, JavaToAssembly} from './components';
 
 interface PracticeTaskTwoPageProps {
   initialSubTask?: TaskId;
@@ -39,6 +39,15 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Sortiere die Befehle in die richtige Reihenfolge.',
       component: WriteAssembly as React.ComponentType<SubTaskComponentProps>,
+      chapters: [],
+      timeLimit: 8 * 60 * 1000,
+    },
+    {
+      id: TaskId.JavaToAssembly,
+      title: 'Java → Assembler',
+      description:
+        'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen.',
+      component: JavaToAssembly as React.ComponentType<SubTaskComponentProps>,
       chapters: [],
       timeLimit: 8 * 60 * 1000,
     },

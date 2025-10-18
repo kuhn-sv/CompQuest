@@ -37,7 +37,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
     }
   }, [show]);
 
-  // Micro missions (local list) - include VonNeumannQuiz, ReadAssembly and WriteAssembly
+  // Micro missions (local list) - include VonNeumannQuiz, ReadAssembly, WriteAssembly and JavaToAssembly
   const defaultMicroMissions: Exercise[] = [
     {
       id: 'von-neumann',
@@ -60,6 +60,14 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
       title: 'Assembler-Programm schreiben',
       description: 'Sortiere die Befehle in die richtige Reihenfolge',
       path: '/task/write-assembly',
+      progressPercent: undefined,
+      disabled: false,
+    },
+    {
+      id: 'java-to-assembly',
+      title: 'Java → Assembler',
+      description: 'Übersetze Java Code in Assembler',
+      path: '/task/java-to-assembly',
       progressPercent: undefined,
       disabled: false,
     },

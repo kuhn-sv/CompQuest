@@ -106,9 +106,8 @@
   &__task-content {
     flex: 1;
     // Important: allow native dropdowns/popovers to render outside the content box
-    overflow: visible;
+    overflow: hidden;
     padding-top: 20px;
-    display: grid; // center inner task content
     place-items: center; // center on both axes
     min-height: 0; // allow the grid to size within the container
     

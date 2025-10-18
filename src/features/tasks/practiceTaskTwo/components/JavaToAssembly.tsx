@@ -1,12 +1,13 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
-import './WriteAssembly.component.scss';
+import './JavaToAssembly.component.scss';
 import {
   generateRounds,
   generateAvailableCommands,
-  WriteAssemblyTask,
+  JavaToAssemblyTask,
   AssemblyCommand,
-} from './WriteAssembly.helper';
+  getTaskCommands,
+} from './javatoassembly.helper';
 import {calculateScore} from './shared/assembly.utils';
 import {
   AssemblyDraggableCommand,
@@ -17,6 +18,8 @@ import GameStartScreen from '../../../../shared/components/startScreen/GameStart
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {DndContext, DragEndEvent} from '@dnd-kit/core';
 import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // Constants
 const DIFFICULTY_MAP: Record<string, Difficulty> = {
@@ -25,27 +28,67 @@ const DIFFICULTY_MAP: Record<string, Difficulty> = {
   schwer: Difficulty.Hard,
 };
 
+// Modal Component for expanded Java code
+const JavaCodeModal: React.FC<{
+  code: string;
+  topic: string;
+  onClose: () => void;
+}> = ({code, topic, onClose}) => {
+  return (
+    <div className="java-to-assembly__modal-overlay" onClick={onClose}>
+      <div
+        className="java-to-assembly__modal-content"
+        onClick={e => e.stopPropagation()}>
+        <div className="java-to-assembly__modal-header">
+          <h2>{topic}</h2>
+          <button
+            className="java-to-assembly__modal-close"
+            onClick={onClose}
+            aria-label="Close modal">
+            ×
+          </button>
+        </div>
+        <div className="java-to-assembly__modal-code">
+          <SyntaxHighlighter language="java" style={vscDarkPlus}>
+            {code}
+          </SyntaxHighlighter>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-const WriteAssembly: React.FC<SubTaskComponentProps> = ({
+
+const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
   taskMeta,
 }) => {
-  const rounds: WriteAssemblyTask[] = useMemo(() => generateRounds(), []);
+  const rounds: JavaToAssemblyTask[] = useMemo(() => generateRounds(), []);
 
   const [roundIndex, setRoundIndex] = useState<number>(0);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
-  
+  const [showModal, setShowModal] = useState<boolean>(false);
+
   // State for placed commands (slots in the program)
-  const [placedCommands, setPlacedCommands] = useState<(AssemblyCommand | null)[]>([]);
-  
+  const [placedCommands, setPlacedCommands] = useState<(AssemblyCommand | null)[]>(
+    [],
+  );
+
   // State for available commands
   const [availableCommands, setAvailableCommands] = useState<AssemblyCommand[]>([]);
-  
+
+  // Track which available command index is placed in which slot (slotIndex -> availableIndex)
+  const [slotToAvailableMap, setSlotToAvailableMap] = useState<Map<number, number>>(
+    new Map(),
+  );
+
   // Track which available command is selected for click-to-assign
-  const [selectedCommandIndex, setSelectedCommandIndex] = useState<number | null>(null);
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState<number | null>(
+    null,
+  );
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
@@ -65,15 +108,16 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   // Initialize round state when round changes
   useEffect(() => {
     if (!current) return;
-    
+
     // Initialize slots based on solution length
-    const slots = new Array(current.commands.length).fill(null);
+    const slots = new Array(current.assembler.length).fill(null);
     setPlacedCommands(slots);
-    
+
     // Generate available commands
     const available = generateAvailableCommands(current);
     setAvailableCommands(available);
-    
+
+    setSlotToAvailableMap(new Map());
     setEvaluated(false);
     setSelectedCommandIndex(null);
   }, [roundIndex, current]);
@@ -82,21 +126,23 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setHasStarted(true);
     reset();
     start();
-    
+
     // Initialize first round
-    const slots = new Array(current.commands.length).fill(null);
+    const slots = new Array(current.assembler.length).fill(null);
     setPlacedCommands(slots);
     const available = generateAvailableCommands(current);
     setAvailableCommands(available);
+    setSlotToAvailableMap(new Map());
     setEvaluated(false);
     setSelectedCommandIndex(null);
   }, [reset, start, current]);
 
   const resetTask = useCallback(() => {
-    const slots = new Array(current.commands.length).fill(null);
+    const slots = new Array(current.assembler.length).fill(null);
     setPlacedCommands(slots);
     const available = generateAvailableCommands(current);
     setAvailableCommands(available);
+    setSlotToAvailableMap(new Map());
     setEvaluated(false);
     setSelectedCommandIndex(null);
     reset();
@@ -107,20 +153,22 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setEvaluated(true);
     stop();
 
+    const correctCommands = getTaskCommands(current);
+
     // Count correct placements
     let correct = 0;
-    for (let i = 0; i < current.commands.length; i++) {
+    for (let i = 0; i < correctCommands.length; i++) {
       const placed = placedCommands[i];
-      const expected = current.commands[i];
+      const expected = correctCommands[i];
       if (placed && placed.op === expected.op && placed.arg === expected.arg) {
         correct++;
       }
     }
 
-    const total = current.commands.length;
+    const total = correctCommands.length;
     const wrong = total - correct;
     const points = calculateScore(correct, wrong);
-    
+
     const difficulty = DIFFICULTY_MAP[current.difficulty] || Difficulty.Easy;
 
     setStageScores(prev => {
@@ -158,8 +206,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       });
     }
   }, [
-    current.commands,
-    current.difficulty,
+    current,
     placedCommands,
     stop,
     getElapsed,
@@ -174,6 +221,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     if (roundIndex < rounds.length - 1) {
       const nextIndex = roundIndex + 1;
       setRoundIndex(nextIndex);
+      setSlotToAvailableMap(new Map());
       setEvaluated(false);
       setSelectedCommandIndex(null);
       start();
@@ -183,12 +231,10 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   // Check if a command from available list is placed
   const isCommandPlaced = useCallback(
     (availableIndex: number) => {
-      const cmd = availableCommands[availableIndex];
-      return placedCommands.some(
-        placed => placed && placed.op === cmd.op && placed.arg === cmd.arg,
-      );
+      // Check if this specific index is used in any slot
+      return Array.from(slotToAvailableMap.values()).includes(availableIndex);
     },
-    [availableCommands, placedCommands],
+    [slotToAvailableMap],
   );
 
   // Handle click on available command
@@ -205,12 +251,20 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
       // Select this command and auto-assign to first empty slot
       const firstEmptySlotIndex = placedCommands.findIndex(cmd => cmd === null);
-      
+
       if (firstEmptySlotIndex !== -1) {
         const cmd = availableCommands[availableIndex];
         const newPlaced = [...placedCommands];
         newPlaced[firstEmptySlotIndex] = cmd;
         setPlacedCommands(newPlaced);
+
+        // Update the mapping
+        setSlotToAvailableMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(firstEmptySlotIndex, availableIndex);
+          return newMap;
+        });
+
         setSelectedCommandIndex(null);
       } else {
         // No empty slots, just select
@@ -232,6 +286,13 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       const newPlaced = [...placedCommands];
       newPlaced[slotIndex] = null;
       setPlacedCommands(newPlaced);
+
+      // Remove from mapping
+      setSlotToAvailableMap(prev => {
+        const newMap = new Map(prev);
+        newMap.delete(slotIndex);
+        return newMap;
+      });
     },
     [placedCommands],
   );
@@ -254,6 +315,14 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
         const cmd = availableCommands[availableIndex];
         const newPlaced = [...placedCommands];
+
+        // If target slot already has a command, we need to remove that mapping first
+        setSlotToAvailableMap(prev => {
+          const newMap = new Map(prev);
+          newMap.set(slotIndex, availableIndex);
+          return newMap;
+        });
+
         newPlaced[slotIndex] = cmd;
         setPlacedCommands(newPlaced);
         setSelectedCommandIndex(null);
@@ -271,6 +340,27 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
         newPlaced[fromSlotIndex] = newPlaced[toSlotIndex];
         newPlaced[toSlotIndex] = temp;
         setPlacedCommands(newPlaced);
+
+        // Swap the mappings as well
+        setSlotToAvailableMap(prev => {
+          const newMap = new Map(prev);
+          const fromAvailableIndex = prev.get(fromSlotIndex);
+          const toAvailableIndex = prev.get(toSlotIndex);
+
+          if (fromAvailableIndex !== undefined) {
+            newMap.set(toSlotIndex, fromAvailableIndex);
+          } else {
+            newMap.delete(toSlotIndex);
+          }
+
+          if (toAvailableIndex !== undefined) {
+            newMap.set(fromSlotIndex, toAvailableIndex);
+          } else {
+            newMap.delete(fromSlotIndex);
+          }
+
+          return newMap;
+        });
       }
     },
     [availableCommands, placedCommands, isCommandPlaced],
@@ -317,7 +407,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       });
     } else {
       onHudChange?.({
-        subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
+        subtitle: 'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen',
         progress: {current: roundIndex + 1, total: rounds.length},
         requestTimer: isRunning ? 'start' : undefined,
       });
@@ -333,19 +423,17 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   }, [onControlsChange, onHudChange]);
 
   return (
-    <div className="write-assembly">
+    <div className="java-to-assembly">
       {!hasStarted ? (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Assembler-Programm schreiben"
+            statusTitle="Java → Assembler"
             statusDescription={
               <>
-                Teste dein Wissen über Assembler-Programme.
-                <br />
-                Sortiere die Befehle in die richtige Reihenfolge.
+                Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen.
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Schreibe alle Programme korrekt.
+                <strong>Deine Mission:</strong> Übersetze alle Programme korrekt.
               </>
             }
             taskCount={rounds.length}
@@ -357,77 +445,111 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
           />
         </div>
       ) : (
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-          <div className="write-assembly__task-header">
-            <h3 className="write-assembly__program-title">
-              Assembler-Operation
-            </h3>
-            <div className="write-assembly__description">
-              {current.prosa_text}
-            </div>
-          </div>
-
-          <div className="write-assembly__content">
-            <div className="write-assembly__left">
-              <div className="write-assembly__available">
-                <h3 className="write-assembly__available-title">
-                  Verfügbare Befehle
-                </h3>
-                <p className="write-assembly__available-subtitle">
-                  Wähle Befehle aus dieser Liste
-                </p>
-                <div className="write-assembly__commands">
-                  {availableCommands.map((command, index) => (
-                    <AssemblyDraggableCommand
-                      key={index}
-                      id={`available-${index}`}
-                      command={command}
-                      isPlaced={isCommandPlaced(index)}
-                      isSelected={selectedCommandIndex === index}
-                      onClick={() => handleCommandClick(index)}
-                      disabled={evaluated}
-                      className="write-assembly__command"
-                    />
-                  ))}
+        <>
+          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+            <div className="java-to-assembly__content">
+              <div className="java-to-assembly__left">
+                <div className="java-to-assembly__java-section">
+                  <div className="java-to-assembly__java-header">
+                    <h3 className="java-to-assembly__java-title">Java Code</h3>
+                    <button
+                      className="java-to-assembly__maximize-btn"
+                      onClick={() => setShowModal(true)}
+                      aria-label="Maximize code"
+                      title="Code vergrößern">
+                      <svg
+                        width="18"
+                        height="18"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round">
+                        <polyline points="15 3 21 3 21 9"></polyline>
+                        <polyline points="9 21 3 21 3 15"></polyline>
+                        <line x1="21" y1="3" x2="14" y2="10"></line>
+                        <line x1="3" y1="21" x2="10" y2="14"></line>
+                      </svg>
+                    </button>
+                  </div>
+                  <div className="java-to-assembly__java-topic">{current.topic}</div>
+                  <div className="java-to-assembly__java-code">
+                    <SyntaxHighlighter language="java" style={vscDarkPlus}>
+                      {current.java}
+                    </SyntaxHighlighter>
+                  </div>
                 </div>
               </div>
-            </div>
 
-            <div className="write-assembly__right">
-              <div className="write-assembly__program">
-                <h3 className="write-assembly__slots-title">Dein Programm</h3>
-                <div className="write-assembly__slots">
-                  {placedCommands.map((command, index) => {
-                    const expected = current.commands[index];
-                    const isCorrect =
-                      evaluated &&
-                      command !== null &&
-                      command.op === expected.op &&
-                      command.arg === expected.arg;
-                    const isWrong = evaluated && !isCorrect;
-
-                    return (
-                      <AssemblyDroppableSlot
+              <div className="java-to-assembly__middle">
+                <div className="java-to-assembly__available">
+                  <h3 className="java-to-assembly__available-title">
+                    Verfügbare Befehle
+                  </h3>
+                  <div className="java-to-assembly__commands">
+                    {availableCommands.map((command, index) => (
+                      <AssemblyDraggableCommand
                         key={index}
-                        index={index}
-                        label={String(index)}
+                        id={`available-${index}`}
                         command={command}
-                        isCorrect={isCorrect}
-                        isWrong={isWrong}
-                        evaluated={evaluated}
-                        onRemove={() => handleRemoveCommand(index)}
-                        className="write-assembly__slot-row"
+                        isPlaced={isCommandPlaced(index)}
+                        isSelected={selectedCommandIndex === index}
+                        onClick={() => handleCommandClick(index)}
+                        disabled={evaluated}
+                        className="java-to-assembly__command"
                       />
-                    );
-                  })}
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="java-to-assembly__right">
+                <div className="java-to-assembly__program">
+                  <h3 className="java-to-assembly__slots-title">Dein Programm</h3>
+                  <div className="java-to-assembly__slots">
+                    {placedCommands.map((command, index) => {
+                      const correctCommands = getTaskCommands(current);
+                      const expected = correctCommands[index];
+                      const isCorrect =
+                        evaluated &&
+                        command !== null &&
+                        command.op === expected.op &&
+                        command.arg === expected.arg;
+                      const isWrong = evaluated && !isCorrect;
+
+                      return (
+                        <AssemblyDroppableSlot
+                          key={index}
+                          index={index}
+                          label={current.addresses[index]}
+                          command={command}
+                          isCorrect={isCorrect}
+                          isWrong={isWrong}
+                          evaluated={evaluated}
+                          onRemove={() => handleRemoveCommand(index)}
+                          className="java-to-assembly__slot-row"
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        </DndContext>
+          </DndContext>
+
+          {showModal && (
+            <JavaCodeModal
+              code={current.java}
+              topic={current.topic}
+              onClose={() => setShowModal(false)}
+            />
+          )}
+        </>
       )}
     </div>
   );
 };
 
-export default WriteAssembly;
+export default JavaToAssembly;
+

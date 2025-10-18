@@ -179,6 +179,15 @@ const AppWithNavbar: React.FC = () => {
           }
         />
 
+        <Route
+          path="/task/java-to-assembly"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage initialSubTask={TaskId.JavaToAssembly} />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Root Route - Redirect basierend auf Auth Status */}
         <Route path="/" element={<Navigate to="/dashboard" replace />} />
 

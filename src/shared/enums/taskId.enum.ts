@@ -10,6 +10,7 @@ export enum TaskId {
   VonNeumann = 'von-neumann',
   ReadAssembly = 'read-assembly',
   WriteAssembly = 'write-assembly',
+  JavaToAssembly = 'java-to-assembly',
   HelperPotenzrechner = 'helper-potenzrechner',
   HelperUmrechnungshelfer = 'helper-umrechnungshelfer',
 }
