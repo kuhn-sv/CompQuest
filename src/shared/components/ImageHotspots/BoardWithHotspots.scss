@@ -1,6 +1,6 @@
-.board-with-hotspots { 
+.board-with-hotspots {
   width: 100%;
-  max-width: 900px; /* optional constraint, adjust where used */
+  max-width: 900px;
   margin: 0 auto;
 }
 .board-svg {
@@ -9,41 +9,45 @@
   height: auto;
 }
 
-.hotspot-group { 
+.hotspot-group {
   cursor: pointer;
   outline: none;
 }
 .hotspot {
-  /* Use CSS primary color if provided, fallback to tomato */
-  fill: var(--primary, rgba(255, 99, 71, 0.95));
-  stroke: #fff;
+  fill: var(--primary, var(--secondary));
+  stroke: var(--text);
   stroke-width: 3px;
-  transition: stroke-width 0.12s ease, filter 0.12s ease, opacity 0.12s ease;
-  transform-origin: center center;
+  transition:
+    stroke-width 0.12s ease,
+    filter 0.12s ease,
+    opacity 0.12s ease;
+  /* Pulse Animation */
+  animation: hotspotPulse 2s ease-in-out infinite;
 }
 .hotspot-ring {
   fill: none;
-  stroke: color-mix(in srgb, var(--primary, rgba(255,99,71,0.95)) 60%, transparent);
+  stroke: color-mix(in srgb, var(--primary, var(--secondary)) 60%, transparent);
   stroke-width: 2px;
   opacity: 0.75;
   transition: opacity 0.2s ease;
+  /* Ring Animation */
+  animation: hotspotRingPulse 2s ease-out infinite;
 }
-/* Remove size-transform on hover to avoid mouse jitter/evade issues. */
+
 .hotspot-group:hover .hotspot,
 .hotspot-group:focus .hotspot {
-  /* keep position stable; visually emphasize using shadow and slightly thicker stroke */
-  filter: drop-shadow(0 0 6px var(--primary, rgba(255,99,71,0.95)));
+  filter: drop-shadow(0 0 6px var(--primary, var(--secondary)));
   stroke-width: 4px;
+  animation-play-state: paused;
 }
 .hotspot-group:hover .hotspot-ring,
 .hotspot-group:focus .hotspot-ring {
   opacity: 1;
+  animation-play-state: paused;
 }
 
-/* focus-visible keyboard outline */
 .hotspot-group:focus {
-  /* add an accessible focus ring using drop-shadow */
-  filter: drop-shadow(0 0 6px rgba(255,99,71,0.85));
+  filter: drop-shadow(0 0 6px var(--secondary));
 }
 
 /* simple modal for hotspot details */
@@ -58,16 +62,16 @@
 .bw-hotspot-modal__backdrop {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: var(--background);
 }
 .bw-hotspot-modal__content {
   position: relative;
-  background: #fff;
-  color: #111;
+  background: var(--text);
+  color: var(--background);
   padding: 18px;
   border-radius: 8px;
   width: min(520px, 90%);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
   z-index: 2;
 }
 .bw-hotspot-modal__close {
@@ -78,4 +82,28 @@
   border: none;
   font-size: 22px;
   cursor: pointer;
+}
+
+/* Pulse Animationen - nur Radius ändern, keine Position */
+@keyframes hotspotPulse {
+  0%,
+  100% {
+    r: 26px;
+    opacity: 0.85;
+  }
+  50% {
+    r: 30px;
+    opacity: 1;
+  }
+}
+
+@keyframes hotspotRingPulse {
+  0% {
+    r: 40px;
+    opacity: 0.75;
+  }
+  100% {
+    r: 55px;
+    opacity: 0;
+  }
 }
