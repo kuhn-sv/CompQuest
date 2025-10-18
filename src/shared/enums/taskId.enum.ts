@@ -9,6 +9,7 @@ export enum TaskId {
   Quiz = 'quiz',
   VonNeumann = 'von-neumann',
   ReadAssembly = 'read-assembly',
+  WriteAssembly = 'write-assembly',
   HelperPotenzrechner = 'helper-potenzrechner',
   HelperUmrechnungshelfer = 'helper-umrechnungshelfer',
 }

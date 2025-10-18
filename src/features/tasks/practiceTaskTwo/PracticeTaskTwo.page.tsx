@@ -2,7 +2,7 @@ import React, {useMemo, useState} from 'react';
 import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
 import type {SubTaskConfig, SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
-import {VonNeumann, ReadAssembly} from './components';
+import {VonNeumann, ReadAssembly, WriteAssembly} from './components';
 
 interface PracticeTaskTwoPageProps {
   initialSubTask?: TaskId;
@@ -30,6 +30,15 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Lies den Assembler-Code und beantworte die Fragen korrekt.',
       component: ReadAssembly as React.ComponentType<SubTaskComponentProps>,
+      chapters: [],
+      timeLimit: 8 * 60 * 1000,
+    },
+    {
+      id: TaskId.WriteAssembly,
+      title: 'Assembler‑Programm schreiben',
+      description:
+        'Sortiere die Befehle in die richtige Reihenfolge.',
+      component: WriteAssembly as React.ComponentType<SubTaskComponentProps>,
       chapters: [],
       timeLimit: 8 * 60 * 1000,
     },
