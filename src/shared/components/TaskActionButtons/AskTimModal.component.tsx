@@ -61,7 +61,6 @@ const AskTimModal: React.FC<AskTimModalProps> = ({open, onClose, taskMeta}) => {
       if (data.error) throw new Error(data.error);
       setAnswer(data.answer ?? 'Ich konnte leider keine Antwort erzeugen.');
 
-      console.log('task meta', taskMeta);
       // Save request/response to Supabase
       if (taskMeta?.id && taskMeta?.title) {
         try {

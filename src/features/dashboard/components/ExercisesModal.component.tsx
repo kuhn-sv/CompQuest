@@ -21,6 +21,36 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
   const [missionsWithProgress, setMissionsWithProgress] =
     useState<Exercise[]>(missions);
   const [helpersList, setHelpersList] = useState<Exercise[]>(helpers);
+  // accordion state: which panels are open
+  const [openPanels, setOpenPanels] = useState<Record<string, boolean>>({
+    '1-zahlendarstellung': false,
+    '2-mikroprozessortechnik': false,
+  });
+
+  // When the modal opens, ensure all accordion panels are closed by default
+  useEffect(() => {
+    if (show) {
+      setOpenPanels({
+        '1-zahlendarstellung': false,
+        '2-mikroprozessortechnik': false,
+      });
+    }
+  }, [show]);
+
+  // Micro missions (local list) - include VonNeumannQuiz
+  const defaultMicroMissions: Exercise[] = [
+    {
+      id: 'VonNeumannQuiz',
+      title: 'VonNeumannQuiz',
+      description: 'Quiz zur Von-Neumann-Architektur',
+      path: '/task/von-neumann',
+      progressPercent: undefined,
+      disabled: false,
+    },
+  ];
+  const [microMissions] = useState<Exercise[]>(defaultMicroMissions);
+  const [microMissionsWithProgress, setMicroMissionsWithProgress] =
+    useState<Exercise[]>(defaultMicroMissions);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,9 +81,10 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
     if (!show) return; // avoid work when modal hidden
     (async () => {
-      const [m, h] = await Promise.all([
+      const [m, h, mm] = await Promise.all([
         loadProgress(missions, true),
         loadProgress(helpers, false),
+        loadProgress(microMissions, true),
       ]);
       // Inject two placeholder items (hard-coded) for upcoming content
       const placeholderMissions: Exercise[] = [
@@ -79,17 +110,24 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
       const missionsWithPlaceholders = [...m, ...placeholderMissions];
       const helpersWithPlaceholders = [...h, ...placeholderHelpers];
+      const microWithPlaceholders = [...mm];
       if (!cancelled) {
         setMissionsWithProgress(missionsWithPlaceholders);
         setHelpersList(helpersWithPlaceholders);
+        setMicroMissionsWithProgress(microWithPlaceholders);
       }
     })();
     return () => {
       cancelled = true;
     };
-  }, [show, missions, helpers]);
+  }, [show, missions, helpers, microMissions]);
 
   if (!show) return null;
+
+  const togglePanel = (key: string) => {
+    setOpenPanels(prev => ({...prev, [key]: !prev[key]}));
+  };
+
   return (
     <div className="dashboard__overlay">
       <div className="dashboard__overlay-content">
@@ -103,16 +141,62 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
           </button>
         </div>
 
-        <div className="dashboard__section">
-          <div className="dashboard__section-title">Missionen</div>
-          <ExercisesList exercises={missionsWithProgress} />
-        </div>
+        <div className="dashboard__accordion">
+          {/* Accordion 1: Zahlendarstellung - contains missions + helpers (current behavior) */}
+          <div className="dashboard__accordion-item">
+            <button
+              className="dashboard__accordion-header"
+              onClick={() => togglePanel('1-zahlendarstellung')}
+              aria-expanded={!!openPanels['1-zahlendarstellung']}>
+              <span>1. Zahlendarstellung</span>
+              <span className="dashboard__accordion-toggle">
+                {openPanels['1-zahlendarstellung'] ? '▾' : '▸'}
+              </span>
+            </button>
+            <div
+              className={`dashboard__accordion-body ${openPanels['1-zahlendarstellung'] ? 'is-open' : ''}`}
+              aria-hidden={!openPanels['1-zahlendarstellung']}>
+              <div className="dashboard__section">
+                <div className="dashboard__section-title">Missionen</div>
+                <ExercisesList exercises={missionsWithProgress} />
+              </div>
 
-        <div className="dashboard__section-separator" />
+              <div className="dashboard__section-separator" />
 
-        <div className="dashboard__section">
-          <div className="dashboard__section-title">Hilfsmodule</div>
-          <ExercisesList exercises={helpersList} />
+              <div className="dashboard__section">
+                <div className="dashboard__section-title">Hilfsmodule</div>
+                <ExercisesList exercises={helpersList} />
+              </div>
+            </div>
+          </div>
+
+          {/* Accordion 2: Mikroprozessortechnik - placeholder content for now */}
+          <div className="dashboard__accordion-item">
+            <button
+              className="dashboard__accordion-header"
+              onClick={() => togglePanel('2-mikroprozessortechnik')}
+              aria-expanded={!!openPanels['2-mikroprozessortechnik']}>
+              <span>2. Mikroprozessortechnik</span>
+              <span className="dashboard__accordion-toggle">
+                {openPanels['2-mikroprozessortechnik'] ? '▾' : '▸'}
+              </span>
+            </button>
+            <div
+              className={`dashboard__accordion-body ${openPanels['2-mikroprozessortechnik'] ? 'is-open' : ''}`}
+              aria-hidden={!openPanels['2-mikroprozessortechnik']}>
+              <div className="dashboard__section">
+                <div className="dashboard__section-title">Missionen</div>
+                <ExercisesList exercises={microMissionsWithProgress} />
+              </div>
+
+              <div className="dashboard__section-separator" />
+
+              <div className="dashboard__section">
+                <div className="dashboard__section-title">Hilfsmodule</div>
+                <ExercisesList exercises={[] /* no helpers yet */} />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
