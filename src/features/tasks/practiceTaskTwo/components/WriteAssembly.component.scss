@@ -1,0 +1,187 @@
+@use '../../../../styles/_mixins' as *;
+@use './shared/assembly.shared';
+
+.write-assembly {
+  padding: 0;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.write-assembly__task-header {
+  padding: 1.5rem 1.5rem 0 1.5rem;
+  flex-shrink: 0;
+}
+
+.write-assembly__content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  padding: 1rem 1.5rem 1.5rem 1.5rem;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  position: relative;
+}
+
+.write-assembly__left {
+  @include custom-scrollbar;
+  flex: 1 1 45%;
+  min-width: 300px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.write-assembly__right {
+  @include custom-scrollbar;
+  flex: 1 1 45%;
+  min-width: 300px;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.write-assembly__program-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--text);
+}
+
+.write-assembly__description {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  margin-bottom: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.write-assembly__slots-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: var(--text);
+}
+
+.write-assembly__slots {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* Slot styles are inherited from assembly.shared.scss */
+.write-assembly__slot-row {
+  @extend .assembly__slot-row;
+}
+
+.write-assembly__slot-index {
+  @extend .assembly__slot-label;
+  min-width: 1.25rem; /* Override for numeric indices */
+}
+
+.write-assembly__slot {
+  @extend .assembly__slot;
+}
+
+.write-assembly__slot-placeholder {
+  @extend .assembly__slot-placeholder;
+}
+
+.write-assembly__placed-command {
+  @extend .assembly__placed-command;
+}
+
+.write-assembly__remove-btn {
+  @extend .assembly__remove-btn;
+}
+
+.write-assembly__available-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--text);
+}
+
+.write-assembly__available-subtitle {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  margin: 0 0 1rem 0;
+}
+
+.write-assembly__available {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.write-assembly__commands {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-content: flex-start;
+}
+
+/* Command styles are inherited from assembly.shared.scss via shared component */
+
+/* Responsive adjustments */
+@media (max-height: 1150px) {
+  .write-assembly__slots {
+    display: block;
+    column-count: 2;
+    column-gap: 0.5rem;
+  }
+  
+  .write-assembly__slot-row {
+    break-inside: avoid;
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 0.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .write-assembly__content {
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  .write-assembly__left,
+  .write-assembly__right {
+    flex: 1 1 100%;
+    max-height: none;
+  }
+
+  .write-assembly__slots {
+    display: flex;
+    flex-direction: column;
+    column-count: auto;
+  }
+}
+
+
+/* Dark mode enhancements */
+@media (prefers-color-scheme: dark) {
+  .write-assembly__description {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .write-assembly__slot {
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  .write-assembly__command {
+    background: rgba(0, 0, 0, 0.3);
+  }
+}
+

@@ -1,0 +1,130 @@
+
+.von-quizz {
+    padding: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.von-quizz__list {
+  list-style: none;
+  padding: 1rem 12px;
+  margin: 0 0 1rem 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  width: 90%;
+  align-self: center;
+}
+
+.von-quizz__item {
+  flex: 1 1 calc(50% - 0.5rem);
+  min-width: 220px;
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--surface-border);
+  border-radius: 10px;
+  gap: 0.5rem;
+  height: 50px;
+}
+
+.von-quizz__btn {
+  flex: 1 1 auto;
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+  transition: box-shadow 0.12s ease, border-color 0.12s ease;
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.von-quizz__btn:hover {
+  background: var(--highlight);
+}
+
+.von-quizz__label {
+  display: inline-block;
+}
+
+/* Radio indicator */
+.von-quizz__radio {
+  width: 18px;
+  height: 18px;
+  min-width: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--primary);
+  background: transparent;
+  margin-right: 0.75rem;
+  box-sizing: border-box;
+  transition: background-color 0.12s ease, border-color 0.12s ease, transform 0.12s ease;
+}
+
+.von-quizz__radio.is-selected {
+  background: var(--primary);
+  border-color: var(--primary70);
+  box-shadow: 0 0 0 4px var(--highlight);
+  transform: scale(1.02);
+}
+
+
+/* Highlight selected items after submission */
+.von-quizz.is-submitted .von-quizz__item.is-correct {
+  border-color: var(--success);
+}
+
+.von-quizz.is-submitted .von-quizz__item.is-correct .von-quizz__btn {
+  background: rgba(100, 229, 147, 0.06); /* subtle success tint */
+}
+
+.von-quizz.is-submitted .von-quizz__item.is-wrong {
+  border-color: var(--error);
+}
+
+.von-quizz.is-submitted .von-quizz__item.is-wrong .von-quizz__btn {
+  background: rgba(255, 77, 109, 0.04); /* subtle error tint */
+}
+
+.von-quizz__controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0 1rem;
+}
+
+.von-quizz__hint {
+  color: var(--text-tertiary);
+}
+
+.von-quizz__submit:disabled {
+  background: var(--primary10);
+  color: var(--text10);
+  cursor: not-allowed;
+}
+
+.von-quizz__feedback {
+  margin-top: 0.75rem;
+  padding: 0 1rem 1rem 1rem;
+}
+
+.von-quizz__success {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.von-quizz__fail {
+  color: var(--warning);
+  font-weight: 600;
+}

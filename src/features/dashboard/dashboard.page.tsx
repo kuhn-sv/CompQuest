@@ -1,5 +1,4 @@
 import React, {useState, useEffect, Suspense} from 'react';
-// import { Link } from 'react-router-dom';
 import ExercisesModal from './components/ExercisesModal.component';
 import {useAuth} from '../auth';
 import './dashboard.page.scss';
@@ -156,7 +155,7 @@ const DashboardPage: React.FC = () => {
         onClose={() => setShowExercises(false)}
         missions={missions}
         helpers={helpers}
-        topicTitle="1. Zahlendarstellung"
+        topicTitle="Aufgabenübersicht"
       />
     </div>
   );

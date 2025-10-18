@@ -1,0 +1,46 @@
+// Shared SCSS mixins for the CompQuest application
+
+// Custom scrollbar styling for consistent appearance across components
+@mixin custom-scrollbar {
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 0.5rem;
+  
+  /* Mobile touch scrolling support */
+  -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
+  overscroll-behavior-y: contain;
+  overscroll-behavior-x: none;
+  
+  /* Webkit browsers (Chrome, Safari, Edge) - Always visible scrollbar */
+  &::-webkit-scrollbar {
+    width: 12px;
+    -webkit-appearance: none;
+  }
+  
+  &::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 6px;
+    margin: 4px 0;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.4);
+    border-radius: 6px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    
+    &:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+    
+    &:active {
+      background: rgba(255, 255, 255, 0.6);
+    }
+  }
+  
+  /* Firefox - Always visible scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.4) rgba(255, 255, 255, 0.1);
+}
+

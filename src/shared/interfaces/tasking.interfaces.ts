@@ -1,5 +1,15 @@
 export type ArithmeticMode = 'positive' | 'twos-complement';
 
+// Configuration for a subtask
+export interface SubTaskConfig {
+  id: string;
+  title: string;
+  description: string;
+  component: React.ComponentType<SubTaskComponentProps>;
+  chapters?: { title: string; content?: string }[];
+  timeLimit?: number; // milliseconds
+}
+
 // Props that any task-like child component can receive from the container host
 export interface SubTaskComponentProps {
   taskProgress?: {

@@ -1,0 +1,327 @@
+@use '../../../../styles/_mixins' as *;
+@use './shared/assembly.shared';
+
+.java-to-assembly {
+  padding: 0;
+  width: 100%;
+  max-width: 1400px;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  position: relative;
+  align-self: stretch;
+}
+
+.java-to-assembly__content {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+  padding: 0 1.5rem 1.5rem 1.5rem;
+  flex: 1;
+  min-height: 0;
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  height: 100%;
+}
+
+.java-to-assembly__left,
+.java-to-assembly__middle,
+.java-to-assembly__right {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.java-to-assembly__left,
+.java-to-assembly__middle {
+  @include custom-scrollbar;
+  overflow-y: auto;
+}
+
+.java-to-assembly__right {
+  overflow: visible;
+}
+
+/* Java Code Section */
+.java-to-assembly__java-section {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.5rem;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.java-to-assembly__java-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.java-to-assembly__java-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--text);
+}
+
+.java-to-assembly__maximize-btn {
+  background: rgba(96, 165, 250, 0.15);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+  border-radius: 50%;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary, #60a5fa);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(96, 165, 250, 0.25);
+    border-color: rgba(96, 165, 250, 0.5);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+  }
+}
+
+.java-to-assembly__java-topic {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.java-to-assembly__java-code {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  border-radius: 0.375rem;
+  
+  pre {
+    margin: 0 !important;
+    padding: 1rem !important;
+    font-size: 0.85rem !important;
+    border-radius: 0.375rem !important;
+    background: rgba(0, 0, 0, 0.4) !important;
+  }
+
+  code {
+    font-family: 'Courier New', Consolas, Monaco, monospace !important;
+  }
+}
+
+/* Available Commands Section */
+.java-to-assembly__available {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.java-to-assembly__available-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem 0;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.java-to-assembly__commands {
+  @include custom-scrollbar;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-content: flex-start;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Command styles are inherited from assembly.shared.scss via shared component */
+
+/* Program Section */
+.java-to-assembly__program {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+
+.java-to-assembly__slots-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 0.75rem 0;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.java-to-assembly__slots {
+  @include custom-scrollbar;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 0.5rem;
+}
+
+/* Slot styles are inherited from assembly.shared.scss with .assembly__ prefix */
+/* Map them to java-to-assembly specific class names */
+.java-to-assembly__slot-row {
+  @extend .assembly__slot-row;
+}
+
+.java-to-assembly__slot-address {
+  @extend .assembly__slot-label;
+}
+
+.java-to-assembly__slot {
+  @extend .assembly__slot;
+}
+
+.java-to-assembly__slot-placeholder {
+  @extend .assembly__slot-placeholder;
+}
+
+.java-to-assembly__placed-command {
+  @extend .assembly__placed-command;
+}
+
+.java-to-assembly__remove-btn {
+  @extend .assembly__remove-btn;
+}
+
+/* Modal Styles */
+.java-to-assembly__modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 2rem;
+  box-sizing: border-box;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.java-to-assembly__modal-content {
+  background: var(--background-secondary, #1e293b);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 0.75rem;
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.java-to-assembly__modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 1.5rem 1rem 1.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+}
+
+.java-to-assembly__modal-close {
+  background: rgba(248, 113, 113, 0.2);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  border-radius: 50%;
+  width: 2.5rem;
+  height: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--error, #f87171);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    background: rgba(248, 113, 113, 0.3);
+    border-color: rgba(248, 113, 113, 0.6);
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+.java-to-assembly__modal-code {
+  flex: 1;
+  overflow: auto;
+  padding: 1.5rem;
+
+  pre {
+    margin: 0 !important;
+    padding: 1.5rem !important;
+    font-size: 1.1rem !important;
+    line-height: 1.6 !important;
+    border-radius: 0.5rem !important;
+    background: rgba(0, 0, 0, 0.5) !important;
+  }
+
+  code {
+    font-family: 'Courier New', Consolas, Monaco, monospace !important;
+  }
+}

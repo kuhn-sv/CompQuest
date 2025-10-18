@@ -19,6 +19,7 @@
   padding: 2rem;
   max-width: 1400px;
   width: 90vw;
+  min-height: 70vh;
   max-height: 70vh;
   overflow-y: auto;
   position: relative;
@@ -107,5 +108,46 @@
     margin: 1rem;
     width: calc(100vw - 2rem);
     padding: 1.5rem;
+  }
+}
+
+.dashboard__accordion {
+  .dashboard__accordion-item {
+    border: 1px solid var(--surface-border);
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+
+    .dashboard__accordion-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      background: transparent;
+      border: none;
+      padding: 0.75rem 1rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text);
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .dashboard__accordion-toggle {
+      margin-left: 1rem;
+      color: var(--text-secondary);
+    }
+
+    .dashboard__accordion-body {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.25s ease, padding 0.25s ease;
+      padding: 0 1rem;
+
+      &.is-open {
+        max-height: 2000px; // generous max to allow content
+        padding: 1rem;
+      }
+    }
   }
 }

@@ -7,6 +7,10 @@ export enum TaskId {
   Complements = 'complements',
   TwosComplementArithmetic = 'twos-complement-arithmetic',
   Quiz = 'quiz',
+  VonNeumann = 'von-neumann',
+  ReadAssembly = 'read-assembly',
+  WriteAssembly = 'write-assembly',
+  JavaToAssembly = 'java-to-assembly',
   HelperPotenzrechner = 'helper-potenzrechner',
   HelperUmrechnungshelfer = 'helper-umrechnungshelfer',
 }

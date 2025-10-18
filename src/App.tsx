@@ -14,6 +14,7 @@ import DashboardPage from './features/dashboard/dashboard.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
+import PracticeTaskTwoPage from './features/tasks/practiceTaskTwo/PracticeTaskTwo.page';
 import HelperModulePage from './features/helpers/HelperModule.page';
 import {TaskId} from './shared/enums/taskId.enum';
 
@@ -94,6 +95,15 @@ const AppWithNavbar: React.FC = () => {
           }
         />
 
+        <Route
+          path="/practice-task-two"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage />
+            </ProtectedRoute>
+          }
+        />
+
         {/* Direct links into specific Practice Task One subtasks */}
         <Route
           path="/task/number-system"
@@ -138,6 +148,42 @@ const AppWithNavbar: React.FC = () => {
           element={
             <ProtectedRoute>
               <PracticeTaskOnePage initialSubTask={TaskId.Quiz} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/task/von-neumann"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage initialSubTask={TaskId.VonNeumann} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/task/read-assembly"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage initialSubTask={TaskId.ReadAssembly} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/task/write-assembly"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage initialSubTask={TaskId.WriteAssembly} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/task/java-to-assembly"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskTwoPage initialSubTask={TaskId.JavaToAssembly} />
             </ProtectedRoute>
           }
         />

@@ -101,7 +101,6 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
       // clear the input field after successful send
       setQuestion('');
 
-      console.log('task meta', taskMeta);
       // Save request/response to Supabase
       if (taskMeta?.id && taskMeta?.title) {
         try {
