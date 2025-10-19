@@ -26,14 +26,27 @@ const CPU_COMPONENTS = ['Steuerwerk', 'Rechenwerk'];
 const TRANSPORT_COMPONENT = 'Transportmedium';
 const BOTTOM_COMPONENTS = ['RAM', 'ROM', 'Peripherie'];
 
-const DraggableComponent: React.FC<{id: string; label: string; isPlaced: boolean}> = ({
-  id,
-  label,
-  isPlaced,
-}) => {
+// Define the order of drop zones (left to right, top to bottom)
+const DROP_ZONE_ORDER = [
+  DROP_ZONES.CPU_LEFT,
+  DROP_ZONES.CPU_RIGHT,
+  DROP_ZONES.TRANSPORT,
+  DROP_ZONES.BOTTOM_LEFT,
+  DROP_ZONES.BOTTOM_CENTER,
+  DROP_ZONES.BOTTOM_RIGHT,
+];
+
+const DraggableComponent: React.FC<{
+  id: string;
+  label: string;
+  isPlaced: boolean;
+  isSelected?: boolean;
+  onClick?: () => void;
+  disabled?: boolean;
+}> = ({id, label, isPlaced, isSelected, onClick, disabled}) => {
   const {attributes, listeners, setNodeRef, transform, isDragging} = useDraggable({
     id,
-    disabled: isPlaced,
+    disabled: isPlaced || disabled,
   });
 
   const style = transform
@@ -46,7 +59,8 @@ const DraggableComponent: React.FC<{id: string; label: string; isPlaced: boolean
     <div
       ref={setNodeRef}
       style={style}
-      className={`draggable-component ${isPlaced ? 'is-placed' : ''} ${isDragging ? 'is-dragging' : ''}`}
+      className={`draggable-component ${isPlaced ? 'is-placed' : ''} ${isDragging ? 'is-dragging' : ''} ${isSelected ? 'is-selected' : ''}`}
+      onClick={onClick}
       {...listeners}
       {...attributes}>
       {label}
@@ -112,13 +126,18 @@ const DroppableZone: React.FC<{
 const VonNeumannReconstruct: React.FC<Props> = ({components, onChange, evaluated}) => {
   const [placements, setPlacements] = useState<Placements>({});
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [selectedComponent, setSelectedComponent] = useState<string | null>(null);
   const sensors = useDndSensors();
 
   // Track which components are placed
-  const placedComponents = new Set(Object.values(placements).filter(Boolean));
+  const placedComponents = React.useMemo(
+    () => new Set(Object.values(placements).filter(Boolean)),
+    [placements],
+  );
 
   const handleDragStart = (event: DragEndEvent) => {
     setActiveId(event.active.id as string);
+    setSelectedComponent(null);
   };
 
   const handleDragEnd = useCallback((event: DragEndEvent) => {
@@ -157,6 +176,35 @@ const VonNeumannReconstruct: React.FC<Props> = ({components, onChange, evaluated
       return cleaned;
     });
   }, []);
+
+  // Handle click on component to auto-assign to next empty zone
+  const handleComponentClick = useCallback(
+    (componentId: string) => {
+      if (evaluated) return;
+      if (placedComponents.has(componentId)) return;
+
+      // Toggle selection
+      if (selectedComponent === componentId) {
+        setSelectedComponent(null);
+        return;
+      }
+
+      // Find first empty drop zone
+      const firstEmptyZone = DROP_ZONE_ORDER.find(zoneId => !placements[zoneId]);
+
+      if (firstEmptyZone) {
+        setPlacements(prev => ({
+          ...prev,
+          [firstEmptyZone]: componentId,
+        }));
+        setSelectedComponent(null);
+      } else {
+        // No empty zones, just select
+        setSelectedComponent(componentId);
+      }
+    },
+    [evaluated, selectedComponent, placements, placedComponents],
+  );
 
   // Validation logic
   const validatePlacement = useCallback(
@@ -354,6 +402,9 @@ const VonNeumannReconstruct: React.FC<Props> = ({components, onChange, evaluated
                   id={component}
                   label={component}
                   isPlaced={false}
+                  isSelected={selectedComponent === component}
+                  onClick={() => handleComponentClick(component)}
+                  disabled={evaluated}
                 />
               ))}
           </div>

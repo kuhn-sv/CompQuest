@@ -216,6 +216,12 @@
     cursor: grabbing;
   }
 
+  &.is-selected {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.15);
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.4);
+  }
+
   &.is-overlay {
     cursor: grabbing;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);

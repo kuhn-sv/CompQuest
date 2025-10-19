@@ -104,6 +104,9 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     null,
   );
   const [reconstructResetKey, setReconstructResetKey] = useState<number>(0);
+  const [shuffledReconstructComponents, setShuffledReconstructComponents] = useState<
+    string[]
+  >([]);
 
   // Bus assignment state
   const [busAssignmentScore, setBusAssignmentScore] = useState<TaskStageScore | null>(
@@ -136,6 +139,11 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     // Shuffle quiz items if this is a quiz round
     if (current.type === 'quiz' && current.items) {
       setShuffledItems(shuffle(current.items));
+    }
+
+    // Shuffle reconstruct components if this is a reconstruct round
+    if (current.type === 'reconstruct' && current.components) {
+      setShuffledReconstructComponents(shuffle(current.components));
     }
   }, [roundIndex, current]);
 
@@ -460,7 +468,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       ) : current.type === 'reconstruct' && current.components ? (
         <VonNeumannReconstruct
           key={reconstructResetKey}
-          components={current.components}
+          components={shuffledReconstructComponents}
           onChange={score => setReconstructScore(score)}
           evaluated={evaluated}
         />

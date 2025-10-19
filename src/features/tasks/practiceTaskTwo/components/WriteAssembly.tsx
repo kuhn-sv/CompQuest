@@ -60,7 +60,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   const [evaluated, setEvaluated] = useState<boolean>(false);
   
   // State for placed commands (slots in the program)
-  const [placedCommands, setPlacedCommands] = useState<(AssemblyCommand | null)[]>([]);
+  const [placedCommands, setPlacedCommands] = useState<({ command: AssemblyCommand; sourceIndex: number } | null)[]>([]);
   
   // State for available commands
   const [availableCommands, setAvailableCommands] = useState<AssemblyCommand[]>([]);
@@ -135,8 +135,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   const resetTask = useCallback(() => {
     const slots = new Array(current.commands.length).fill(null);
     setPlacedCommands(slots);
-    const available = generateAvailableCommands(current);
-    setAvailableCommands(available);
+    // Don't regenerate available commands on reset - keep the original shuffled order
     setEvaluated(false);
     setSelectedCommandIndex(null);
     reset();
@@ -152,7 +151,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     for (let i = 0; i < current.commands.length; i++) {
       const placed = placedCommands[i];
       const expected = current.commands[i];
-      if (placed && placed.op === expected.op && placed.arg === expected.arg) {
+      if (placed && placed.command.op === expected.op && placed.command.arg === expected.arg) {
         correct++;
       }
     }
@@ -223,12 +222,11 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   // Check if a command from available list is placed
   const isCommandPlaced = useCallback(
     (availableIndex: number) => {
-      const cmd = availableCommands[availableIndex];
       return placedCommands.some(
-        placed => placed && placed.op === cmd.op && placed.arg === cmd.arg,
+        placed => placed && placed.sourceIndex === availableIndex,
       );
     },
-    [availableCommands, placedCommands],
+    [placedCommands],
   );
 
   // Handle click on available command
@@ -249,7 +247,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       if (firstEmptySlotIndex !== -1) {
         const cmd = availableCommands[availableIndex];
         const newPlaced = [...placedCommands];
-        newPlaced[firstEmptySlotIndex] = cmd;
+        newPlaced[firstEmptySlotIndex] = { command: cmd, sourceIndex: availableIndex };
         setPlacedCommands(newPlaced);
         setSelectedCommandIndex(null);
       } else {
@@ -294,7 +292,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
         const cmd = availableCommands[availableIndex];
         const newPlaced = [...placedCommands];
-        newPlaced[slotIndex] = cmd;
+        newPlaced[slotIndex] = { command: cmd, sourceIndex: availableIndex };
         setPlacedCommands(newPlaced);
         setSelectedCommandIndex(null);
       }
@@ -442,13 +440,13 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
               <div className="write-assembly__program">
                 <h3 className="write-assembly__slots-title">Dein Programm</h3>
                 <div className="write-assembly__slots">
-                  {placedCommands.map((command, index) => {
+                  {placedCommands.map((placedItem, index) => {
                     const expected = current.commands[index];
                     const isCorrect =
                       evaluated &&
-                      command !== null &&
-                      command.op === expected.op &&
-                      command.arg === expected.arg;
+                      placedItem !== null &&
+                      placedItem.command.op === expected.op &&
+                      placedItem.command.arg === expected.arg;
                     const isWrong = evaluated && !isCorrect;
 
                     return (
@@ -456,7 +454,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
                         key={index}
                         index={index}
                         label={String(index)}
-                        command={command}
+                        command={placedItem?.command ?? null}
                         isCorrect={isCorrect}
                         isWrong={isWrong}
                         evaluated={evaluated}

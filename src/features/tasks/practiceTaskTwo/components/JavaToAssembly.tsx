@@ -184,8 +184,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   const resetTask = useCallback(() => {
     const slots = new Array(current.assembler.length).fill(null);
     setPlacedCommands(slots);
-    const available = generateAvailableCommands(current);
-    setAvailableCommands(available);
+    // Don't regenerate available commands on reset - keep the original shuffled order
     setSlotToAvailableMap(new Map());
     setEvaluated(false);
     setSelectedCommandIndex(null);
