@@ -34,10 +34,16 @@ import { getQualitySettings } from './quality.settings';
 import { getModelPathForQuality } from './lod.config';
 import { determineInitialQuality, getDeviceDescription } from './device.detector';
 
-const Model3D: React.FC<Model3DProps> = ({ 
+// Extend Model3DProps to include critical performance callback
+interface ExtendedModel3DProps extends Model3DProps {
+  onCriticalPerformance?: () => void;
+}
+
+const Model3D: React.FC<ExtendedModel3DProps> = ({ 
   modelPath, 
   onComponentClick, 
   onCpuClick,
+  onCriticalPerformance,
   className = '',
   style = {}
 }) => {
@@ -168,6 +174,14 @@ const Model3D: React.FC<Model3DProps> = ({
         }
       }
     });
+
+    // Handle critical performance (recommend 2D fallback)
+    if (onCriticalPerformance) {
+      performanceMonitor.onCriticalPerformance(() => {
+        console.error('[Model3D] Critical performance detected, recommending 2D fallback');
+        onCriticalPerformance();
+      });
+    }
 
     // Load the GLTF file with LOD (start with low-quality model)
     const initialModelPath = getModelPathForQuality(initialQuality);

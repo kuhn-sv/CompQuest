@@ -25,7 +25,9 @@ export const createCamera = (width: number, height: number): THREE.PerspectiveCa
 export const createRenderer = (width: number, height: number): THREE.WebGLRenderer => {
   const renderer = new THREE.WebGLRenderer({ 
     antialias: true,
-    alpha: true
+    alpha: true,
+    powerPreference: 'low-power', // Battery/performance saving mode
+    precision: 'lowp' // Low precision shaders for better performance
   });
   renderer.setSize(width, height);
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));

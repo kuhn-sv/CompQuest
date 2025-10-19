@@ -2,10 +2,10 @@ import { QualityLevel, QualitySettings } from '../../interfaces/performance.type
 
 export const QUALITY_PRESETS: Record<QualityLevel, QualitySettings> = {
   [QualityLevel.LOW]: {
-    pixelRatio: 0.75, // Reduced from 1.0 for better performance
+    pixelRatio: 0.5, // Ultra-low for very weak devices (75% fewer pixels than before!)
     antialias: false,
     lightCount: 1, // Only ambient + 1 directional
-    targetFPS: 30,
+    targetFPS: 20, // Lower FPS target to reduce CPU load
     useMaterialSimplification: true,
     pauseAnimationWhenIdle: true // Pause after 3s inactivity to save CPU/GPU
   },

@@ -13,6 +13,7 @@ const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
   // Default to 2D to avoid heavy 3D loading on lower-end devices
   const [is3DView, setIs3DView] = useState(false);
+  const [showPerformanceWarning, setShowPerformanceWarning] = useState(false);
   const {user, signOut} = useAuth();
   const {isTablet} = useDeviceType();
 
@@ -20,6 +21,18 @@ const DashboardPage: React.FC = () => {
     // On tablets we prefer a lightweight 2D fallback to avoid crashes
     if (isTablet) setIs3DView(false);
   }, [isTablet]);
+
+  // Handle critical performance - automatically switch to 2D
+  const handleCriticalPerformance = () => {
+    console.warn('[Dashboard] Critical 3D performance detected, switching to 2D');
+    setIs3DView(false);
+    setShowPerformanceWarning(true);
+    
+    // Hide warning after 10 seconds
+    setTimeout(() => {
+      setShowPerformanceWarning(false);
+    }, 10000);
+  };
 
   const missions = [
     {
@@ -116,12 +129,23 @@ const DashboardPage: React.FC = () => {
             <Model3D
               modelPath="/motherboard__components.glb"
               onCpuClick={handleCpuClick}
+              onCriticalPerformance={handleCriticalPerformance}
               className="dashboard__3d-viewer"
             />
           </Suspense>
         ) : (
           <div className="dashboard__2d-wrapper">
             <BoardWithHotspots onCpuClick={handleCpuClick} />
+          </div>
+        )}
+        
+        {/* Performance Warning */}
+        {showPerformanceWarning && (
+          <div className="dashboard__performance-warning">
+            <span className="dashboard__performance-warning-icon">⚠️</span>
+            <p className="dashboard__performance-warning-text">
+              3D-Ansicht zu langsam für dieses Gerät. Automatisch auf 2D gewechselt.
+            </p>
           </div>
         )}
 
