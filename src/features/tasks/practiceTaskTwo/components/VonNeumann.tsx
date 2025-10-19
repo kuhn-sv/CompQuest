@@ -6,6 +6,7 @@ import vonNeumannData from '../../../../data/tasks/von-neumann.json';
 import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import VonNeumannQuiz from './VonNeumannQuiz';
 import VonNeumannFunctions from './VonNeumannFunctions';
 import VonNeumannReconstruct from './VonNeumannReconstruct';
 import VonNeumannBusAssignment from './VonNeumannBusAssignment';
@@ -89,7 +90,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   const [evaluated, setEvaluated] = useState<boolean>(false);
 
   // Quiz state
-  const [selected, setSelected] = useState<Record<string, boolean>>({});
+  const [quizScore, setQuizScore] = useState<TaskStageScore | null>(null);
   const [shuffledItems, setShuffledItems] = useState<
     {id: string; label: string; isCore: boolean}[]
   >([]);
@@ -130,7 +131,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
 
   // Initialize round state when round changes
   useEffect(() => {
-    setSelected({});
+    setQuizScore(null);
     setEvaluated(false);
     setFunctionsScore(null);
     setReconstructScore(null);
@@ -183,7 +184,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     } else if (current.type === 'reconstruct' && current.components) {
       taskContext = {
         ...baseContext,
-        question: 'Rekonstruiere die Von‑Neumann‑Architektur.',
+        question: 'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.',
         availableComponents: current.components,
       };
     } else if (current.type === 'busAssignment' && current.buses) {
@@ -197,15 +198,11 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     onTaskContextChange?.(taskContext);
   }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
-  const toggle = (id: string) => {
-    setSelected(prev => ({...prev, [id]: !prev[id]}));
-  };
-
   const startTask = useCallback(() => {
     setHasStarted(true);
     reset();
     start();
-    setSelected({});
+    setQuizScore(null);
     setEvaluated(false);
     setFunctionsScore(null);
     setReconstructScore(null);
@@ -213,7 +210,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   }, [reset, start]);
 
   const resetTask = useCallback(() => {
-    setSelected({});
+    setQuizScore(null);
     setEvaluated(false);
     setFunctionsScore(null);
     setReconstructScore(null);
@@ -232,18 +229,10 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     let total = 1;
     let points = 0;
 
-    if (current.type === 'quiz' && current.items) {
-      const totalPossible = current.items.filter(i => i.isCore).length;
-      const correctCount = current.items.filter(
-        i => selected[i.id] && i.isCore,
-      ).length;
-      const incorrectCount = current.items.filter(
-        i => selected[i.id] && !i.isCore,
-      ).length;
-
-      correct = correctCount;
-      total = totalPossible;
-      points = correctCount - incorrectCount;
+    if (current.type === 'quiz' && quizScore) {
+      correct = quizScore.correct;
+      total = quizScore.total;
+      points = quizScore.points;
     } else if (current.type === 'functions' && functionsScore) {
       correct = functionsScore.correct;
       total = functionsScore.total;
@@ -279,7 +268,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     }
   }, [
     current,
-    selected,
+    quizScore,
     functionsScore,
     reconstructScore,
     busAssignmentScore,
@@ -295,7 +284,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     if (roundIndex < rounds.length - 1) {
       const nextIndex = roundIndex + 1;
       setRoundIndex(nextIndex);
-      setSelected({});
+      setQuizScore(null);
       setEvaluated(false);
       setFunctionsScore(null);
       setReconstructScore(null);
@@ -387,7 +376,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     if (current.type === 'functions') {
       subtitle = 'Den Kernkomponenten die jeweilige Funktion zuordnen';
     } else if (current.type === 'reconstruct') {
-      subtitle = 'Rekonstruiere die Von-Neumann-Architektur';
+      subtitle = 'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.';
     } else if (current.type === 'busAssignment') {
       subtitle = 'Verlege die Kommunikationsverbindungen zwischen den Komponenten';
     }
@@ -432,35 +421,11 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
           />
         </div>
       ) : current.type === 'quiz' && current.items ? (
-        <>
-          <ul className="von-quizz__list">
-            {shuffledItems.map(item => (
-              <li
-                key={item.id}
-                className={`von-quizz__item ${
-                  evaluated && selected[item.id]
-                    ? item.isCore
-                      ? 'is-correct'
-                      : 'is-wrong'
-                    : ''
-                }`}>
-                <button
-                  type="button"
-                  className={`von-quizz__btn ${selected[item.id] ? 'is-selected' : ''}`}
-                  onClick={() => toggle(item.id)}
-                  aria-pressed={!!selected[item.id]}
-                  aria-label={item.label}
-                  disabled={evaluated}>
-                  <span
-                    className={`von-quizz__radio ${selected[item.id] ? 'is-selected' : ''}`}
-                    aria-hidden="true"
-                  />
-                  <span className="von-quizz__label">{item.label}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
-        </>
+        <VonNeumannQuiz
+          items={shuffledItems}
+          onChange={score => setQuizScore(score)}
+          evaluated={evaluated}
+        />
       ) : current.type === 'functions' && current.functionPairs ? (
         <VonNeumannFunctions
           left={current.functionPairs.left}

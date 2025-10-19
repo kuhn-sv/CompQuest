@@ -279,12 +279,6 @@ const VonNeumannReconstruct: React.FC<Props> = ({components, onChange, evaluated
         <div className="vn-reconstruct__content">
           {/* Left side: Von-Neumann Architecture Diagram */}
           <div className="vn-reconstruct__diagram">
-            <h3 className="vn-reconstruct__title">
-              Aufgabe 1/4: Rekonstruiere die Von-Neumann-Architektur
-            </h3>
-            <p className="vn-reconstruct__subtitle">
-              Ziehe die Komponenten an ihren Platz
-            </p>
 
             {/* CPU Container */}
             <div className="architecture-container">

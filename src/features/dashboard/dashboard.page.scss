@@ -64,8 +64,6 @@
     left: 0;
     width: 100vw;
     height: 100vh;
-    min-width: 400px;
-    min-height: 300px;
     z-index: 1;
   }
 
@@ -176,9 +174,13 @@
 }
 
 .dashboard__2d-wrapper {
-  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 100%;
   height: 100%;
+  transform: scale(1.2);
+  margin-top: 10vh;
 }
 
 .dashboard__2d-viewer {

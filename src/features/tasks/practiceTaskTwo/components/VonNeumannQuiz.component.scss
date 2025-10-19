@@ -14,19 +14,17 @@
 }
 
 .von-quizz__list {
-  list-style: none;
   padding: 1rem 12px;
-  margin: 0 0 1rem 0;
   display: flex;
   flex-wrap: wrap;
   gap: 1rem;
-  width: 90%;
-  align-self: center;
+  align-items: center;
+  justify-content: center;
 }
 
 .von-quizz__item {
-  flex: 1 1 calc(50% - 0.5rem);
-  min-width: 220px;
+  max-width: calc((100% - 1rem) / 2);
+  min-width: 45%;
   display: flex;
   align-items: center;
   border: 1px solid var(--surface-border);

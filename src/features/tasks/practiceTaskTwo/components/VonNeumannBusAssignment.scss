@@ -254,23 +254,35 @@
   width: 100%;
 }
 
-.bus-button {
-  padding: 0.75rem 1.5rem;
+.draggable-component {
+  padding: 0.85rem 1rem;
   border-radius: 8px;
-  background: var(--secondary30);
-  border: 1px solid var(--secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 2px solid rgba(255, 255, 255, 0.1);
   color: var(--text);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
   cursor: grab;
   transition: all 0.2s ease;
+  text-align: center;
   user-select: none;
   touch-action: none;
 
   &:hover:not(.is-placed) {
-    background: var(--secondary);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.15);
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &.is-placed {
+    opacity: 0.3;
+    cursor: not-allowed;
+    pointer-events: none;
   }
 
   &.is-dragging {
@@ -278,21 +290,16 @@
     cursor: grabbing;
   }
 
-  &.is-placed {
-    opacity: 0.3;
-    pointer-events: none;
-  }
-
-  &.is-disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    pointer-events: none;
+  &.is-selected {
+    border-color: var(--primary);
+    background: rgba(var(--primary-rgb), 0.15);
+    box-shadow: 0 0 12px rgba(var(--primary-rgb), 0.4);
   }
 
   &.is-overlay {
     cursor: grabbing;
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
-    transform: scale(1.05);
+    transform: rotate(2deg);
   }
 }
 

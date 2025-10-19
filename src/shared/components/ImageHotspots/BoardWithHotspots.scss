@@ -1,12 +1,18 @@
 .board-with-hotspots {
   width: 100%;
   max-width: 900px;
+  max-height: 90vh;
   margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 .board-svg {
   display: block;
   width: 100%;
   height: auto;
+  max-height: 90vh;
+  object-fit: contain;
 }
 
 .hotspot-group {
