@@ -5,7 +5,8 @@
     "java": "static int add(int a, int b) {\n    return a + b;\n}",
     "addresses": ["0000", "0001", "0010", "0011"],
     "assembler": ["LDA (13)", "ADD (14)", "STA 15", "END"],
-    "difficulty": "leicht"
+    "difficulty": "leicht",
+    "hint": "Speicherstelle 13: a\n Speicherstelle 14: b\n Speicherstelle 15: Ergebnis"
   },
   {
     "id": "T2_sub",
@@ -13,7 +14,8 @@
     "java": "static int sub(int a, int b) {\n    return a - b;\n}",
     "addresses": ["0000", "0001", "0010", "0011"],
     "assembler": ["LDA (13)", "SUB (14)", "STA 15", "END"],
-    "difficulty": "leicht"
+    "difficulty": "leicht",
+    "hint": "Speicherstelle 13: a\n Speicherstelle 14: b\n Speicherstelle 15: Ergebnis"
   },
   {
     "id": "T3_mulBy2",
@@ -21,7 +23,8 @@
     "java": "static int mulBy2(int x) {\n    return x + x;\n}",
     "addresses": ["0000", "0001", "0010", "0011"],
     "assembler": ["LDA (13)", "ADD (13)", "STA 15", "END"],
-    "difficulty": "leicht"
+    "difficulty": "leicht",
+    "hint": "Speicherstelle 13: x\n Speicherstelle 15: Ergebnis"
   },
   {
     "id": "T4_divFloor",
@@ -29,7 +32,8 @@
     "java": "static int divFloor(int a, int b) {\n    if (b <= 0) throw new IllegalArgumentException(\"b > 0 required\");\n    int q = 0;\n    while (a >= b) {\n        a -= b;\n        q++;\n    }\n    return q;\n}",
     "addresses": ["0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000", "1001", "1010"],
     "assembler": ["LDA #0", "STA 15", "LDA (13)", "SUB (14)", "BRN 1010", "STA 13", "LDA (15)", "ADD #1", "STA 15", "JMP 0010", "END"],
-    "difficulty": "schwer"
+    "difficulty": "schwer",
+    "hint": "Speicherstelle 13: a\n Speicherstelle 14: b\n Speicherstelle 15: Ergebnis"
   },
   {
     "id": "T5_absVal",
@@ -37,7 +41,8 @@
     "java": "static int absVal(int x) {\n    return (x < 0) ? -x : x;\n}",
     "addresses": ["0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111"],
     "assembler": ["LDA (13)", "BRN 0100", "STA 15", "END", "LDA #0", "SUB (13)", "STA 15", "END"],
-    "difficulty": "mittel"
+    "difficulty": "mittel",
+    "hint": "Speicherstelle 13: x\n Speicherstelle 15: Ergebnis"
   },
   {
     "id": "T6_min2",
@@ -45,7 +50,8 @@
     "java": "static int min2(int a, int b) {\n    return (a < b) ? a : b;\n}",
     "addresses": ["0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000"],
     "assembler": ["LDA (13)", "SUB (14)", "BRN 0110", "LDA (14)", "STA 15", "END", "LDA (13)", "STA 15", "END"],
-    "difficulty": "mittel"
+    "difficulty": "mittel",
+    "hint": "Speicherstelle 13: a\n Speicherstelle 14: b\n Speicherstelle 15: Ergebnis"
   },
   {
     "id": "T7_max2",
@@ -53,7 +59,8 @@
     "java": "static int max2(int a, int b) {\n    return (a < b) ? b : a;\n}",
     "addresses": ["0000", "0001", "0010", "0011", "0100", "0101", "0110", "0111", "1000"],
     "assembler": ["LDA (13)", "SUB (14)", "BRN 0110", "LDA (13)", "STA 15", "END", "LDA (14)", "STA 15", "END"],
-    "difficulty": "mittel"
+    "difficulty": "mittel",
+    "hint": "Speicherstelle 13: a\n Speicherstelle 14: b\n Speicherstelle 15: Ergebnis"
   }
 ]
 

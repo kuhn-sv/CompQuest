@@ -35,7 +35,7 @@
       {"addr": "0010", "op": "STA", "arg": "15"},
       {"addr": "0011", "op": "END", "arg": ""}
     ],
-    "options": ["Multiplikation", "Addition", "Maximum", "Subtraktion"],
+    "options": ["Multiplikation mit 2", "Division mit 2", "Maximum", "Subtraktion"],
     "correct_index": 0
   },
   {
