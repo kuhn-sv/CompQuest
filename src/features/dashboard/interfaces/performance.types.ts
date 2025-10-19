@@ -10,6 +10,7 @@ export interface QualitySettings {
   lightCount: number;
   targetFPS: number;
   useMaterialSimplification: boolean;
+  pauseAnimationWhenIdle?: boolean;
 }
 
 export interface PerformanceMetrics {

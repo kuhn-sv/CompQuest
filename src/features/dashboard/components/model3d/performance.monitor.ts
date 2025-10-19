@@ -1,10 +1,12 @@
 import { QualityLevel, PerformanceMetrics } from '../../interfaces/performance.types';
 
 const FPS_SAMPLE_SIZE = 60; // Track last 60 frames
-const UPGRADE_DELAY = 3000; // 3 seconds stable before upgrade
-const DOWNGRADE_DELAY = 1000; // 1 second before downgrade
-const FPS_LOW_THRESHOLD = 25;
-const FPS_MEDIUM_THRESHOLD = 45;
+const UPGRADE_DELAY_LOW_TO_MEDIUM = 2000; // 2 seconds stable before LOW→MEDIUM
+const UPGRADE_DELAY_MEDIUM_TO_HIGH = 3000; // 3 seconds stable before MEDIUM→HIGH
+const DOWNGRADE_DELAY = 500; // 0.5 seconds before downgrade
+const FPS_LOW_THRESHOLD = 20; // Reduced from 25 for more aggressive optimization
+const FPS_MEDIUM_THRESHOLD = 35; // Reduced from 45 (easier upgrade to MEDIUM)
+const FPS_HIGH_THRESHOLD = 50; // New threshold for HIGH quality
 
 export class PerformanceMonitor {
   private frameTimes: number[] = [];
@@ -99,7 +101,9 @@ export class PerformanceMonitor {
       const timeSinceLastChange = now - this.lastQualityChangeTime;
       
       const isDowngrade = this.isQualityDowngrade(this.currentQuality, targetQuality);
-      const requiredDelay = isDowngrade ? DOWNGRADE_DELAY : UPGRADE_DELAY;
+      const requiredDelay = isDowngrade 
+        ? DOWNGRADE_DELAY 
+        : this.getUpgradeDelay(this.currentQuality, targetQuality);
       
       if (timeSinceLastChange >= requiredDelay) {
         this.changeQuality(targetQuality);
@@ -108,13 +112,35 @@ export class PerformanceMonitor {
   }
 
   /**
+   * Get required delay for quality upgrade based on transition
+   */
+  private getUpgradeDelay(current: QualityLevel, target: QualityLevel): number {
+    // LOW → MEDIUM requires model swap, use shorter delay
+    if (current === QualityLevel.LOW && target === QualityLevel.MEDIUM) {
+      return UPGRADE_DELAY_LOW_TO_MEDIUM;
+    }
+    // MEDIUM → HIGH is just settings change, use longer delay to ensure stability
+    if (current === QualityLevel.MEDIUM && target === QualityLevel.HIGH) {
+      return UPGRADE_DELAY_MEDIUM_TO_HIGH;
+    }
+    return UPGRADE_DELAY_MEDIUM_TO_HIGH;
+  }
+
+  /**
    * Determine target quality based on FPS
+   * LOW: < 20 FPS
+   * MEDIUM: 20-35 FPS (loads 15MB model)
+   * HIGH: > 50 FPS (same model, better settings)
    */
   private determineTargetQuality(fps: number): QualityLevel {
     if (fps < FPS_LOW_THRESHOLD) {
       return QualityLevel.LOW;
     } else if (fps < FPS_MEDIUM_THRESHOLD) {
       return QualityLevel.MEDIUM;
+    } else if (fps < FPS_HIGH_THRESHOLD) {
+      // Stay at MEDIUM if FPS is between MEDIUM and HIGH threshold
+      // This prevents too aggressive upgrades
+      return this.currentQuality === QualityLevel.HIGH ? QualityLevel.HIGH : QualityLevel.MEDIUM;
     } else {
       return QualityLevel.HIGH;
     }

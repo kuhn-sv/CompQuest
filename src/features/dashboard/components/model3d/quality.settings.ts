@@ -2,25 +2,28 @@ import { QualityLevel, QualitySettings } from '../../interfaces/performance.type
 
 export const QUALITY_PRESETS: Record<QualityLevel, QualitySettings> = {
   [QualityLevel.LOW]: {
-    pixelRatio: 1,
+    pixelRatio: 0.75, // Reduced from 1.0 for better performance
     antialias: false,
     lightCount: 1, // Only ambient + 1 directional
     targetFPS: 30,
-    useMaterialSimplification: true
+    useMaterialSimplification: true,
+    pauseAnimationWhenIdle: true // Pause after 3s inactivity to save CPU/GPU
   },
   [QualityLevel.MEDIUM]: {
-    pixelRatio: 1.5,
+    pixelRatio: 1.25, // Slightly reduced from 1.5
     antialias: true,
     lightCount: 3, // Ambient + 3 directional
     targetFPS: 45,
-    useMaterialSimplification: false
+    useMaterialSimplification: false,
+    pauseAnimationWhenIdle: false
   },
   [QualityLevel.HIGH]: {
     pixelRatio: Math.min(window.devicePixelRatio, 2),
     antialias: true,
     lightCount: 6, // Ambient + 6 directional (all sides)
     targetFPS: 60,
-    useMaterialSimplification: false
+    useMaterialSimplification: false,
+    pauseAnimationWhenIdle: false
   }
 };
 

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { QualityLevel, QualitySettings } from '../../interfaces/performance.types';
 import { getQualitySettings } from './quality.settings';
+import { getModelPathForQuality, requiresModelSwap } from './lod.config';
 // Enable caching of fetched assets to speed up subsequent loads
 THREE.Cache.enabled = true;
 
@@ -529,4 +530,92 @@ export const applyQualitySettings = (
   if (model) {
     simplifyMaterials(model, quality);
   }
+};
+
+// ===== LOD (LEVEL OF DETAIL) SYSTEM =====
+
+/**
+ * Unload current model from scene and cleanup
+ */
+export const unloadCurrentModel = (
+  scene: THREE.Scene,
+  model: THREE.Object3D | null
+): void => {
+  if (!model) return;
+  
+  // Remove from scene
+  scene.remove(model);
+  
+  // Traverse and dispose of geometries and materials
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      if (child.geometry) {
+        child.geometry.dispose();
+      }
+      
+      if (child.material) {
+        if (Array.isArray(child.material)) {
+          child.material.forEach(material => material.dispose());
+        } else {
+          child.material.dispose();
+        }
+      }
+    }
+  });
+};
+
+/**
+ * Swap model for a different LOD version
+ * Preserves rotation state and applies smooth transition
+ */
+export const swapModel = (
+  scene: THREE.Scene,
+  currentModel: THREE.Object3D | null,
+  newQuality: QualityLevel,
+  onLoaded: (newModel: THREE.Group) => void,
+  onError?: (error: unknown) => void
+): void => {
+  const modelPath = getModelPathForQuality(newQuality);
+  
+  console.log(`[ModelSwap] Loading ${modelPath} for ${newQuality} quality`);
+  
+  // Store current rotation if model exists
+  const currentRotation = currentModel ? {
+    x: currentModel.rotation.x,
+    y: currentModel.rotation.y,
+    z: currentModel.rotation.z
+  } : null;
+  
+  // Load new model
+  loadGLTFModel(
+    modelPath,
+    scene,
+    null,
+    (newModel) => {
+      // Remove old model
+      if (currentModel) {
+        unloadCurrentModel(scene, currentModel);
+      }
+      
+      // Apply previous rotation to new model
+      if (currentRotation) {
+        newModel.rotation.set(currentRotation.x, currentRotation.y, currentRotation.z);
+      }
+      
+      console.log(`[ModelSwap] Successfully loaded ${modelPath}`);
+      onLoaded(newModel);
+    },
+    undefined,
+    onError
+  );
+};
+
+/**
+ * Check if quality change requires model swap
+ */
+export const needsModelSwap = (
+  currentQuality: QualityLevel,
+  newQuality: QualityLevel
+): boolean => {
+  return requiresModelSwap(currentQuality, newQuality);
 };

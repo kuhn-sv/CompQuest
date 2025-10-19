@@ -23,12 +23,16 @@ import {
   cleanupEventListeners,
   applyQualitySettings,
   shouldAnimate,
+  swapModel,
+  needsModelSwap,
   MouseState
 } from './model3d.helper';
 import type { Model3DProps } from '../../interfaces';
 import { PerformanceMonitor } from './performance.monitor';
 import { QualityLevel } from '../../interfaces/performance.types';
 import { getQualitySettings } from './quality.settings';
+import { getModelPathForQuality } from './lod.config';
+import { determineInitialQuality, getDeviceDescription } from './device.detector';
 
 const Model3D: React.FC<Model3DProps> = ({ 
   modelPath, 
@@ -45,11 +49,15 @@ const Model3D: React.FC<Model3DProps> = ({
   const rayRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   
   const [isLoading, setIsLoading] = useState(true);
-  const [currentQuality, setCurrentQuality] = useState<QualityLevel>(QualityLevel.HIGH);
+  const [currentQuality, setCurrentQuality] = useState<QualityLevel>(QualityLevel.LOW);
   
   // Performance monitoring
   const performanceMonitorRef = useRef<PerformanceMonitor | null>(null);
   const lastAnimationTimeRef = useRef<number>(0);
+  
+  // Idle animation tracking
+  const lastInteractionTimeRef = useRef<number>(performance.now());
+  const isIdleRef = useRef<boolean>(false);
   
   // Mouse state management
   const mouseState = useRef<MouseState>({
@@ -97,36 +105,91 @@ const Model3D: React.FC<Model3DProps> = ({
     // Lighting
     setupLighting(scene);
     
+    // Determine initial quality based on device capabilities
+    const initialQuality = determineInitialQuality();
+    console.log(`[Model3D] Device: ${getDeviceDescription()}`);
+    console.log(`[Model3D] Starting with ${initialQuality} quality`);
+    setCurrentQuality(initialQuality);
+    
     // Performance monitoring setup
-    const performanceMonitor = new PerformanceMonitor(QualityLevel.HIGH);
+    const performanceMonitor = new PerformanceMonitor(initialQuality);
     performanceMonitorRef.current = performanceMonitor;
     
     // Handle quality changes
     performanceMonitor.onQualityChange((newQuality: QualityLevel) => {
-      console.log(`[Model3D] Adjusting quality to: ${newQuality}`);
-      setCurrentQuality(newQuality);
+      console.log(`[Model3D] Quality change: ${currentQuality} → ${newQuality}`);
       
-      if (sceneRef.current && rendererRef.current && currentMount) {
-        applyQualitySettings(
-          rendererRef.current,
-          sceneRef.current,
+      // Check if we need to swap the model (LOD change)
+      if (needsModelSwap(currentQuality, newQuality)) {
+        console.log(`[Model3D] Model swap required for quality upgrade`);
+        setIsLoading(true);
+        
+        swapModel(
+          sceneRef.current!,
           currentModelRef.current,
           newQuality,
-          currentMount.clientWidth,
-          currentMount.clientHeight
+          (newModel) => {
+            currentModelRef.current = newModel;
+            setupCPUPulseAnimation(newModel);
+            
+            // Apply quality settings to new model
+            if (rendererRef.current && currentMount) {
+              applyQualitySettings(
+                rendererRef.current,
+                sceneRef.current!,
+                newModel,
+                newQuality,
+                currentMount.clientWidth,
+                currentMount.clientHeight
+              );
+            }
+            
+            setCurrentQuality(newQuality);
+            setIsLoading(false);
+          },
+          (error) => {
+            console.error('[Model3D] Model swap failed:', error);
+            setIsLoading(false);
+          }
         );
+      } else {
+        // Just update settings, no model swap needed
+        setCurrentQuality(newQuality);
+        
+        if (sceneRef.current && rendererRef.current && currentMount) {
+          applyQualitySettings(
+            rendererRef.current,
+            sceneRef.current,
+            currentModelRef.current,
+            newQuality,
+            currentMount.clientWidth,
+            currentMount.clientHeight
+          );
+        }
       }
     });
 
-    // Load the GLTF file (no placeholder)
+    // Load the GLTF file with LOD (start with low-quality model)
+    const initialModelPath = getModelPathForQuality(initialQuality);
+    console.log(`[Model3D] Loading initial model: ${initialModelPath}`);
+    
     loadGLTFModel(
-      modelPath,
+      initialModelPath,
       scene,
       null,
       (modelGroup) => {
         currentModelRef.current = modelGroup;
         // Find and apply CPU pulse animation
         setupCPUPulseAnimation(modelGroup);
+        // Apply initial quality settings
+        applyQualitySettings(
+          renderer,
+          scene,
+          modelGroup,
+          initialQuality,
+          currentMount.clientWidth,
+          currentMount.clientHeight
+        );
         // Precompile shaders/materials to reduce first-frame hitch
         try {
           renderer.compile(scene, camera);
@@ -202,6 +265,10 @@ const Model3D: React.FC<Model3DProps> = ({
     };
 
     const onMouseDown = (event: MouseEvent) => {
+      // Track interaction for idle animation
+      lastInteractionTimeRef.current = performance.now();
+      isIdleRef.current = false;
+      
       if (event.button === 0) {
         mouseState.current.isMouseDown = true;
         mouseState.current.isDragging = false;
@@ -235,6 +302,10 @@ const Model3D: React.FC<Model3DProps> = ({
     };
 
     const onMouseMove = (event: MouseEvent) => {
+      // Track interaction for idle animation
+      lastInteractionTimeRef.current = performance.now();
+      isIdleRef.current = false;
+      
       if (!mouseState.current.isMouseDown) {
         return; // Removed hover logic
       }
@@ -267,6 +338,10 @@ const Model3D: React.FC<Model3DProps> = ({
 
     // Touch event handlers
     const onTouchStart = (event: TouchEvent) => {
+      // Track interaction for idle animation
+      lastInteractionTimeRef.current = performance.now();
+      isIdleRef.current = false;
+      
       const touch = getTouchClientPosition(event);
       if (!touch) return;
       
@@ -289,6 +364,10 @@ const Model3D: React.FC<Model3DProps> = ({
     };
 
     const onTouchMove = (event: TouchEvent) => {
+      // Track interaction for idle animation
+      lastInteractionTimeRef.current = performance.now();
+      isIdleRef.current = false;
+      
       if (!mouseState.current.isMouseDown) return;
       
       // Prevent default to avoid scrolling while rotating model
@@ -390,8 +469,17 @@ const Model3D: React.FC<Model3DProps> = ({
       
       const currentTime = performance.now();
       
-      // Get current quality settings for FPS throttling
+      // Get current quality settings for FPS throttling and idle detection
       const qualitySettings = getQualitySettings(currentQuality);
+      
+      // Check if animation should be paused due to inactivity (only in LOW mode)
+      const timeSinceInteraction = currentTime - lastInteractionTimeRef.current;
+      const shouldPauseWhenIdle = qualitySettings.pauseAnimationWhenIdle && timeSinceInteraction > 3000;
+      
+      if (shouldPauseWhenIdle && !isIdleRef.current) {
+        isIdleRef.current = true;
+        console.log('[Model3D] Pausing animation due to inactivity (LOW mode)');
+      }
       
       // Only animate if enough time has passed (FPS throttling)
       if (!shouldAnimate(lastAnimationTimeRef.current, qualitySettings.targetFPS, currentTime)) {
@@ -405,7 +493,8 @@ const Model3D: React.FC<Model3DProps> = ({
         performanceMonitor.recordFrame();
       }
 
-      if (currentModelRef.current) {
+      // Skip model rotation if idle (save CPU), but keep rendering for CPU pulse
+      if (currentModelRef.current && !isIdleRef.current) {
         updateModelRotation(
           currentModelRef.current, 
           mouseState.current.targetRotationX, 
@@ -413,7 +502,7 @@ const Model3D: React.FC<Model3DProps> = ({
         );
       }
 
-      // Update CPU pulse animation
+      // Update CPU pulse animation (always, even when idle)
       if (cpuMaterialRef.current) {
         updateCPUPulse(cpuMaterialRef.current, Date.now());
       }
@@ -470,7 +559,7 @@ const Model3D: React.FC<Model3DProps> = ({
       
       cleanupThreeJS(renderer, currentMount);
     };
-  }, [modelPath, onComponentClick, onCpuClick, currentQuality]);
+  }, [modelPath, onComponentClick, onCpuClick]);
 
   return (
     <div className={`model3d ${className}`} style={style}>
