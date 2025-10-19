@@ -113,8 +113,6 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
     
     // Determine initial quality based on device capabilities
     const initialQuality = determineInitialQuality();
-    console.log(`[Model3D] Device: ${getDeviceDescription()}`);
-    console.log(`[Model3D] Starting with ${initialQuality} quality`);
     setCurrentQuality(initialQuality);
     
     // Performance monitoring setup
@@ -123,11 +121,8 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
     
     // Handle quality changes
     performanceMonitor.onQualityChange((newQuality: QualityLevel) => {
-      console.log(`[Model3D] Quality change: ${currentQuality} → ${newQuality}`);
-      
       // Check if we need to swap the model (LOD change)
       if (needsModelSwap(currentQuality, newQuality)) {
-        console.log(`[Model3D] Model swap required for quality upgrade`);
         setIsLoading(true);
         
         swapModel(
@@ -178,14 +173,12 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
     // Handle critical performance (recommend 2D fallback)
     if (onCriticalPerformance) {
       performanceMonitor.onCriticalPerformance(() => {
-        console.error('[Model3D] Critical performance detected, recommending 2D fallback');
         onCriticalPerformance();
       });
     }
 
     // Load the GLTF file with LOD (start with low-quality model)
     const initialModelPath = getModelPathForQuality(initialQuality);
-    console.log(`[Model3D] Loading initial model: ${initialModelPath}`);
     
     loadGLTFModel(
       initialModelPath,
@@ -492,7 +485,6 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
       
       if (shouldPauseWhenIdle && !isIdleRef.current) {
         isIdleRef.current = true;
-        console.log('[Model3D] Pausing animation due to inactivity (LOW mode)');
       }
       
       // Only animate if enough time has passed (FPS throttling)

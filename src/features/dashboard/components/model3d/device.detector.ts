@@ -52,10 +52,6 @@ export function detectDeviceCapabilities(): DeviceCapabilities {
  * Strategy: Start LOW (safe), let performance monitoring upgrade if capable
  */
 export function determineInitialQuality(): QualityLevel {
-  const capabilities = detectDeviceCapabilities();
-  
-  console.log('[DeviceDetector] Detected capabilities:', capabilities);
-  
   // Always start with LOW for progressive enhancement
   // Performance monitor will upgrade if device is capable
   return QualityLevel.LOW;

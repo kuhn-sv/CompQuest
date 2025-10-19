@@ -18,13 +18,13 @@ const DashboardPage: React.FC = () => {
   const {isTablet} = useDeviceType();
 
   useEffect(() => {
-    // On tablets we prefer a lightweight 2D fallback to avoid crashes
+    // On tablets we start with 2D but allow user to switch to 3D
+    // The automatic 2D fallback will catch performance issues
     if (isTablet) setIs3DView(false);
   }, [isTablet]);
 
   // Handle critical performance - automatically switch to 2D
   const handleCriticalPerformance = () => {
-    console.warn('[Dashboard] Critical 3D performance detected, switching to 2D');
     setIs3DView(false);
     setShowPerformanceWarning(true);
     
@@ -162,16 +162,18 @@ const DashboardPage: React.FC = () => {
             <p>🖱️ Halten + Ziehen in 3D: Modell drehen</p>
           </div>
         </div>
-        {!isTablet && (
-          <button
-            className="dashboard__toggle-view-btn"
-            onClick={() => setIs3DView(!is3DView)}
-            title={
-              is3DView ? 'Wechsle zu 2D Ansicht' : 'Wechsle zu 3D Ansicht'
-            }>
-            {is3DView ? <span>2D</span> : <span>3D</span>}
-          </button>
-        )}
+        <button
+          className="dashboard__toggle-view-btn"
+          onClick={() => setIs3DView(!is3DView)}
+          title={
+            is3DView 
+              ? 'Wechsle zu 2D Ansicht' 
+              : isTablet 
+                ? 'Wechsle zu 3D Ansicht (bei zu niedriger Performance wird automatisch zurück zu 2D gewechselt)'
+                : 'Wechsle zu 3D Ansicht'
+          }>
+          {is3DView ? <span>2D</span> : <span>3D</span>}
+        </button>
       </div>
 
       <ExercisesModal

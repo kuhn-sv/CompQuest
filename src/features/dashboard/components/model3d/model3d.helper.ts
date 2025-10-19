@@ -579,8 +579,6 @@ export const swapModel = (
 ): void => {
   const modelPath = getModelPathForQuality(newQuality);
   
-  console.log(`[ModelSwap] Loading ${modelPath} for ${newQuality} quality`);
-  
   // Store current rotation if model exists
   const currentRotation = currentModel ? {
     x: currentModel.rotation.x,
@@ -604,7 +602,6 @@ export const swapModel = (
         newModel.rotation.set(currentRotation.x, currentRotation.y, currentRotation.z);
       }
       
-      console.log(`[ModelSwap] Successfully loaded ${modelPath}`);
       onLoaded(newModel);
     },
     undefined,

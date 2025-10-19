@@ -5,9 +5,9 @@ const UPGRADE_DELAY_LOW_TO_MEDIUM = 2000; // 2 seconds stable before LOW→MEDIU
 const UPGRADE_DELAY_MEDIUM_TO_HIGH = 3000; // 3 seconds stable before MEDIUM→HIGH
 const DOWNGRADE_DELAY = 500; // 0.5 seconds before downgrade
 const FPS_CRITICAL_THRESHOLD = 15; // Below this = unusable, recommend 2D fallback
-const FPS_LOW_THRESHOLD = 20; // Reduced from 25 for more aggressive optimization
-const FPS_MEDIUM_THRESHOLD = 35; // Reduced from 45 (easier upgrade to MEDIUM)
-const FPS_HIGH_THRESHOLD = 50; // New threshold for HIGH quality
+const FPS_LOW_THRESHOLD = 18; // Very low performance, stay at LOW
+const FPS_MEDIUM_THRESHOLD = 25; // Reduced from 35 (easier upgrade for good devices)
+const FPS_HIGH_THRESHOLD = 45; // Reduced from 50 (easier upgrade to HIGH)
 const CRITICAL_DURATION = 5000; // 5 seconds of critical FPS before recommending 2D
 
 export class PerformanceMonitor {
@@ -143,12 +143,10 @@ export class PerformanceMonitor {
       // Start tracking critical performance duration
       if (this.criticalPerformanceStartTime === null) {
         this.criticalPerformanceStartTime = now;
-        console.warn(`[PerformanceMonitor] Critical performance detected: ${fps.toFixed(1)} FPS`);
       } else {
         // Check if we've been in critical state long enough
         const criticalDuration = now - this.criticalPerformanceStartTime;
         if (criticalDuration >= CRITICAL_DURATION && this.onCriticalPerformanceCallback) {
-          console.error(`[PerformanceMonitor] Performance critically low for ${(criticalDuration / 1000).toFixed(1)}s, recommending 2D fallback`);
           this.onCriticalPerformanceCallback();
           // Reset to avoid repeated callbacks
           this.criticalPerformanceStartTime = null;
@@ -156,9 +154,6 @@ export class PerformanceMonitor {
       }
     } else {
       // Performance recovered
-      if (this.criticalPerformanceStartTime !== null) {
-        console.log(`[PerformanceMonitor] Performance recovered from critical state`);
-      }
       this.criticalPerformanceStartTime = null;
     }
   }
@@ -212,7 +207,6 @@ export class PerformanceMonitor {
   private changeQuality(newQuality: QualityLevel): void {
     if (newQuality === this.currentQuality) return;
     
-    console.log(`[PerformanceMonitor] Quality change: ${this.currentQuality} -> ${newQuality}`);
     this.currentQuality = newQuality;
     this.lastQualityChangeTime = performance.now();
     
