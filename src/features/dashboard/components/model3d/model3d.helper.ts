@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { QualityLevel, QualitySettings } from '../../interfaces/performance.types';
+import { getQualitySettings } from './quality.settings';
 // Enable caching of fetched assets to speed up subsequent loads
 THREE.Cache.enabled = true;
 
@@ -173,6 +175,36 @@ export const calculateMousePosition = (
   };
 };
 
+// Touch position calculation
+export const calculateTouchPosition = (
+  touch: Touch,
+  rect: DOMRect
+): { x: number; y: number } => {
+  return {
+    x: ((touch.clientX - rect.left) / rect.width) * 2 - 1,
+    y: -((touch.clientY - rect.top) / rect.height) * 2 + 1
+  };
+};
+
+// Get client position from touch event
+export const getTouchClientPosition = (
+  event: TouchEvent
+): { x: number; y: number } | null => {
+  if (event.touches.length > 0) {
+    return {
+      x: event.touches[0].clientX,
+      y: event.touches[0].clientY
+    };
+  }
+  if (event.changedTouches.length > 0) {
+    return {
+      x: event.changedTouches[0].clientX,
+      y: event.changedTouches[0].clientY
+    };
+  }
+  return null;
+};
+
 // Raycast intersection
 export const getIntersectedObject = (
   mouse: THREE.Vector2,
@@ -317,4 +349,184 @@ export const cleanupEventListeners = (
   listeners.forEach(({ event, handler }) => {
     element.removeEventListener(event, handler);
   });
+};
+
+// ===== PERFORMANCE & QUALITY MANAGEMENT =====
+
+/**
+ * Apply quality settings to renderer
+ */
+export const applyRendererQuality = (
+  renderer: THREE.WebGLRenderer,
+  quality: QualityLevel,
+  width: number,
+  height: number
+): void => {
+  const settings = getQualitySettings(quality);
+  
+  renderer.setPixelRatio(settings.pixelRatio);
+  renderer.setSize(width, height);
+  
+  // Note: Antialiasing cannot be changed after renderer creation,
+  // but we track it for potential renderer recreation
+};
+
+/**
+ * Adjust lighting based on quality level
+ */
+export const adjustLighting = (
+  scene: THREE.Scene,
+  quality: QualityLevel
+): void => {
+  const settings = getQualitySettings(quality);
+  
+  // Remove all existing lights
+  const lightsToRemove: THREE.Light[] = [];
+  scene.traverse((child) => {
+    if (child instanceof THREE.Light) {
+      lightsToRemove.push(child);
+    }
+  });
+  lightsToRemove.forEach(light => scene.remove(light));
+  
+  // Add ambient light (always present)
+  const ambientLight = new THREE.AmbientLight(0x404040, 2.0);
+  scene.add(ambientLight);
+  
+  // Add directional lights based on quality
+  const lightIntensity = 1.0;
+  
+  if (settings.lightCount >= 1) {
+    // Front light (most important)
+    const frontLight = new THREE.DirectionalLight(0xffffff, lightIntensity);
+    frontLight.position.set(0, 0, 10);
+    frontLight.castShadow = false;
+    scene.add(frontLight);
+  }
+  
+  if (settings.lightCount >= 3) {
+    // Add top and one side light
+    const topLight = new THREE.DirectionalLight(0xffffff, lightIntensity);
+    topLight.position.set(0, 10, 0);
+    topLight.castShadow = false;
+    scene.add(topLight);
+    
+    const sideLight = new THREE.DirectionalLight(0xffffff, lightIntensity);
+    sideLight.position.set(10, 0, 0);
+    sideLight.castShadow = false;
+    scene.add(sideLight);
+  }
+  
+  if (settings.lightCount >= 6) {
+    // Add remaining lights (back, left, bottom)
+    const lights = [
+      { position: [0, 0, -10], name: 'back' },
+      { position: [-10, 0, 0], name: 'left' },
+      { position: [0, -10, 0], name: 'bottom' }
+    ];
+    
+    lights.forEach(({ position }) => {
+      const light = new THREE.DirectionalLight(0xffffff, lightIntensity);
+      light.position.set(position[0], position[1], position[2]);
+      light.castShadow = false;
+      scene.add(light);
+    });
+  }
+};
+
+/**
+ * Store original materials for restoration
+ */
+const originalMaterialsMap = new WeakMap<THREE.Mesh, THREE.Material | THREE.Material[]>();
+
+/**
+ * Simplify materials for better performance
+ */
+export const simplifyMaterials = (
+  model: THREE.Object3D,
+  quality: QualityLevel
+): void => {
+  const settings = getQualitySettings(quality);
+  
+  if (!settings.useMaterialSimplification) {
+    // Restore original materials if we have them
+    model.traverse((child) => {
+      if (child instanceof THREE.Mesh) {
+        const originalMaterial = originalMaterialsMap.get(child);
+        if (originalMaterial) {
+          child.material = originalMaterial;
+        }
+      }
+    });
+    return;
+  }
+  
+  // Apply simplified materials
+  model.traverse((child) => {
+    if (child instanceof THREE.Mesh) {
+      // Store original material if not already stored
+      if (!originalMaterialsMap.has(child)) {
+        originalMaterialsMap.set(child, child.material);
+      }
+      
+      // Skip CPU component (it has its own pulsing material)
+      if (isCPUComponent(child.name)) {
+        return;
+      }
+      
+      const originalMaterial = Array.isArray(child.material) 
+        ? child.material[0] 
+        : child.material;
+      
+      if (originalMaterial instanceof THREE.MeshStandardMaterial || 
+          originalMaterial instanceof THREE.MeshPhongMaterial) {
+        
+        // Create a simple material with basic lighting
+        const simplifiedMaterial = new THREE.MeshBasicMaterial({
+          color: originalMaterial.color,
+          map: originalMaterial.map,
+          transparent: originalMaterial.transparent,
+          opacity: originalMaterial.opacity,
+          side: originalMaterial.side
+        });
+        
+        child.material = simplifiedMaterial;
+      }
+    }
+  });
+};
+
+/**
+ * Check if enough time has passed for next animation frame based on target FPS
+ */
+export const shouldAnimate = (
+  lastAnimationTime: number,
+  targetFPS: number,
+  currentTime: number
+): boolean => {
+  const frameDelay = 1000 / targetFPS;
+  return (currentTime - lastAnimationTime) >= frameDelay;
+};
+
+/**
+ * Apply all quality settings at once
+ */
+export const applyQualitySettings = (
+  renderer: THREE.WebGLRenderer,
+  scene: THREE.Scene,
+  model: THREE.Object3D | null,
+  quality: QualityLevel,
+  width: number,
+  height: number
+): void => {
+  // Apply renderer settings
+  applyRendererQuality(renderer, quality, width, height);
+  
+  // Adjust lighting
+  adjustLighting(scene, quality);
+  
+  // Simplify materials if model is loaded
+  if (model) {
+    simplifyMaterials(model, quality);
+  }
 };

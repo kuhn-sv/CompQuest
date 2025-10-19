@@ -9,3 +9,5 @@ export type {
 	UserTaskAttempt,
 	UserTaskBest,
 } from './levels.interfaces';
+export { QualityLevel } from './performance.types';
+export type { QualitySettings, PerformanceMetrics } from './performance.types';
