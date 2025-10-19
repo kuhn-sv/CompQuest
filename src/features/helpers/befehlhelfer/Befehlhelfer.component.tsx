@@ -1,8 +1,8 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import type { SubTaskComponentProps } from '../../../shared/interfaces/tasking.interfaces';
 import './Befehlhelfer.scss';
 import OperationMatcher from './components/OperationMatcher';
-import type {Operation} from './types';
+import type { Operation } from './types';
 
 // All 12 operations from the microprocessor instruction set
 const ALL_OPERATIONS: Operation[] = [
@@ -52,8 +52,8 @@ const ALL_OPERATIONS: Operation[] = [
     description: 'Lädt den Funktionszähler mit dem Wert n',
   },
   {
-    id: 'bra',
-    command: 'BRA #n',
+    id: 'brz',
+    command: 'BRZ #n',
     description: 'Addiert n auf den Instruktionszähler, falls das Zero-Bit gesetzt ist',
   },
   {
