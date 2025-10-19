@@ -288,14 +288,18 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
     [taskMeta, hudState],
   );
 
+  const handleTaskContextChange = useCallback((ctx: unknown | null) => {
+    setTaskContext(ctx);
+  }, []);
+
   const injected: TaskContainerInjectedProps = useMemo(
     () => ({
       onControlsChange: handleControlsChange,
       onHudChange: handleHudChange,
-      onTaskContextChange: (ctx: unknown | null) => setTaskContext(ctx),
+      onTaskContextChange: handleTaskContextChange,
       onSummaryChange: handleSummaryChange,
     }),
-    [handleControlsChange, handleHudChange, handleSummaryChange],
+    [handleControlsChange, handleHudChange, handleTaskContextChange, handleSummaryChange],
   );
 
   // progressPercent is now handled inside TaskContainerHeader

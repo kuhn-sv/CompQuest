@@ -79,7 +79,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       taskMeta={taskMeta}
       title={currentTask?.title ?? ''}
       description={currentTask?.description}>
-      {({onControlsChange, onHudChange, onSummaryChange}) => (
+      {({onControlsChange, onHudChange, onSummaryChange, onTaskContextChange}) => (
         <>
           {CurrentTaskComponent && (
             <CurrentTaskComponent
@@ -87,6 +87,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
               onControlsChange={onControlsChange}
               onHudChange={onHudChange}
               onSummaryChange={onSummaryChange}
+              onTaskContextChange={onTaskContextChange}
             />
           )}
         </>

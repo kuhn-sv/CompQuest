@@ -2,16 +2,17 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './JavaToAssembly.component.scss';
 import {
-  generateRounds,
   generateAvailableCommands,
-  JavaToAssemblyTask,
   AssemblyCommand,
   getTaskCommands,
-} from './javatoassembly.helper';
-import {calculateScore} from './shared/assembly.utils';
+} from './JavaToAssembly.helper';
+import javaToAssemblyTasksData from '../../../../data/tasks/java-to-assembly.json';
 import {
   AssemblyDraggableCommand,
   AssemblyDroppableSlot,
+  calculateScore,
+  shuffle,
+  DIFFICULTY_MAP,
 } from './shared';
 import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
@@ -21,11 +22,32 @@ import {useDndSensors} from '../../../../shared/hooks/dndSensors';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
-// Constants
-const DIFFICULTY_MAP: Record<string, Difficulty> = {
-  leicht: Difficulty.Easy,
-  mittel: Difficulty.Medium,
-  schwer: Difficulty.Hard,
+// Types
+interface JavaToAssemblyTask {
+  id: string;
+  topic: string;
+  java: string;
+  addresses: string[];
+  assembler: string[];
+  difficulty: string;
+}
+
+// Generate rounds from JSON data
+const generateRounds = (): JavaToAssemblyTask[] => {
+  const tasks = javaToAssemblyTasksData as JavaToAssemblyTask[];
+
+  // Select tasks by difficulty: 2x leicht, 1x mittel, 1x schwer
+  const leichtTasks = tasks.filter(t => t.difficulty === 'leicht');
+  const mittelTasks = tasks.filter(t => t.difficulty === 'mittel');
+  const schwerTasks = tasks.filter(t => t.difficulty === 'schwer');
+
+  const selected = [
+    ...shuffle(leichtTasks).slice(0, 2),
+    ...shuffle(mittelTasks).slice(0, 1),
+    ...shuffle(schwerTasks).slice(0, 1),
+  ];
+
+  return shuffle(selected);
 };
 
 // Modal Component for expanded Java code
@@ -63,6 +85,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
+  onTaskContextChange,
   taskMeta,
 }) => {
   const rounds: JavaToAssemblyTask[] = useMemo(() => generateRounds(), []);
@@ -121,6 +144,27 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     setEvaluated(false);
     setSelectedCommandIndex(null);
   }, [roundIndex, current]);
+
+  // Update task context for Tim whenever the current task changes
+  useEffect(() => {
+    if (!current || !hasStarted) {
+      onTaskContextChange?.(null);
+      return;
+    }
+
+    const taskContext = {
+      subtaskType: 'JavaToAssembly',
+      taskId: current.id,
+      roundIndex: roundIndex,
+      topic: current.topic,
+      difficulty: current.difficulty,
+      javaCode: current.java,
+      numberOfCommands: current.assembler.length,
+      addresses: current.addresses,
+    };
+
+    onTaskContextChange?.(taskContext);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
     setHasStarted(true);
@@ -419,8 +463,9 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     return () => {
       onControlsChange?.(null);
       onHudChange?.(null);
+      onTaskContextChange?.(null);
     };
-  }, [onControlsChange, onHudChange]);
+  }, [onControlsChange, onHudChange, onTaskContextChange]);
 
   return (
     <div className="java-to-assembly">

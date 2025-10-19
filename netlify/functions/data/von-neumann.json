@@ -1,0 +1,46 @@
+{
+  "quizItems": [
+    {"id": "cpu", "label": "CPU (Central Processing Unit)", "isCore": true},
+    {"id": "power-supply", "label": "Netzteil", "isCore": false},
+    {"id": "ram", "label": "RAM (Random Access Memory)", "isCore": true},
+    {"id": "control", "label": "Steuerwerk (Control Unit)", "isCore": true},
+    {"id": "alu", "label": "ALU (Arithmetic Logic Unit)", "isCore": true},
+    {"id": "gpu", "label": "Grafikprozessor (Graphics Processing Unit)", "isCore": false},
+    {"id": "cache", "label": "Cache-Speicher", "isCore": false},
+    {"id": "peripherie", "label": "Peripherie", "isCore": true},
+    {"id": "rom", "label": "ROM (Read-Only Memory)", "isCore": true},
+    {"id": "bus", "label": "BUS", "isCore": true}
+  ],
+  "reconstructComponents": [
+    "Steuerwerk",
+    "Rechenwerk",
+    "Transportmedium",
+    "RAM",
+    "ROM",
+    "Peripherie"
+  ],
+  "busComponents": [
+    "Datenbus",
+    "Adressbus",
+    "Steuerbus"
+  ],
+  "idToLabel": {
+    "cpu": "CPU",
+    "ram": "RAM",
+    "peripherie": "Peripherie",
+    "bus": "BUS",
+    "alu": "Rechenwerk",
+    "control": "Steuerwerk",
+    "rom": "ROM"
+  },
+  "idToDesc": {
+    "cpu": "Leitet Befehle, steuert Abläufe und koordiniert alle Systemteile.",
+    "ram": "Speichert veränderbare Daten und Programme vorübergehend.",
+    "peripherie": "Ermöglicht Eingabe, Ausgabe und externe Datenspeicherung.",
+    "bus": "Überträgt Daten und Steuerinformationen zwischen Systemeinheiten.",
+    "alu": "Führt logische und mathematische Operationen aus.",
+    "control": "Bestimmt die Reihenfolge und Steuerung der Befehlsausführung.",
+    "rom": "Beinhaltet dauerhaft gespeicherte Start- und Basisinformationen."
+  }
+}
+

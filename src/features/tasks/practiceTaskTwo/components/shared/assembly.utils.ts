@@ -1,4 +1,5 @@
 import type {AssemblyCommand} from './assembly.types';
+import {Difficulty} from '../../../../../shared/enums/difficulty.enum';
 
 /**
  * Calculates the score based on correct and wrong answers
@@ -10,6 +11,30 @@ import type {AssemblyCommand} from './assembly.types';
  */
 export const calculateScore = (correct: number, wrong: number): number => {
   return Math.max(0, correct - wrong);
+};
+
+/**
+ * Shuffles an array using Fisher-Yates algorithm
+ *
+ * @param array - The array to shuffle
+ * @returns A new shuffled array
+ */
+export const shuffle = <T,>(array: T[]): T[] => {
+  const arr = [...array];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+};
+
+/**
+ * Maps difficulty strings to Difficulty enum values
+ */
+export const DIFFICULTY_MAP: Record<string, Difficulty> = {
+  leicht: Difficulty.Easy,
+  mittel: Difficulty.Medium,
+  schwer: Difficulty.Hard,
 };
 
 /**
@@ -46,7 +71,7 @@ export const generateAvailableCommands = (
   const count = Math.floor(Math.random() * (max - min + 1)) + min;
 
   // Shuffle distractors and select up to count
-  const shuffledDistractors = [...distractors].sort(() => Math.random() - 0.5);
+  const shuffledDistractors = shuffle(distractors);
 
   // Add distractors that aren't already in correct commands
   let added = 0;
@@ -64,7 +89,7 @@ export const generateAvailableCommands = (
   }
 
   // Shuffle all commands
-  return commands.sort(() => Math.random() - 0.5);
+  return shuffle(commands);
 };
 
 /**
@@ -104,7 +129,7 @@ export const generateRounds = <T extends {difficulty: string}>(
       remainingTasks.length > 0 ? remainingTasks : availableTasks;
 
     if (tasksToChooseFrom.length > 0) {
-      const shuffled = [...tasksToChooseFrom].sort(() => Math.random() - 0.5);
+      const shuffled = shuffle(tasksToChooseFrom);
       result.push(shuffled[0]);
     }
   }

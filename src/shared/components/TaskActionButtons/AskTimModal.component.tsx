@@ -1,4 +1,4 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {useEffect, useMemo, useRef, useState} from 'react';
 import './AskTimModal.component.scss';
 import {trainingService} from '../../../services/supabase/training.service';
 
@@ -19,7 +19,7 @@ interface AskTimModalProps {
 
 const MAX_LEN = 250;
 
-const TIM_VERSION = '0.1';
+const TIM_VERSION = '0.2';
 
 const AskTimModal: React.FC<AskTimModalProps> = ({
   open,
@@ -34,6 +34,7 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
   const [messages, setMessages] = useState<
     Array<{role: 'user' | 'assistant'; content: string}>
   >([]);
+  const conversationRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) {
@@ -44,6 +45,13 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
       setLoading(false);
     }
   }, [open]);
+
+  // Scroll to bottom when modal opens or messages change
+  useEffect(() => {
+    if (open && conversationRef.current) {
+      conversationRef.current.scrollTop = conversationRef.current.scrollHeight;
+    }
+  }, [open, messages]);
 
   const remaining = useMemo(() => MAX_LEN - question.length, [question]);
 
@@ -142,7 +150,7 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
 
         <div className="asktim-content">
           <div className="asktim-panel">
-            <div className="asktim-conversation">
+            <div className="asktim-conversation" ref={conversationRef}>
               {messages.length === 0 && !answer && !loading && (
                 <div className="asktim-empty">
                   Keine Unterhaltung vorhanden.

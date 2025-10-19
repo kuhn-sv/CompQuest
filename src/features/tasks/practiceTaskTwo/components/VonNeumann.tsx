@@ -1,7 +1,8 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './VonNeumannQuiz.component.scss';
-import {generateRounds, VonNeumannRound} from './vonneumann.helper';
+import {VonNeumannRound} from './vonneumann.helper';
+import vonNeumannData from '../../../../data/tasks/von-neumann.json';
 import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
@@ -9,6 +10,65 @@ import VonNeumannFunctions from './VonNeumannFunctions';
 import VonNeumannReconstruct from './VonNeumannReconstruct';
 import VonNeumannBusAssignment from './VonNeumannBusAssignment';
 import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
+import {shuffle} from './shared';
+
+type RoundType = 'quiz' | 'functions' | 'reconstruct' | 'busAssignment';
+
+// Generate rounds from JSON data
+const generateRounds = (count: number): VonNeumannRound[] => {
+  const rounds: VonNeumannRound[] = [];
+  const data = vonNeumannData as {
+    quizItems: {id: string; label: string; isCore: boolean}[];
+    reconstructComponents: string[];
+    busComponents: string[];
+    idToLabel: Record<string, string>;
+    idToDesc: Record<string, string>;
+  };
+
+  const generateFunctionPairs = () => {
+    const poolIds = ['cpu', 'ram', 'peripherie', 'bus', 'alu', 'control', 'rom'];
+    const shuffledIds = shuffle(poolIds);
+    const chosenIds = shuffledIds.slice(0, 4);
+    const leftItems = chosenIds.map(id => ({id, label: data.idToLabel[id]}));
+    const rightItems = shuffle(chosenIds.map(id => ({id, label: data.idToDesc[id]})));
+
+    return {left: leftItems, right: rightItems};
+  };
+
+  for (let i = 0; i < count; i++) {
+    if (i === 2) {
+      rounds.push({
+        id: 'vonneumann-reconstruct-3',
+        type: 'reconstruct',
+        components: data.reconstructComponents,
+      });
+    } else if (i === 3) {
+      rounds.push({
+        id: 'vonneumann-bus-4',
+        type: 'busAssignment',
+        buses: data.busComponents,
+      });
+    } else {
+      const type: RoundType = i % 2 === 0 ? 'quiz' : 'functions';
+
+      if (type === 'quiz') {
+        rounds.push({
+          id: `vonneumann-quiz-${i + 1}`,
+          type: 'quiz',
+          items: data.quizItems,
+        });
+      } else {
+        rounds.push({
+          id: `vonneumann-functions-${i + 1}`,
+          type: 'functions',
+          functionPairs: generateFunctionPairs(),
+        });
+      }
+    }
+  }
+
+  return rounds;
+};
 
 const DEFAULT_ROUNDS = 4;
 
@@ -16,6 +76,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
+  onTaskContextChange,
   taskMeta,
 }) => {
   const rounds: VonNeumannRound[] = useMemo(
@@ -74,14 +135,57 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
 
     // Shuffle quiz items if this is a quiz round
     if (current.type === 'quiz' && current.items) {
-      const arr = [...current.items];
-      for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-      }
-      setShuffledItems(arr);
+      setShuffledItems(shuffle(current.items));
     }
   }, [roundIndex, current]);
+
+  // Update task context for Tim whenever the current task changes
+  useEffect(() => {
+    if (!current || !hasStarted) {
+      onTaskContextChange?.(null);
+      return;
+    }
+
+    const baseContext = {
+      subtaskType: 'VonNeumann',
+      taskId: current.id,
+      roundIndex: roundIndex,
+      roundType: current.type,
+    };
+
+    let taskContext: Record<string, unknown> = baseContext;
+
+    if (current.type === 'quiz' && current.items) {
+      taskContext = {
+        ...baseContext,
+        question: 'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur aus.',
+        availableItems: current.items.map(item => item.label),
+      };
+    } else if (current.type === 'functions' && current.functionPairs) {
+      // Send the selected component IDs so server can reconstruct the correct matches
+      taskContext = {
+        ...baseContext,
+        question: 'Ordne die Komponenten ihren Funktionen zu.',
+        components: current.functionPairs.left.map(item => item.label),
+        descriptions: current.functionPairs.right.map(item => item.label),
+        selectedComponentIds: current.functionPairs.left.map(item => item.id),
+      };
+    } else if (current.type === 'reconstruct' && current.components) {
+      taskContext = {
+        ...baseContext,
+        question: 'Rekonstruiere die Von‑Neumann‑Architektur.',
+        availableComponents: current.components,
+      };
+    } else if (current.type === 'busAssignment' && current.buses) {
+      taskContext = {
+        ...baseContext,
+        question: 'Ordne die Bussysteme ihren Funktionen zu.',
+        buses: current.buses,
+      };
+    }
+
+    onTaskContextChange?.(taskContext);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const toggle = (id: string) => {
     setSelected(prev => ({...prev, [id]: !prev[id]}));
@@ -261,8 +365,9 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     return () => {
       onControlsChangeRef.current?.(null);
       onHudChangeRef.current?.(null);
+      onTaskContextChange?.(null);
     };
-  }, []);
+  }, [onTaskContextChange]);
 
   // Update HUD in parent: subtitle + progress + timer control
   useEffect(() => {

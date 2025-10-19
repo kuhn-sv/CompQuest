@@ -2,15 +2,16 @@ import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './WriteAssembly.component.scss';
 import {
-  generateRounds,
   generateAvailableCommands,
-  WriteAssemblyTask,
   AssemblyCommand,
-} from './WriteAssembly.helper';
-import {calculateScore} from './shared/assembly.utils';
+} from './writeAssembly.helper';
+import writeAssemblyTasksData from '../../../../data/tasks/write-assembly.json';
 import {
   AssemblyDraggableCommand,
   AssemblyDroppableSlot,
+  calculateScore,
+  shuffle,
+  DIFFICULTY_MAP,
 } from './shared';
 import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
@@ -18,11 +19,30 @@ import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {DndContext, DragEndEvent} from '@dnd-kit/core';
 import {useDndSensors} from '../../../../shared/hooks/dndSensors';
 
-// Constants
-const DIFFICULTY_MAP: Record<string, Difficulty> = {
-  leicht: Difficulty.Easy,
-  mittel: Difficulty.Medium,
-  schwer: Difficulty.Hard,
+// Types
+interface WriteAssemblyTask {
+  id: string;
+  prosa_text: string;
+  difficulty: string;
+  commands: AssemblyCommand[];
+}
+
+// Generate rounds from JSON data
+const generateRounds = (): WriteAssemblyTask[] => {
+  const tasks = writeAssemblyTasksData as WriteAssemblyTask[];
+
+  // Select tasks by difficulty: 2x leicht, 1x mittel, 1x schwer
+  const leichtTasks = tasks.filter(t => t.difficulty === 'leicht');
+  const mittelTasks = tasks.filter(t => t.difficulty === 'mittel');
+  const schwerTasks = tasks.filter(t => t.difficulty === 'schwer');
+
+  const selected = [
+    ...shuffle(leichtTasks).slice(0, 2),
+    ...shuffle(mittelTasks).slice(0, 1),
+    ...shuffle(schwerTasks).slice(0, 1),
+  ];
+
+  return shuffle(selected);
 };
 
 
@@ -30,6 +50,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
+  onTaskContextChange,
   taskMeta,
 }) => {
   const rounds: WriteAssemblyTask[] = useMemo(() => generateRounds(), []);
@@ -77,6 +98,25 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setEvaluated(false);
     setSelectedCommandIndex(null);
   }, [roundIndex, current]);
+
+  // Update task context for Tim whenever the current task changes
+  useEffect(() => {
+    if (!current || !hasStarted) {
+      onTaskContextChange?.(null);
+      return;
+    }
+
+    const taskContext = {
+      subtaskType: 'WriteAssembly',
+      taskId: current.id,
+      roundIndex: roundIndex,
+      taskDescription: current.prosa_text,
+      difficulty: current.difficulty,
+      numberOfCommands: current.commands.length,
+    };
+
+    onTaskContextChange?.(taskContext);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
     setHasStarted(true);
@@ -329,8 +369,9 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     return () => {
       onControlsChange?.(null);
       onHudChange?.(null);
+      onTaskContextChange?.(null);
     };
-  }, [onControlsChange, onHudChange]);
+  }, [onControlsChange, onHudChange, onTaskContextChange]);
 
   return (
     <div className="write-assembly">

@@ -1,15 +1,44 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
-import {generateRounds, AssemblyTask} from './readAssembly.helper';
+import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
 import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import {shuffle} from './shared';
+
+interface AssemblyInstruction {
+  addr: string;
+  op: string;
+  arg: string;
+}
+
+interface AssemblyTask {
+  id: string;
+  variant: 1 | 2;
+  question: string;
+  program: AssemblyInstruction[];
+  options: string[];
+  correct_index: number;
+  initial_values?: Record<string, number>;
+}
+
+const generateRounds = (): AssemblyTask[] => {
+  const tasks = readAssemblyTasksData as AssemblyTask[];
+  const variant1Tasks = tasks.filter(t => t.variant === 1);
+  const variant2Tasks = tasks.filter(t => t.variant === 2);
+
+  const selected1 = shuffle(variant1Tasks).slice(0, 2);
+  const selected2 = shuffle(variant2Tasks).slice(0, 2);
+
+  return shuffle([...selected1, ...selected2]);
+};
 
 const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
   onSummaryChange,
+  onTaskContextChange,
   taskMeta,
 }) => {
   const rounds: AssemblyTask[] = useMemo(() => generateRounds(), []);
@@ -38,6 +67,31 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     setSelectedAnswer(null);
     setEvaluated(false);
   }, [roundIndex]);
+
+  // Update task context for Tim whenever the current task changes
+  useEffect(() => {
+    if (!current || !hasStarted) {
+      onTaskContextChange?.(null);
+      return;
+    }
+
+    const taskContext = {
+      subtaskType: 'ReadAssembly',
+      taskId: current.id,
+      roundIndex: roundIndex,
+      variant: current.variant,
+      question: current.question,
+      assemblyProgram: current.program.map(instr => ({
+        address: instr.addr,
+        operation: instr.op,
+        argument: instr.arg,
+      })),
+      answerOptions: current.options,
+      initialValues: current.initial_values || null,
+    };
+
+    onTaskContextChange?.(taskContext);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
     setHasStarted(true);
@@ -153,8 +207,9 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     return () => {
       onControlsChange?.(null);
       onHudChange?.(null);
+      onTaskContextChange?.(null);
     };
-  }, [onControlsChange, onHudChange]);
+  }, [onControlsChange, onHudChange, onTaskContextChange]);
 
   const handleAnswerSelect = (index: number) => {
     if (!evaluated) {
