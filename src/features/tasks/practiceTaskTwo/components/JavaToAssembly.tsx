@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
 import './JavaToAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -14,13 +14,13 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import {useTimer} from '../../../../shared/hooks';
+import { useTimer } from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
-import {DndContext, DragEndEvent} from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
-import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
-import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { useDndSensors } from '../../../../shared/hooks/dndSensors';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // Types
 interface JavaToAssemblyTask {
@@ -472,13 +472,16 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
       {!hasStarted ? (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Java → Assembler"
+            statusTitle="Compiler defekt!"
             statusDescription={
               <>
-                Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen.
+              Der Hochsprachen-Parser liefert nur Fragmente – der Codegenerator zur CPU ist getrennt. Ohne korrekte Übersetzung bricht die Pipeline zwischen Java und Instruktionssatz.
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Übersetze alle Programme korrekt.
+                <strong>Deine Mission:</strong> Übersetze den gegebenen Java-Code in funktional äquivalenten Assembler:<br /><br />
+              • Wähle nur passende Befehle aus dem Pool. <br />
+              • Ordne sie in die richtige Reihenfolge. <br />
+              • Filtere falsche/irrelevante Instruktionen konsequent heraus. <br />
               </>
             }
             taskCount={rounds.length}

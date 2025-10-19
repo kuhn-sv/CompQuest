@@ -1,5 +1,5 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
 import {useTimer} from '../../../../shared/hooks';
@@ -222,15 +222,18 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
       {!hasStarted ? (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Assembler-Programm lesen"
+            statusTitle="Instruktionsdecoder beschädigt!"
             statusDescription={
               <>
-                Teste dein Wissen über Assembler-Programme.
-                <br />
-                Lies den Code und beantworte die Fragen.
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Beantworte alle Fragen korrekt.
+                Der Mikrocode deines Prozessors ist korrupt – Befehle werden nicht mehr korrekt interpretiert. Die CPU versteht nur noch Fragmente aus alten Assembler-Instruktionen.
+              <br />
+              <br />
+                <strong>Deine Mission:</strong> Du musst du die verbleibenden Assemblerfragmente analysieren, um ihre Bedeutung zu rekonstruieren.
+              <br />
+              Beantworte Fragen wie:<br /><br />
+              • Was tut dieses Programm?<br />
+              • Welche Werte stehen am Ende in bestimmten Speicherzellen? <br /><br />
+              Nur wenn du die Logik der CPU wieder verstehst, kann der Prozessor korrekt kompilierte Befehle ausführen.
               </>
             }
             taskCount={rounds.length}
