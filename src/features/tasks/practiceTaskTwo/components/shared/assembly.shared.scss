@@ -17,6 +17,7 @@
   cursor: grab;
   transition: all 0.2s ease;
   user-select: none;
+  touch-action: none;
 
   &:hover:not(.is-disabled):not(.is-dragging) {
     background: rgba(255, 255, 255, 0.12);
@@ -35,7 +36,7 @@
   }
 
   &.is-dragging {
-    opacity: 0.5;
+    opacity: 0.3;
     cursor: grabbing;
   }
 
@@ -153,3 +154,10 @@
   }
 }
 
+/* Drag overlay styles */
+.assembly__drag-overlay {
+  cursor: grabbing;
+  z-index: 9999;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+  transform: rotate(3deg);
+}

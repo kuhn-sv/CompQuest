@@ -22,14 +22,15 @@ const DROP_ZONES = {
 const LEFT_BUS = 'Datenbus';
 const RIGHT_BUSES = ['Adressbus', 'Steuerbus'];
 
-const DraggableBus: React.FC<{id: string; label: string; isPlaced: boolean}> = ({
+const DraggableBus: React.FC<{id: string; label: string; isPlaced: boolean; evaluated?: boolean}> = ({
   id,
   label,
   isPlaced,
+  evaluated,
 }) => {
   const {attributes, listeners, setNodeRef, transform, isDragging} = useDraggable({
     id,
-    disabled: isPlaced,
+    disabled: isPlaced || evaluated,
   });
 
   const style = transform
@@ -42,7 +43,7 @@ const DraggableBus: React.FC<{id: string; label: string; isPlaced: boolean}> = (
     <div
       ref={setNodeRef}
       style={style}
-      className={`bus-button ${isPlaced ? 'is-placed' : ''} ${isDragging ? 'is-dragging' : ''}`}
+      className={`bus-button ${isPlaced ? 'is-placed' : ''} ${isDragging ? 'is-dragging' : ''} ${evaluated ? 'is-disabled' : ''}`}
       {...listeners}
       {...attributes}>
       {label}
@@ -123,7 +124,7 @@ const VonNeumannBusAssignment: React.FC<Props> = ({buses, onChange, evaluated}) 
     const {active, over} = event;
     setActiveId(null);
 
-    if (!over) {
+    if (!over || evaluated) {
       return;
     }
 
@@ -154,7 +155,7 @@ const VonNeumannBusAssignment: React.FC<Props> = ({buses, onChange, evaluated}) 
       cleaned[dropZoneId] = busId;
       return cleaned;
     });
-  }, []);
+  }, [evaluated]);
 
   // Handle click-to-assign mode
   const handleZoneClick = (zoneId: string) => {
@@ -367,11 +368,12 @@ const VonNeumannBusAssignment: React.FC<Props> = ({buses, onChange, evaluated}) 
                   <div
                     key={bus}
                     onClick={() => handleBusClick(bus)}
-                    style={{cursor: selectedZone ? 'pointer' : 'grab'}}>
+                    style={{cursor: evaluated ? 'not-allowed' : selectedZone ? 'pointer' : 'grab'}}>
                     <DraggableBus
                       id={bus}
                       label={bus}
                       isPlaced={false}
+                      evaluated={evaluated}
                     />
                   </div>
                 ))}

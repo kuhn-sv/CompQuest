@@ -99,6 +99,7 @@ const VonNeumannFunctions: React.FC<Props> = ({
   }, [pairs]);
 
   const handleLeftClick = (id: string) => {
+    if (evaluated) return; // Disable interactions after evaluation
     setSelectedLeft(prev => (prev === id ? null : id));
     // if left already paired, unpair
     setPairs(prev => {
@@ -112,6 +113,7 @@ const VonNeumannFunctions: React.FC<Props> = ({
   };
 
   const handleRightClick = (id: string) => {
+    if (evaluated) return; // Disable interactions after evaluation
     if (!selectedLeft) {
       // select right as a single click (allow selecting right first)
       setSelectedRight(prev => (prev === id ? null : id));
@@ -151,7 +153,7 @@ const VonNeumannFunctions: React.FC<Props> = ({
                 key={item.id}
                 data-side="left"
                 data-id={item.id}
-                className={`vn-item vn-item--left ${selectedLeft === item.id ? 'is-selected' : ''} ${isCorrect ? 'is-correct' : ''} ${isWrong ? 'is-wrong' : ''}`}
+                className={`vn-item vn-item--left ${selectedLeft === item.id ? 'is-selected' : ''} ${isCorrect ? 'is-correct' : ''} ${isWrong ? 'is-wrong' : ''} ${evaluated ? 'is-disabled' : ''}`}
                 onClick={() => handleLeftClick(item.id)}>
                 {item.label}
               </div>
@@ -171,7 +173,7 @@ const VonNeumannFunctions: React.FC<Props> = ({
                 key={item.id}
                 data-side="right"
                 data-id={item.id}
-                className={`vn-item vn-item--right ${Object.values(pairs).includes(item.id) ? 'is-paired' : ''} ${isCorrect ? 'is-correct' : ''} ${isWrong ? 'is-wrong' : ''}`}
+                className={`vn-item vn-item--right ${Object.values(pairs).includes(item.id) ? 'is-paired' : ''} ${isCorrect ? 'is-correct' : ''} ${isWrong ? 'is-wrong' : ''} ${evaluated ? 'is-disabled' : ''}`}
                 onClick={() => handleRightClick(item.id)}>
                 {item.label}
               </div>

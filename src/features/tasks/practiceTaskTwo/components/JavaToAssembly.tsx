@@ -17,7 +17,7 @@ import {
 import { useTimer } from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import { Difficulty } from '../../../../shared/enums/difficulty.enum';
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
 import { useDndSensors } from '../../../../shared/hooks/dndSensors';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
@@ -112,6 +112,9 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   const [selectedCommandIndex, setSelectedCommandIndex] = useState<number | null>(
     null,
   );
+
+  // Track actively dragged command for DragOverlay
+  const [activeCommand, setActiveCommand] = useState<AssemblyCommand | null>(null);
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
@@ -340,10 +343,31 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     [placedCommands],
   );
 
+  // Handle drag start
+  const handleDragStart = useCallback(
+    (event: DragStartEvent) => {
+      const {active} = event;
+      const activeId = active.id as string;
+
+      // Set active command for overlay
+      if (activeId.startsWith('available-')) {
+        const availableIndex = parseInt(activeId.replace('available-', ''), 10);
+        setActiveCommand(availableCommands[availableIndex]);
+      } else if (activeId.startsWith('placed-')) {
+        const slotIndex = active.data.current?.fromSlot;
+        if (slotIndex !== undefined && placedCommands[slotIndex]) {
+          setActiveCommand(placedCommands[slotIndex]);
+        }
+      }
+    },
+    [availableCommands, placedCommands],
+  );
+
   // Handle drag end
   const handleDragEnd = useCallback(
     (event: DragEndEvent) => {
       const {active, over} = event;
+      setActiveCommand(null);
       if (!over) return;
 
       const activeId = active.id as string;
@@ -408,6 +432,11 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     },
     [availableCommands, placedCommands, isCommandPlaced],
   );
+
+  // Handle drag cancel
+  const handleDragCancel = useCallback(() => {
+    setActiveCommand(null);
+  }, []);
 
   // Update controls when state changes
   useEffect(() => {
@@ -493,7 +522,11 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
         </div>
       ) : (
         <>
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          <DndContext
+            sensors={sensors}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onDragCancel={handleDragCancel}>
             <div className="java-to-assembly__content">
               <div className="java-to-assembly__left">
                 <div className="java-to-assembly__java-section">
@@ -583,6 +616,16 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
                 </div>
               </div>
             </div>
+
+            <DragOverlay>
+              {activeCommand ? (
+                <div className="assembly__command assembly__drag-overlay">
+                  {activeCommand.arg
+                    ? `${activeCommand.op} ${activeCommand.arg}`
+                    : activeCommand.op}
+                </div>
+              ) : null}
+            </DragOverlay>
           </DndContext>
 
           {showModal && (

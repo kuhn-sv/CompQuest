@@ -112,6 +112,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   const [busAssignmentScore, setBusAssignmentScore] = useState<TaskStageScore | null>(
     null,
   );
+  const [busAssignmentResetKey, setBusAssignmentResetKey] = useState<number>(0);
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
@@ -135,6 +136,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     setReconstructScore(null);
     setBusAssignmentScore(null);
     setReconstructResetKey(prev => prev + 1);
+    setBusAssignmentResetKey(prev => prev + 1);
 
     // Shuffle quiz items if this is a quiz round
     if (current.type === 'quiz' && current.items) {
@@ -217,6 +219,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     setReconstructScore(null);
     setBusAssignmentScore(null);
     setReconstructResetKey(prev => prev + 1);
+    setBusAssignmentResetKey(prev => prev + 1);
     reset();
     start();
   }, [reset, start]);
@@ -474,6 +477,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
         />
       ) : current.type === 'busAssignment' && current.buses ? (
         <VonNeumannBusAssignment
+          key={busAssignmentResetKey}
           buses={current.buses}
           onChange={score => setBusAssignmentScore(score)}
           evaluated={evaluated}

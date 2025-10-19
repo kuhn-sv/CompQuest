@@ -22,7 +22,7 @@
 .vn-bus-assignment__diagram {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
   align-items: center;
 }
 
@@ -221,6 +221,7 @@
   padding: 0.5rem;
   text-align: center;
   user-select: none;
+  touch-action: none;
 
   &.is-dragging {
     opacity: 0.5;
@@ -250,8 +251,6 @@
   gap: 1rem;
   justify-content: center;
   flex-wrap: wrap;
-  padding: 1rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
   width: 100%;
 }
 
@@ -266,6 +265,7 @@
   cursor: grab;
   transition: all 0.2s ease;
   user-select: none;
+  touch-action: none;
 
   &:hover:not(.is-placed) {
     background: var(--secondary);
@@ -280,6 +280,12 @@
 
   &.is-placed {
     opacity: 0.3;
+    pointer-events: none;
+  }
+
+  &.is-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
     pointer-events: none;
   }
 
