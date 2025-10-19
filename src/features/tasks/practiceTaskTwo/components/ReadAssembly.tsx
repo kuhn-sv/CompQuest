@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
@@ -50,8 +50,8 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
-  // Accumulate per-round scores
-  const [stageScores, setStageScores] = useState<
+  // Accumulate per-round scores (used via setStageScores updater function)
+  const [_stageScores, setStageScores] = useState<
     Array<{
       difficulty: Difficulty;
       correct: number;
@@ -61,6 +61,25 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   >([]);
 
   const current = rounds[roundIndex];
+
+  // Use ref to store current evaluation data to avoid stale closure issues
+  // when parent component doesn't update callback references
+  const evaluationDataRef = useRef({
+    selectedAnswer,
+    correctIndex: current.correct_index,
+    roundIndex,
+    roundsLength: rounds.length,
+  });
+
+  // Keep ref up-to-date with current values
+  useEffect(() => {
+    evaluationDataRef.current = {
+      selectedAnswer,
+      correctIndex: current.correct_index,
+      roundIndex,
+      roundsLength: rounds.length,
+    };
+  }, [selectedAnswer, current.correct_index, roundIndex, rounds.length]);
 
   // Initialize round state when round changes
   useEffect(() => {
@@ -112,7 +131,10 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     setEvaluated(true);
     stop();
 
-    const isCorrect = selectedAnswer === current.correct_index;
+    // Read current values from ref to avoid stale closure issues
+    const { selectedAnswer, correctIndex, roundIndex, roundsLength } = evaluationDataRef.current;
+
+    const isCorrect = selectedAnswer === correctIndex;
     const correct = isCorrect ? 1 : 0;
     const total = 1;
     const points = isCorrect ? 1 : 0;
@@ -121,29 +143,23 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     setStageScores(prev => {
       const next = [...prev];
       next[roundIndex] = {difficulty, correct, total, points};
+      
+      // If last round, compute final result and emit to container using fresh state
+      if (roundIndex === roundsLength - 1) {
+        const elapsedMs = getElapsed();
+        
+        onSummaryChange?.({
+          elapsedMs,
+          perStage: next.map(s => ({...s, difficulty: s.difficulty})),
+        });
+      }
+      
       return next;
     });
-
-    // If last round, compute final result and emit to container
-    if (roundIndex === rounds.length - 1) {
-      const elapsedMs = getElapsed();
-      const base = [...stageScores];
-      base[roundIndex] = {difficulty, correct, total, points};
-
-      onSummaryChange?.({
-        elapsedMs,
-        perStage: base.map(s => ({...s, difficulty: s.difficulty})),
-      });
-    }
   }, [
-    current.correct_index,
-    selectedAnswer,
     stop,
     getElapsed,
     onSummaryChange,
-    roundIndex,
-    rounds.length,
-    stageScores,
   ]);
 
   const next = useCallback(() => {
