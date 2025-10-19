@@ -81,7 +81,7 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
       })();
 
       // include prior messages so the assistant receives the chat history
-      const res = await fetch('/api/ask-tim', {
+      const res = await fetch('/.netlify/functions/ask-tim', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
