@@ -21,7 +21,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Identifiziere die Kernkomponenten der Von-Neumann-Architektur und rekonstruiere den Aufbau.',
       component: VonNeumann as React.ComponentType<SubTaskComponentProps>,
-      chapters: [],
+      chapters: [{title: '11.1'}],
       timeLimit: 8 * 60 * 1000,
     },
     {
@@ -30,7 +30,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Lies den Assembler-Code und beantworte die Fragen korrekt.',
       component: ReadAssembly as React.ComponentType<SubTaskComponentProps>,
-      chapters: [],
+      chapters: [{title: '11.2'}],
       timeLimit: 8 * 60 * 1000,
     },
     {
@@ -39,7 +39,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Sortiere die Befehle in die richtige Reihenfolge.',
       component: WriteAssembly as React.ComponentType<SubTaskComponentProps>,
-      chapters: [],
+      chapters: [{title: '11.2'}],
       timeLimit: 8 * 60 * 1000,
     },
     {
@@ -48,7 +48,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       description:
         'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen.',
       component: JavaToAssembly as React.ComponentType<SubTaskComponentProps>,
-      chapters: [],
+      chapters: [{title: '11.2'}],
       timeLimit: 8 * 60 * 1000,
     },
   ];

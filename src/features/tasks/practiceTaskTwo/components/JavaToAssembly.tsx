@@ -30,6 +30,7 @@ interface JavaToAssemblyTask {
   addresses: string[];
   assembler: string[];
   difficulty: string;
+  hint?: string;
 }
 
 // Generate rounds from JSON data
@@ -553,12 +554,16 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
                       </svg>
                     </button>
                   </div>
-                  <div className="java-to-assembly__java-topic">{current.topic}</div>
                   <div className="java-to-assembly__java-code">
                     <SyntaxHighlighter language="java" style={vscDarkPlus}>
                       {current.java}
                     </SyntaxHighlighter>
                   </div>
+                  {current.hint && (
+                    <div className="java-to-assembly__hint">
+                      {current.hint}
+                    </div>
+                  )}
                 </div>
               </div>
 

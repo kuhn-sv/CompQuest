@@ -9,6 +9,8 @@ import useDeviceType from '../../shared/hooks/useDeviceType';
 import {BoardWithHotspots} from '../../shared/components';
 import {TaskId} from '../../shared/enums/taskId.enum';
 
+const VIEW_MODE_STORAGE_KEY = 'compquest-view-mode';
+
 const DashboardPage: React.FC = () => {
   const [showExercises, setShowExercises] = useState(false);
   // Default to 2D to avoid heavy 3D loading on lower-end devices
@@ -17,21 +19,41 @@ const DashboardPage: React.FC = () => {
   const {user, signOut} = useAuth();
   const {isTablet} = useDeviceType();
 
+  // Load saved view mode from localStorage on mount
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
+    if (savedViewMode !== null) {
+      setIs3DView(savedViewMode === '3D');
+    }
+  }, []);
+
   useEffect(() => {
     // On tablets we start with 2D but allow user to switch to 3D
     // The automatic 2D fallback will catch performance issues
-    if (isTablet) setIs3DView(false);
+    if (isTablet) {
+      setIs3DView(false);
+      localStorage.setItem(VIEW_MODE_STORAGE_KEY, '2D');
+    }
   }, [isTablet]);
 
   // Handle critical performance - automatically switch to 2D
   const handleCriticalPerformance = () => {
     setIs3DView(false);
     setShowPerformanceWarning(true);
+    // Save 2D mode to localStorage when automatically switched due to performance
+    localStorage.setItem(VIEW_MODE_STORAGE_KEY, '2D');
     
     // Hide warning after 10 seconds
     setTimeout(() => {
       setShowPerformanceWarning(false);
     }, 10000);
+  };
+
+  // Toggle view mode and save to localStorage
+  const handleToggleView = () => {
+    const newViewMode = !is3DView;
+    setIs3DView(newViewMode);
+    localStorage.setItem(VIEW_MODE_STORAGE_KEY, newViewMode ? '3D' : '2D');
   };
 
   const missions = [
@@ -164,7 +186,7 @@ const DashboardPage: React.FC = () => {
         </div>
         <button
           className="dashboard__toggle-view-btn"
-          onClick={() => setIs3DView(!is3DView)}
+          onClick={handleToggleView}
           title={
             is3DView 
               ? 'Wechsle zu 2D Ansicht' 
