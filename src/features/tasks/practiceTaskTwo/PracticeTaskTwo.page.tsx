@@ -1,8 +1,8 @@
-import React, {useMemo, useState} from 'react';
-import {TaskContainer} from '../../../shared/components';
-import {TaskId} from '../../../shared/enums/taskId.enum';
-import type {SubTaskConfig, SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
-import {VonNeumann, ReadAssembly, WriteAssembly, JavaToAssembly} from './components';
+import React, { useMemo, useState } from 'react';
+import { TaskContainer } from '../../../shared/components';
+import { TaskId } from '../../../shared/enums/taskId.enum';
+import type { SubTaskConfig, SubTaskComponentProps } from '../../../shared/interfaces/tasking.interfaces';
+import { VonNeumann, ReadAssembly, WriteAssembly, JavaToAssembly } from './components';
 
 interface PracticeTaskTwoPageProps {
   initialSubTask?: TaskId;
@@ -19,7 +19,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       id: TaskId.VonNeumann,
       title: 'Von‑Neumann‑Architektur',
       description:
-        'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur.',
+        'Identifiziere die Kernkomponenten der Von-Neumann-Architektur und rekonstruiere den Aufbau.',
       component: VonNeumann as React.ComponentType<SubTaskComponentProps>,
       chapters: [],
       timeLimit: 8 * 60 * 1000,

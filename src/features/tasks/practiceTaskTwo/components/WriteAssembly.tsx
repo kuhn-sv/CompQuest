@@ -1,22 +1,22 @@
-import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
 import './WriteAssembly.component.scss';
 import {
   generateRounds,
   generateAvailableCommands,
   WriteAssemblyTask,
   AssemblyCommand,
-} from './WriteAssembly.helper';
-import {calculateScore} from './shared/assembly.utils';
+} from './writeAssembly.helper';
+import { calculateScore } from './shared/assembly.utils';
 import {
   AssemblyDraggableCommand,
   AssemblyDroppableSlot,
 } from './shared';
-import {useTimer} from '../../../../shared/hooks';
+import { useTimer } from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
-import {DndContext, DragEndEvent} from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import { DndContext, DragEndEvent } from '@dnd-kit/core';
+import { useDndSensors } from '../../../../shared/hooks/dndSensors';
 
 // Constants
 const DIFFICULTY_MAP: Record<string, Difficulty> = {
@@ -340,12 +340,16 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
             statusTitle="Assembler-Programm schreiben"
             statusDescription={
               <>
-                Teste dein Wissen über Assembler-Programme.
+               Instruktionspfad korrupt!
+              Die Steuerlogik versteht nur noch Prosa – der Decoder kann keine gültigen Befehlsfolgen mehr erzeugen. Falsche Instruktionen stören den Takt, der Programmzähler driftet.
+                
                 <br />
-                Sortiere die Befehle in die richtige Reihenfolge.
                 <br />
-                <br />
-                <strong>Deine Mission:</strong> Schreibe alle Programme korrekt.
+                <strong>Deine Mission:</strong> Rekonstruiere aus der Prosa-Beschreibung ein korrektes Assembler-Programm: <br /> <br />
+              • Wähle nur passende Befehle aus dem Pool. <br />
+              • Ordne sie in die richtige Reihenfolge. <br />
+              • Filtere falsche/irrelevante Instruktionen konsequent heraus. <br /> <br />
+              Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den Datenpfad frei.
               </>
             }
             taskCount={rounds.length}

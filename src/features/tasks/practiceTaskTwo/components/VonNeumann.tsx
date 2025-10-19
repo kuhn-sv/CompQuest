@@ -1,14 +1,14 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
 import './VonNeumannQuiz.component.scss';
-import {generateRounds, VonNeumannRound} from './vonneumann.helper';
-import {useTimer} from '../../../../shared/hooks';
+import { generateRounds, VonNeumannRound } from './vonneumann.helper';
+import { useTimer } from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 import VonNeumannFunctions from './VonNeumannFunctions';
 import VonNeumannReconstruct from './VonNeumannReconstruct';
 import VonNeumannBusAssignment from './VonNeumannBusAssignment';
-import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
+import type { TaskStageScore } from '../../../../shared/interfaces/tasking.interfaces';
 
 const DEFAULT_ROUNDS = 4;
 
@@ -267,9 +267,9 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   // Update HUD in parent: subtitle + progress + timer control
   useEffect(() => {
     if (!hasStarted) return;
-    let subtitle = 'Kernkomponenten identifizieren';
+    let subtitle = 'Kernkomponenten der Von-Neumann Architektur identifizieren';
     if (current.type === 'functions') {
-      subtitle = 'Funktionen zuordnen';
+      subtitle = 'Den Kernkomponenten die jeweilige Funktion zuordnen';
     } else if (current.type === 'reconstruct') {
       subtitle = 'Rekonstruiere die Von-Neumann-Architektur';
     } else if (current.type === 'busAssignment') {
@@ -297,15 +297,14 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       {!hasStarted ? (
         <div className="ns-start-overlay">
           <GameStartScreen
-            statusTitle="Von-Neumann-Architektur"
+            statusTitle="Systemkern fragmentiert!"
             statusDescription={
               <>
-                Teste dein Wissen über die Von-Neumann-Architektur.
-                <br />
-                Identifiziere Kernkomponenten und ordne Funktionen zu.
+                Ein Defekt in der Architektursteuerung hat den logischen Aufbau deines Rechners zerstört. Speicher, Rechenwerk und Steuerwerk sind isoliert – der Informationsfluss steht still.
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Beantworte alle Fragen korrekt.
+                
+                <strong>Deine Mission:</strong> Identifiziere die Komponenten und ihre Funktionen, rekonstruiere die Von-Neumann-Architektur und verbinde die Komponenten miteinander, bis der Datenstrom wieder fließt.
               </>
             }
             taskCount={rounds.length}
