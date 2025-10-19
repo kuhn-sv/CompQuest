@@ -71,7 +71,7 @@ $ns-field-height: 40px !default;
   &--trailing {
     flex: 1;
     min-width: 80px;
-    background: var(--primary10);
+    background: var(--primary);
     &.success { background: var(--success); }
     &.error { background: var(--error); }
   }

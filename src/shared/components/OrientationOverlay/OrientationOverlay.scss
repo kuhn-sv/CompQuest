@@ -1,0 +1,92 @@
+@use '../../../styles/_variables' as *;
+
+.orientation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.95);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.3s ease-in-out;
+
+  &__content {
+    text-align: center;
+    padding: 2rem;
+    max-width: 400px;
+    animation: slideUp 0.4s ease-out;
+  }
+
+  &__icon {
+    color: var(--primary);
+    margin-bottom: 2rem;
+    animation: rotate 2s ease-in-out infinite;
+    display: inline-block;
+
+    svg {
+      width: 120px;
+      height: 120px;
+      filter: drop-shadow(0 0 20px var(--primary));
+    }
+  }
+
+  &__title {
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 0 0 1rem 0;
+    line-height: 1.2;
+  }
+
+  &__message {
+    font-size: 1.125rem;
+    color: var(--text-secondary);
+    margin: 0;
+    line-height: 1.5;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes rotate {
+  0%, 100% {
+    transform: rotate(0deg);
+  }
+  25% {
+    transform: rotate(-15deg);
+  }
+  75% {
+    transform: rotate(15deg);
+  }
+}
+
+// Prevent any interaction with content behind overlay
+.orientation-overlay ~ * {
+  pointer-events: none;
+}
+

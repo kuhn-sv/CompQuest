@@ -16,6 +16,35 @@ export const clamp = (n: number, min: number, max: number) => Math.max(min, Math
 
 const randomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
+/**
+ * Generates an array of unique random integers within a given range.
+ * @param count - Number of unique integers to generate
+ * @param min - Minimum value (inclusive)
+ * @param max - Maximum value (inclusive)
+ * @returns Array of unique random integers
+ */
+const generateUniqueRandomInts = (count: number, min: number, max: number): number[] => {
+  const range = max - min + 1;
+  if (count > range) {
+    throw new Error(`Cannot generate ${count} unique values from range [${min}, ${max}]`);
+  }
+  
+  const values = new Set<number>();
+  let attempts = 0;
+  const maxAttempts = 1000;
+  
+  while (values.size < count && attempts < maxAttempts) {
+    values.add(randomInt(min, max));
+    attempts++;
+  }
+  
+  if (values.size < count) {
+    throw new Error(`Failed to generate ${count} unique values after ${maxAttempts} attempts`);
+  }
+  
+  return Array.from(values);
+};
+
 export const formatWithBase = (value: string | number, base: Base): string => `${value}${toSubscript(base)}`;
 
 export const parseFromBase = (value: string, base: Base): number => {
@@ -61,15 +90,16 @@ const ranges: Record<Difficulty, { min: number; max: number }> = {
 export const generateLeichtSet = (): GeneratedSet => {
   const { min, max } = ranges[Difficulty.Easy];
   // Easy: Always decimal (left) to binary (right), 4 tasks
-  const tasks: NumberTask[] = [];
-  for (let i = 0; i < 4; i++) {
-    const n = randomInt(min, max);
+  // Generate 4 unique decimal values
+  const uniqueValues = generateUniqueRandomInts(4, min, max);
+  
+  const tasks: NumberTask[] = uniqueValues.map(n => {
     const fromBase: Base = 10;
     const toBaseVal: Base = 2;
     const sourceValue = String(n);
     const expectedValue = toBaseString(n, toBaseVal);
-    tasks.push({ id: uid(), fromBase, toBase: toBaseVal, sourceValue, expectedValue });
-  }
+    return { id: uid(), fromBase, toBase: toBaseVal, sourceValue, expectedValue };
+  });
 
   const answerPool: AnswerOption[] = shuffle(
     tasks.map<AnswerOption>(t => ({ value: t.expectedValue, base: t.toBase }))
@@ -87,8 +117,11 @@ export const generateMittelSet = (): GeneratedSet => {
   const extraBase = bases[randomInt(0, bases.length - 1)];
   const taskBases: Base[] = shuffle([...bases, extraBase]);
 
-  const tasks: NumberTask[] = taskBases.map((b) => {
-    const n = randomInt(min, max);
+  // Generate 4 unique decimal values
+  const uniqueValues = generateUniqueRandomInts(4, min, max);
+
+  const tasks: NumberTask[] = taskBases.map((b, idx) => {
+    const n = uniqueValues[idx];
     const fromBase: Base = 10;
     const toBaseVal: Base = b;
     const sourceValue = String(n);
@@ -117,8 +150,11 @@ export const generateSchwerSet = (): GeneratedSet => {
   // Pick exactly 4 unique random pairs
   const selectedPairs = shuffle(pairs).slice(0, 4);
 
-  const tasks: NumberTask[] = selectedPairs.map(([a, b]) => {
-    const n = randomInt(min, max);
+  // Generate 4 unique decimal values
+  const uniqueValues = generateUniqueRandomInts(4, min, max);
+
+  const tasks: NumberTask[] = selectedPairs.map(([a, b], idx) => {
+    const n = uniqueValues[idx];
     const flip = Math.random() < 0.5;
     const fromBase: Base = flip ? a : b;
     const toBaseVal: Base = flip ? b : a;

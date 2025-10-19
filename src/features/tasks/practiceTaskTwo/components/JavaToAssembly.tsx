@@ -48,7 +48,7 @@ const generateRounds = (): JavaToAssemblyTask[] => {
     ...shuffle(schwerTasks).slice(0, 1),
   ];
 
-  return shuffle(selected);
+  return selected;
 };
 
 // Modal Component for expanded Java code

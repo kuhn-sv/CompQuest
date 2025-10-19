@@ -17,14 +17,27 @@ import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOn
 import PracticeTaskTwoPage from './features/tasks/practiceTaskTwo/PracticeTaskTwo.page';
 import HelperModulePage from './features/helpers/HelperModule.page';
 import {TaskId} from './shared/enums/taskId.enum';
+import {useOrientation} from './shared/hooks/useOrientation';
+import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
 
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)
   useTheme();
+  
+  // Check device orientation - show overlay on mobile/tablet devices in portrait mode
+  const {isPortrait} = useOrientation();
+  const isMobileOrTablet = typeof window !== 'undefined' && 
+    window.matchMedia && 
+    (window.matchMedia('(max-width: 1024px)').matches || 
+     window.matchMedia('(pointer: coarse)').matches);
+  
+  const shouldShowOrientationOverlay = isMobileOrTablet && isPortrait;
+  
   return (
     <AuthProvider>
       <Router>
         {/* Theme toggle removed; app runs in dark mode */}
+        {shouldShowOrientationOverlay && <OrientationOverlay />}
         <AppWithNavbar />
       </Router>
     </AuthProvider>

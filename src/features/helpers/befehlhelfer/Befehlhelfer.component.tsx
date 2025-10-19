@@ -95,13 +95,20 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
     const shuffled = shuffle(ALL_OPERATIONS);
     const selected = shuffled.slice(0, 4);
     
-    // Shuffle the descriptions (right side) independently
-    const descriptions = shuffle(selected.map(op => op.description));
+    // Create a mapping of description to original operation ID
+    const descriptionMap = selected.map(op => ({
+      description: op.description,
+      originalId: op.id,
+    }));
     
-    // Create new operations with shuffled descriptions but keep original IDs for matching
+    // Shuffle the descriptions (right side) independently
+    const shuffledDescriptions = shuffle(descriptionMap);
+    
+    // Create new operations with shuffled descriptions and track correct pairing
     const withShuffledDescriptions = selected.map((op, idx) => ({
       ...op,
-      description: descriptions[idx],
+      description: shuffledDescriptions[idx].description,
+      correctDescriptionId: shuffledDescriptions[idx].originalId,
     }));
     
     setCurrentOperations(withShuffledDescriptions);

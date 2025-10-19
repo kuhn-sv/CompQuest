@@ -48,8 +48,10 @@ const OperationMatcher: React.FC<Props> = ({operations, evaluated}) => {
       const from = getCenter('left', l);
       const to = getCenter('right', r);
       if (!from || !to) return;
-      // IDs are preserved from original operations, so matching IDs = correct pair
-      const status = evaluated ? (r === l ? 'correct' : 'wrong') : undefined;
+      // Check if the paired description actually belongs to this command
+      const rightOp = operations.find(op => op.id === r);
+      const isCorrectPair = rightOp?.correctDescriptionId === l;
+      const status = evaluated ? (isCorrectPair ? 'correct' : 'wrong') : undefined;
       lines.push({
         fromX: from.x,
         fromY: from.y,
@@ -70,7 +72,7 @@ const OperationMatcher: React.FC<Props> = ({operations, evaluated}) => {
     setLines(buildLines());
     // buildLines uses getCenter which depends on DOM state, not suitable as dependency
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pairs, evaluated]);
+  }, [pairs, evaluated, operations]);
 
   // Update lines on resize
   useEffect(() => {
@@ -116,8 +118,9 @@ const OperationMatcher: React.FC<Props> = ({operations, evaluated}) => {
         <div className="operation-matcher__col operation-matcher__col--left">
           {operations.map(op => {
             const pairedRight = pairs[op.id];
-            const isCorrect = evaluated && pairedRight === op.id;
-            const isWrong = evaluated && pairedRight && pairedRight !== op.id;
+            const pairedRightOp = pairedRight ? operations.find(o => o.id === pairedRight) : null;
+            const isCorrect = evaluated && pairedRightOp?.correctDescriptionId === op.id;
+            const isWrong = evaluated && pairedRight && pairedRightOp?.correctDescriptionId !== op.id;
             return (
               <div
                 key={op.id}
@@ -136,8 +139,8 @@ const OperationMatcher: React.FC<Props> = ({operations, evaluated}) => {
             const leftId = Object.entries(pairs).find(
               ([, r]) => r === op.id,
             )?.[0];
-            const isCorrect = evaluated && leftId === op.id;
-            const isWrong = evaluated && leftId && leftId !== op.id;
+            const isCorrect = evaluated && leftId && op.correctDescriptionId === leftId;
+            const isWrong = evaluated && leftId && op.correctDescriptionId !== leftId;
             return (
               <div
                 key={op.id}

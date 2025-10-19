@@ -51,7 +51,7 @@ export const ConnectionOverlay: React.FC<ConnectionOverlayProps> = ({
         {connectionLines.map(line => {
           // Calculate bend points for L-shaped line - extend further left to close gap
           const midX = line.fromX + (line.toX - line.fromX) * 0.3; // Closer to fromX (30% instead of 60%)
-          let strokeColor = 'var(--primary10)';
+          let strokeColor = 'var(--primary)';
           if (line.status === 'correct') strokeColor = 'var(--success)';
           if (line.status === 'wrong') strokeColor = 'var(--error)';
           return (
