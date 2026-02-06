@@ -1,10 +1,9 @@
--- Derived views and admin-friendly views (RLS still applies via underlying tables)
+-- Remove admin_tim_messages_recent view and update admin_exercise_overview to remove email field
 
-create or replace view public.tim_question_counts as
-select user_id, task_id, count(*)::int as question_count
-from public.tim_messages
-group by user_id, task_id;
+-- Drop the admin_tim_messages_recent view completely
+drop view if exists public.admin_tim_messages_recent;
 
+-- Recreate admin_exercise_overview without email field (for privacy)
 create or replace view public.admin_exercise_overview as
 select
   es.user_id,
@@ -28,3 +27,4 @@ select
   ) as last_question_at
 from public.exercise_stats es
 left join public.profiles p on p.id = es.user_id;
+

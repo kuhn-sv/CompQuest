@@ -16,13 +16,7 @@ alter view if exists public.admin_exercise_overview set (
   security_barrier = on
 );
 
-alter view if exists public.admin_tim_messages_recent set (
-  security_invoker = on,
-  security_barrier = on
-);
-
 -- Optional (not applied here): tighten GRANTs to restrict who can SELECT from admin_* views.
 -- Example:
 -- revoke all on public.admin_exercise_overview from public, anon, authenticated;
 -- grant select on public.admin_exercise_overview to service_role, supabase_admin;
--- Do similarly for public.admin_tim_messages_recent.

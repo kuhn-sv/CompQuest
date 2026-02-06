@@ -351,7 +351,6 @@ group by user_id, task_id;
 create or replace view public.admin_exercise_overview as
 select
   es.user_id,
-  p.email,
   p.display_name,
   p.matrikelnummer,
   p.role,
@@ -372,24 +371,6 @@ select
   ) as last_question_at
 from public.exercise_stats es
 left join public.profiles p on p.id = es.user_id;
-
-create or replace view public.admin_tim_messages_recent as
-select
-  tm.id,
-  tm.created_at,
-  tm.user_id,
-  p.email,
-  p.display_name,
-  p.matrikelnummer,
-  p.role,
-  tm.task_id,
-  tm.task_title,
-  tm.level,
-  tm.tim_version,
-  tm.request,
-  tm.response
-from public.tim_messages tm
-left join public.profiles p on p.id = tm.user_id;
 
 -- =============================================================
 -- 6) RPC: compute remaining daily credits for Tim messages
