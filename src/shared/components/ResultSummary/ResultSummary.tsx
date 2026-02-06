@@ -18,6 +18,7 @@ interface ResultSummaryProps {
   title?: string;
   endHref?: string; // if provided, renders a Link
   endLabel?: string;
+  endState?: Record<string, unknown>; // passed as location.state to the Link
   onClose?: () => void; // alternative to Link: render button
   chapters?: {title: string; content?: string}[];
   timeLimit?: number; // milliseconds
@@ -30,6 +31,7 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
   title = 'Zahlen-Konverter Abgeschlossen!',
   endHref,
   endLabel,
+  endState,
   onClose,
   chapters,
   timeLimit,
@@ -94,7 +96,7 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
           Wiederholen
         </button>
         {endHref ? (
-          <Link to={endHref} className="summary-btn primary">
+          <Link to={endHref} state={endState} className="summary-btn primary">
             {endLabel ?? 'Weiter'}
           </Link>
         ) : (

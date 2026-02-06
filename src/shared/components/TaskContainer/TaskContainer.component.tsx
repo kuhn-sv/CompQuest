@@ -79,6 +79,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   description,
   endHref = '/dashboard',
   endLabel = 'Beenden',
+  endState = {openExercises: true},
   taskMeta,
   forceShowFooter = false,
   autoStartTimer = false,
@@ -326,6 +327,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
               formatTime={formatTime}
               endHref={endHref}
               endLabel={endLabel}
+              endState={endState}
               taskId={taskMeta?.id}
               title={taskMeta?.title}
               chapters={taskMeta?.chapters}

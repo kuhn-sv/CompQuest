@@ -18,6 +18,7 @@ export interface TaskContainerProps {
   description?: string;
   endHref?: string;
   endLabel?: string;
+  endState?: Record<string, unknown>; // passed as location.state when navigating via endHref
   // Optional meta to record progress in DB on completion
   taskMeta?: {
     id: string;

@@ -1,7 +1,9 @@
 import React, {useState, useEffect, Suspense} from 'react';
+import {useLocation} from 'react-router-dom';
 import ExercisesModal from './components/ExercisesModal.component';
 import {useAuth} from '../auth';
 import './dashboard.page.scss';
+import type {DashboardNavigationState} from '../../shared/interfaces';
 const Model3D = React.lazy(
   () => import('./components/model3d/model3d.component'),
 );
@@ -12,7 +14,18 @@ import {TaskId} from '../../shared/enums/taskId.enum';
 const VIEW_MODE_STORAGE_KEY = 'compquest-view-mode';
 
 const DashboardPage: React.FC = () => {
+  const location = useLocation();
   const [showExercises, setShowExercises] = useState(false);
+
+  // Auto-open exercises modal when navigated with state (e.g. from ResultSummary "Beenden")
+  useEffect(() => {
+    const navState = location.state as DashboardNavigationState | undefined;
+    if (navState?.openExercises) {
+      setShowExercises(true);
+      // Clear state so a page refresh doesn't re-open the modal
+      window.history.replaceState({}, '');
+    }
+  }, [location.state]);
   // Default to 2D to avoid heavy 3D loading on lower-end devices
   const [is3DView, setIs3DView] = useState(false);
   const [showPerformanceWarning, setShowPerformanceWarning] = useState(false);
@@ -42,7 +55,7 @@ const DashboardPage: React.FC = () => {
     setShowPerformanceWarning(true);
     // Save 2D mode to localStorage when automatically switched due to performance
     localStorage.setItem(VIEW_MODE_STORAGE_KEY, '2D');
-    
+
     // Hide warning after 10 seconds
     setTimeout(() => {
       setShowPerformanceWarning(false);
@@ -160,13 +173,14 @@ const DashboardPage: React.FC = () => {
             <BoardWithHotspots onCpuClick={handleCpuClick} />
           </div>
         )}
-        
+
         {/* Performance Warning */}
         {showPerformanceWarning && (
           <div className="dashboard__performance-warning">
             <span className="dashboard__performance-warning-icon">⚠️</span>
             <p className="dashboard__performance-warning-text">
-              3D-Ansicht zu langsam für dieses Gerät. Automatisch auf 2D gewechselt.
+              3D-Ansicht zu langsam für dieses Gerät. Automatisch auf 2D
+              gewechselt.
             </p>
           </div>
         )}
@@ -188,9 +202,9 @@ const DashboardPage: React.FC = () => {
           className="dashboard__toggle-view-btn"
           onClick={handleToggleView}
           title={
-            is3DView 
-              ? 'Wechsle zu 2D Ansicht' 
-              : isTablet 
+            is3DView
+              ? 'Wechsle zu 2D Ansicht'
+              : isTablet
                 ? 'Wechsle zu 3D Ansicht (bei zu niedriger Performance wird automatisch zurück zu 2D gewechselt)'
                 : 'Wechsle zu 3D Ansicht'
           }>
