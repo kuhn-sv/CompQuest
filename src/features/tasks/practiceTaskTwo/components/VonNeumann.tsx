@@ -3,11 +3,7 @@ import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.
 import './VonNeumannQuiz.component.scss';
 import {VonNeumannRound} from './vonneumann.helper';
 import vonNeumannData from '../../../../data/tasks/von-neumann.json';
-import {
-  useTimer,
-  useFooterControls,
-  useHudState,
-} from '../../../../shared/hooks';
+import {useFooterControls, useHudState} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import VonNeumannQuiz from './VonNeumannQuiz';
@@ -93,6 +89,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   onTaskContextChange,
   taskMeta,
+  getElapsed,
 }) => {
   const rounds: VonNeumannRound[] = useMemo(
     () => generateRounds(DEFAULT_ROUNDS),
@@ -125,8 +122,6 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   const [busAssignmentScore, setBusAssignmentScore] =
     useState<TaskStageScore | null>(null);
   const [busAssignmentResetKey, setBusAssignmentResetKey] = useState<number>(0);
-
-  const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
   // Accumulate per-round scores
   const [stageScores, setStageScores] = useState<
@@ -213,14 +208,18 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
 
   const startTask = useCallback(() => {
     setHasStarted(true);
-    reset();
-    start();
     setQuizScore(null);
     setEvaluated(false);
     setFunctionsScore(null);
     setReconstructScore(null);
     setBusAssignmentScore(null);
-  }, [reset, start]);
+    // Tell container to start its timer
+    onHudChange?.({
+      progress: {current: 1, total: rounds.length},
+      requestTimer: 'start',
+      isStartScreen: false,
+    });
+  }, [onHudChange, rounds.length]);
 
   const resetTask = useCallback(() => {
     setQuizScore(null);
@@ -234,7 +233,6 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
-    stop();
 
     let correct = 0;
     let total = 1;
@@ -268,7 +266,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
 
     // If last round, compute final result and emit to container
     if (roundIndex === rounds.length - 1) {
-      const elapsedMs = getElapsed();
+      const elapsedMs = getElapsed?.() ?? 0;
       const base = [...stageScores];
       base[roundIndex] = {difficulty, correct, total, points};
 
@@ -283,7 +281,6 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     functionsScore,
     reconstructScore,
     busAssignmentScore,
-    stop,
     getElapsed,
     onSummaryChange,
     roundIndex,
@@ -300,9 +297,8 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       setFunctionsScore(null);
       setReconstructScore(null);
       setBusAssignmentScore(null);
-      start();
     }
-  }, [roundIndex, rounds.length, start]);
+  }, [roundIndex, rounds.length]);
 
   // Footer controls (stabilised via hook)
   useFooterControls(
@@ -334,9 +330,8 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     return {
       subtitle,
       progress: {current: roundIndex + 1, total: rounds.length},
-      requestTimer: isRunning ? ('start' as const) : undefined,
     };
-  }, [hasStarted, roundIndex, rounds.length, isRunning, current.type]);
+  }, [hasStarted, roundIndex, rounds.length, current.type]);
   useHudState(onHudChange, hudState);
 
   // Cleanup task context on unmount

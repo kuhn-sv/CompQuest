@@ -13,11 +13,7 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import {
-  useTimer,
-  useFooterControls,
-  useHudState,
-} from '../../../../shared/hooks';
+import {useFooterControls, useHudState} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {
@@ -60,6 +56,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   onTaskContextChange,
   taskMeta,
+  getElapsed,
 }) => {
   const rounds: WriteAssemblyTask[] = useMemo(() => generateRounds(), []);
 
@@ -86,8 +83,6 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   const [activeCommand, setActiveCommand] = useState<AssemblyCommand | null>(
     null,
   );
-
-  const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
   // Accumulate per-round scores
   const [stageScores, setStageScores] = useState<
@@ -139,8 +134,6 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
   const startTask = useCallback(() => {
     setHasStarted(true);
-    reset();
-    start();
 
     // Initialize first round
     const slots = new Array(current.commands.length).fill(null);
@@ -149,7 +142,14 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setAvailableCommands(available);
     setEvaluated(false);
     setSelectedCommandIndex(null);
-  }, [reset, start, current]);
+    // Tell container to start its timer
+    onHudChange?.({
+      progress: {current: 1, total: rounds.length},
+      requestTimer: 'start',
+      subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
+      isStartScreen: false,
+    });
+  }, [current, onHudChange, rounds.length]);
 
   const resetTask = useCallback(() => {
     const slots = new Array(current.commands.length).fill(null);
@@ -161,7 +161,6 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
-    stop();
 
     // Count correct placements
     let correct = 0;
@@ -191,7 +190,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
     // If last round, compute final result and emit to container
     if (roundIndex === rounds.length - 1) {
-      const elapsedMs = getElapsed();
+      const elapsedMs = getElapsed?.() ?? 0;
       const base = [...stageScores];
       base[roundIndex] = {difficulty, correct, total, points};
 
@@ -230,7 +229,6 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     current.commands,
     current.difficulty,
     placedCommands,
-    stop,
     getElapsed,
     onSummaryChange,
     roundIndex,
@@ -245,9 +243,8 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       setRoundIndex(nextIndex);
       setEvaluated(false);
       setSelectedCommandIndex(null);
-      start();
     }
-  }, [roundIndex, rounds.length, start]);
+  }, [roundIndex, rounds.length]);
 
   // Check if a command from available list is placed
   const isCommandPlaced = useCallback(
@@ -393,9 +390,8 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     return {
       subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
       progress: {current: roundIndex + 1, total: rounds.length},
-      requestTimer: isRunning ? ('start' as const) : undefined,
     };
-  }, [hasStarted, roundIndex, rounds.length, isRunning]);
+  }, [hasStarted, roundIndex, rounds.length]);
   useHudState(onHudChange, hudState);
 
   // Cleanup task context on unmount

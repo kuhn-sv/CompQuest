@@ -1,8 +1,16 @@
-import React, { useMemo, useState } from 'react';
-import { TaskContainer } from '../../../shared/components';
-import { TaskId } from '../../../shared/enums/taskId.enum';
-import type { SubTaskConfig, SubTaskComponentProps } from '../../../shared/interfaces/tasking.interfaces';
-import { VonNeumann, ReadAssembly, WriteAssembly, JavaToAssembly } from './components';
+import React, {useMemo, useState} from 'react';
+import {TaskContainer} from '../../../shared/components';
+import {TaskId} from '../../../shared/enums/taskId.enum';
+import type {
+  SubTaskConfig,
+  SubTaskComponentProps,
+} from '../../../shared/interfaces/tasking.interfaces';
+import {
+  VonNeumann,
+  ReadAssembly,
+  WriteAssembly,
+  JavaToAssembly,
+} from './components';
 
 interface PracticeTaskTwoPageProps {
   initialSubTask?: TaskId;
@@ -27,8 +35,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
     {
       id: TaskId.ReadAssembly,
       title: 'Assembler‑Programm lesen',
-      description:
-        'Lies den Assembler-Code und beantworte die Fragen korrekt.',
+      description: 'Lies den Assembler-Code und beantworte die Fragen korrekt.',
       component: ReadAssembly as React.ComponentType<SubTaskComponentProps>,
       chapters: [{title: '11.2'}],
       timeLimit: 8 * 60 * 1000,
@@ -36,8 +43,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
     {
       id: TaskId.WriteAssembly,
       title: 'Assembler‑Programm schreiben',
-      description:
-        'Sortiere die Befehle in die richtige Reihenfolge.',
+      description: 'Sortiere die Befehle in die richtige Reihenfolge.',
       component: WriteAssembly as React.ComponentType<SubTaskComponentProps>,
       chapters: [{title: '11.2'}],
       timeLimit: 8 * 60 * 1000,
@@ -79,7 +85,13 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
       taskMeta={taskMeta}
       title={currentTask?.title ?? ''}
       description={currentTask?.description}>
-      {({onControlsChange, onHudChange, onSummaryChange, onTaskContextChange}) => (
+      {({
+        onControlsChange,
+        onHudChange,
+        onSummaryChange,
+        onTaskContextChange,
+        getElapsed,
+      }) => (
         <>
           {CurrentTaskComponent && (
             <CurrentTaskComponent
@@ -88,6 +100,7 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
               onHudChange={onHudChange}
               onSummaryChange={onSummaryChange}
               onTaskContextChange={onTaskContextChange}
+              getElapsed={getElapsed}
             />
           )}
         </>

@@ -34,6 +34,9 @@ export interface SubTaskComponentProps {
   // (human-readable prompt, variables). This will be forwarded to the
   // AskTim modal so the assistant can use the exact task statement.
   onTaskContextChange?: (context: unknown | null) => void;
+  // Returns the container-level elapsed time in ms (single source of truth).
+  // Subtasks should use this instead of running their own timer.
+  getElapsed?: () => number;
   // Optional arithmetic mode used by some subtasks (e.g., positive vs twos-complement arithmetic)
   arithmeticMode?: ArithmeticMode;
 }

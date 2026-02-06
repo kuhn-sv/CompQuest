@@ -5,7 +5,6 @@ import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRo
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 // Footer buttons rendered by parent
 import type {SubTaskComponentProps} from '../interfaces';
-import {useTimer} from '../../../../shared/hooks';
 import {
   generateRounds,
   ComplementRound,
@@ -25,6 +24,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   taskMeta,
   onTaskContextChange,
+  getElapsed,
 }) => {
   const rounds: Round[] = useMemo(
     () => generateRounds(4, DEFAULT_BIT_COUNT),
@@ -34,8 +34,6 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   const [bits, setBits] = useState<number[]>(Array(DEFAULT_BIT_COUNT).fill(0));
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
-
-  const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
   // Accumulate per-round scores and final summary
   const [stageScores, setStageScores] = useState<
@@ -59,11 +57,15 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
   const startTask = React.useCallback(() => {
     setHasStarted(true);
-    reset();
-    start();
     setBits(Array(current.bitCount).fill(0));
     setEvaluated(false);
-  }, [current.bitCount, reset, start]);
+    // Tell container to start its timer
+    onHudChangeRef.current?.({
+      subtitle: 'Datenfluss wiederherstellen',
+      progress: {current: 1, total: rounds.length},
+      requestTimer: 'start',
+    });
+  }, [current.bitCount, rounds.length]);
 
   const resetTask = React.useCallback(() => {
     setBits(Array(current.bitCount).fill(0));
@@ -72,7 +74,6 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
   const evaluate = React.useCallback(() => {
     setEvaluated(true);
-    stop();
     const correct = bitsToString(bits) === bitsToString(expectedBits) ? 1 : 0;
     const total = 1;
     const points = correct;
@@ -86,7 +87,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
     // If last round, compute final result and emit to container
     if (roundIndex === rounds.length - 1) {
-      const elapsedMs = getElapsed();
+      const elapsedMs = getElapsed?.() ?? 0;
       const baseScores = (() => {
         const base = [...stageScores];
         base[roundIndex] = {difficulty, correct, total, points};
@@ -105,7 +106,6 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
     roundIndex,
     rounds.length,
     stageScores,
-    stop,
   ]);
 
   const next = React.useCallback(() => {
@@ -114,9 +114,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       setRoundIndex(nextIndex);
       setBits(Array(rounds[nextIndex].bitCount).fill(0));
       setEvaluated(false);
-      start();
     }
-  }, [roundIndex, rounds, start]);
+  }, [roundIndex, rounds]);
 
   // Provide footer controls to parent (stabilized)
   const resetRef = useRef(resetTask);
@@ -196,9 +195,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
     onHudChangeRef.current?.({
       subtitle: 'Datenfluss wiederherstellen',
       progress: {current: roundIndex + 1, total: rounds.length},
-      requestTimer: isRunning ? 'start' : undefined,
     });
-  }, [hasStarted, roundIndex, rounds.length, isRunning]);
+  }, [hasStarted, roundIndex, rounds.length]);
 
   // Inform parent HUD about start screen visibility before task starts
   useEffect(() => {

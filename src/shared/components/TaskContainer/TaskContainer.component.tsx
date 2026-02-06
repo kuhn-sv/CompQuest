@@ -20,6 +20,8 @@ export interface TaskContainerInjectedProps {
   onTaskContextChange: (context: unknown | null) => void;
   // Subtasks may send partial summaries; container will normalize them
   onSummaryChange: (summary: Partial<TaskSummaryState> | null) => void;
+  // Returns the container-level elapsed time in ms (single source of truth).
+  getElapsed: () => number;
 }
 
 interface TaskContainerProps {
@@ -40,6 +42,64 @@ interface TaskContainerProps {
   autoStartTimer?: boolean;
   children: (injected: TaskContainerInjectedProps) => React.ReactNode;
 }
+
+// --- Shallow-equal helpers (pure, stateless – live outside the component) ---
+
+const hudShallowEqual = (a: TaskHudState | null, b: TaskHudState | null) => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  const aProg = a.progress;
+  const bProg = b.progress;
+  const progEqual =
+    aProg === bProg ||
+    (!!aProg &&
+      !!bProg &&
+      aProg.current === bProg.current &&
+      aProg.total === bProg.total);
+  return (
+    progEqual &&
+    a.requestTimer === b.requestTimer &&
+    a.subtitle === b.subtitle &&
+    a.isStartScreen === b.isStartScreen
+  );
+};
+
+const summaryShallowEqual = (
+  a: TaskSummaryState | null,
+  b: TaskSummaryState | null,
+) => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    a.elapsedMs === b.elapsedMs &&
+    a.withinThreshold === b.withinThreshold &&
+    a.timeBonus === b.timeBonus &&
+    a.totalCorrect === b.totalCorrect &&
+    a.totalPossible === b.totalPossible &&
+    a.totalPoints === b.totalPoints &&
+    a.thresholdMs === b.thresholdMs
+  );
+};
+
+const controlsShallowEqual = (
+  a: TaskFooterControls | null,
+  b: TaskFooterControls | null,
+) => {
+  if (a === b) return true;
+  if (!a || !b) return false;
+  return (
+    // Compare handler presence (not function identity) to avoid spurious
+    // updates when child re-creates stable callbacks with new references.
+    !!a.onReset === !!b.onReset &&
+    !!a.onEvaluate === !!b.onEvaluate &&
+    !!a.onNext === !!b.onNext &&
+    a.showReset === b.showReset &&
+    a.showEvaluate === b.showEvaluate &&
+    a.showNext === b.showNext &&
+    a.disableReset === b.disableReset &&
+    a.disableNext === b.disableNext
+  );
+};
 
 // Reusable container for tasks/subtasks with header (title/desc/timer/progress), body, footer actions, and summary overlay
 export const TaskContainer: React.FC<TaskContainerProps> = ({
@@ -69,62 +129,6 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   const prevSummaryRef = useRef<TaskSummaryState | null>(null);
   const prevControlsRef = useRef<TaskFooterControls | null>(null);
   const pendingSummaryRef = useRef<TaskSummaryState | null>(null);
-
-  const hudShallowEqual = (a: TaskHudState | null, b: TaskHudState | null) => {
-    if (a === b) return true;
-    if (!a || !b) return false;
-    const aProg = a.progress;
-    const bProg = b.progress;
-    const progEqual =
-      aProg === bProg ||
-      (!!aProg &&
-        !!bProg &&
-        aProg.current === bProg.current &&
-        aProg.total === bProg.total);
-    return (
-      progEqual &&
-      a.requestTimer === b.requestTimer &&
-      a.subtitle === b.subtitle &&
-      a.isStartScreen === b.isStartScreen
-    );
-  };
-
-  const summaryShallowEqual = (
-    a: TaskSummaryState | null,
-    b: TaskSummaryState | null,
-  ) => {
-    if (a === b) return true;
-    if (!a || !b) return false;
-    return (
-      a.elapsedMs === b.elapsedMs &&
-      a.withinThreshold === b.withinThreshold &&
-      a.timeBonus === b.timeBonus &&
-      a.totalCorrect === b.totalCorrect &&
-      a.totalPossible === b.totalPossible &&
-      a.totalPoints === b.totalPoints &&
-      a.thresholdMs === b.thresholdMs
-    );
-  };
-
-  const controlsShallowEqual = (
-    a: TaskFooterControls | null,
-    b: TaskFooterControls | null,
-  ) => {
-    if (a === b) return true;
-    if (!a || !b) return false;
-    return (
-      // Compare handler presence (not function identity) to avoid spurious
-      // updates when child re-creates stable callbacks with new references.
-      !!a.onReset === !!b.onReset &&
-      !!a.onEvaluate === !!b.onEvaluate &&
-      !!a.onNext === !!b.onNext &&
-      a.showReset === b.showReset &&
-      a.showEvaluate === b.showEvaluate &&
-      a.showNext === b.showNext &&
-      a.disableReset === b.disableReset &&
-      a.disableNext === b.disableNext
-    );
-  };
 
   // Keep timer handlers in refs so injected callbacks can be stable
   const startRef = useRef(start);
@@ -174,6 +178,13 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
     if (hud.requestTimer === 'stop') stopRef.current();
     if (hud.requestTimer === 'reset') resetRef.current();
   }, []);
+
+  // Ref-mirror for hudState so handleSummaryChange can read it without
+  // depending on the state value (keeps the callback identity stable).
+  const hudStateRef = useRef<TaskHudState | null>(null);
+  useEffect(() => {
+    hudStateRef.current = hudState;
+  }, [hudState]);
 
   const handleSummaryChange = useCallback(
     (summary: Partial<TaskSummaryState> | null) => {
@@ -234,9 +245,10 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
       // Instead, store it as pending and show a "Weiter" button so the user
       // can view results after clicking Next. If we don't have progress info,
       // fall back to the old behavior.
+      const currentHud = hudStateRef.current;
       const isLastSubtask = !!(
-        hudState?.progress &&
-        hudState.progress.current === hudState.progress.total
+        currentHud?.progress &&
+        currentHud.progress.current === currentHud.progress.total
       );
 
       if (normalized && isLastSubtask) {
@@ -284,7 +296,8 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
           .catch(err => console.error('Failed to record attempt:', err));
       }
     },
-    [taskMeta, hudState],
+    // hudState removed from deps – read from hudStateRef instead
+    [taskMeta],
   );
 
   const handleTaskContextChange = useCallback((ctx: unknown | null) => {
@@ -297,12 +310,14 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
       onHudChange: handleHudChange,
       onTaskContextChange: handleTaskContextChange,
       onSummaryChange: handleSummaryChange,
+      getElapsed,
     }),
     [
       handleControlsChange,
       handleHudChange,
       handleTaskContextChange,
       handleSummaryChange,
+      getElapsed,
     ],
   );
 

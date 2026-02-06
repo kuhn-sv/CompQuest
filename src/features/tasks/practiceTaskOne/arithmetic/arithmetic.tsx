@@ -9,7 +9,6 @@ import {
 import type {SubTaskComponentProps} from '../interfaces';
 import {
   useConnectionLines,
-  useTimer,
   useFooterControls,
   useHudState,
   CONNECTION_LINE_PRESETS,
@@ -39,6 +38,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   arithmeticMode = 'positive',
   onTaskContextChange,
   taskMeta,
+  getElapsed,
 }) => {
   // 3-stage flow: Easy, Medium, Hard
   const stages: Difficulty[] = useMemo(
@@ -59,8 +59,6 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [stageScores, setStageScores] = useState<PAStageScore[]>([]);
   // final summary is lifted to container
-
-  const {start, stop, reset, getElapsed} = useTimer();
 
   // dnd-kit PoC state/handlers are used; ResultsSection and DndProvider handle draggables
 
@@ -99,8 +97,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   });
 
   const startSetForStage = useCallback(
-    (idx: number, options?: {resetTimer?: boolean}) => {
-      const {resetTimer: shouldResetTimer = true} = options ?? {};
+    (idx: number) => {
       const difficulty = stages[idx];
       const {tasks, answerPool} = generateAdditionSet(
         difficulty,
@@ -111,19 +108,15 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
       setEvaluated(false);
       setActiveTaskId(null);
-      if (shouldResetTimer) {
-        reset();
-      }
-      start();
     },
-    [reset, start, stages, arithmeticMode],
+    [stages, arithmeticMode],
   );
 
   // Initial start handler
   const handleInitialStart = useCallback(() => {
     setHasStarted(true);
     setStageIndex(0);
-    startSetForStage(0, {resetTimer: true});
+    startSetForStage(0);
     // Start parent HUD timer and set initial progress
     onHudChangeRef.current?.({
       progress: {current: 1, total: stages.length},
@@ -296,7 +289,6 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
-    stop();
     const difficulty = stages[stageIndex];
     const total = tasks.length;
     const correct = tasks.filter(t => {
@@ -312,13 +304,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       return next;
     });
     if (stageIndex === stages.length - 1) {
-      // Stop parent HUD timer when finishing the last stage
-      onHudChangeRef.current?.({
-        progress: {current: stages.length, total: stages.length},
-        requestTimer: 'stop',
-      });
-
-      const elapsedMs = getElapsed();
+      const elapsedMs = getElapsed?.() ?? 0;
       const perStage = (() => {
         const base = [...stageScores];
         base[stageIndex] = {difficulty, correct, total, points};
@@ -338,7 +324,6 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     stageIndex,
     stageScores,
     stages,
-    stop,
     tasks,
   ]);
 
@@ -346,7 +331,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     if (stageIndex < stages.length - 1) {
       const nextIndex = stageIndex + 1;
       setStageIndex(nextIndex);
-      startSetForStage(nextIndex, {resetTimer: false});
+      startSetForStage(nextIndex);
       // Update HUD progress on stage advance (timer continues)
       onHudChangeRef.current?.({
         progress: {current: nextIndex + 1, total: stages.length},

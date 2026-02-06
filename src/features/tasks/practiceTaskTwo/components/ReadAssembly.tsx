@@ -2,11 +2,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
-import {
-  useTimer,
-  useFooterControls,
-  useHudState,
-} from '../../../../shared/hooks';
+import {useFooterControls, useHudState} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {shuffle} from './shared';
@@ -44,6 +40,7 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   onTaskContextChange,
   taskMeta,
+  getElapsed,
 }) => {
   const rounds: AssemblyTask[] = useMemo(() => generateRounds(), []);
 
@@ -51,8 +48,6 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
-
-  const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
   // Accumulate per-round scores (used via setStageScores updater function)
   const [_stageScores, setStageScores] = useState<
@@ -118,11 +113,16 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
 
   const startTask = useCallback(() => {
     setHasStarted(true);
-    reset();
-    start();
     setSelectedAnswer(null);
     setEvaluated(false);
-  }, [reset, start]);
+    // Tell container to start its timer
+    onHudChange?.({
+      progress: {current: 1, total: rounds.length},
+      requestTimer: 'start',
+      subtitle: 'Wähle die richtige Antwort aus.',
+      isStartScreen: false,
+    });
+  }, [onHudChange, rounds.length]);
 
   const resetTask = useCallback(() => {
     setSelectedAnswer(null);
@@ -131,7 +131,6 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
-    stop();
 
     // Read current values from ref to avoid stale closure issues
     const {selectedAnswer, correctIndex, roundIndex, roundsLength} =
@@ -149,7 +148,7 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
 
       // If last round, compute final result and emit to container using fresh state
       if (roundIndex === roundsLength - 1) {
-        const elapsedMs = getElapsed();
+        const elapsedMs = getElapsed?.() ?? 0;
 
         onSummaryChange?.({
           elapsedMs,
@@ -159,7 +158,7 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
 
       return next;
     });
-  }, [stop, getElapsed, onSummaryChange]);
+  }, [getElapsed, onSummaryChange]);
 
   const next = useCallback(() => {
     if (roundIndex < rounds.length - 1) {
@@ -167,9 +166,8 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
       setRoundIndex(nextIndex);
       setSelectedAnswer(null);
       setEvaluated(false);
-      start();
     }
-  }, [roundIndex, rounds.length, start]);
+  }, [roundIndex, rounds.length]);
 
   // Footer controls (stabilised via hook)
   useFooterControls(
@@ -191,9 +189,8 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     return {
       subtitle: 'Wähle die richtige Antwort aus.',
       progress: {current: roundIndex + 1, total: rounds.length},
-      requestTimer: isRunning ? ('start' as const) : undefined,
     };
-  }, [hasStarted, roundIndex, rounds.length, isRunning]);
+  }, [hasStarted, roundIndex, rounds.length]);
   useHudState(onHudChange, hudState);
 
   // Cleanup task context on unmount

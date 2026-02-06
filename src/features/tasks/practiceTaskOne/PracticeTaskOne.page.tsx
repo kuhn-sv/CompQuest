@@ -104,6 +104,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
         onHudChange,
         onSummaryChange,
         onTaskContextChange,
+        getElapsed,
       }) => (
         <>
           {CurrentTaskComponent && (
@@ -113,6 +114,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
               onHudChange={onHudChange}
               onSummaryChange={onSummaryChange}
               onTaskContextChange={onTaskContextChange}
+              getElapsed={getElapsed}
             />
           )}
         </>

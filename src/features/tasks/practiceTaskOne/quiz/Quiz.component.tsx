@@ -3,7 +3,6 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import './quiz.page.scss';
 import {GameStartScreen} from '../../../../shared/components';
 import type {SubTaskComponentProps, TaskStageScore} from '../interfaces';
-import {useTimer} from '../../../../shared/hooks';
 
 interface QuizQuestion {
   id: string;
@@ -51,14 +50,13 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   taskMeta,
   onTaskContextChange,
+  getElapsed,
 }) => {
   const [hasStarted, setHasStarted] = useState(false);
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [evaluated, setEvaluated] = useState(false);
   const [scores, setScores] = useState<TaskStageScore[]>([]);
-
-  const {start, stop, reset, getElapsed} = useTimer();
 
   // refs for stable callbacks to parent
   const onControlsChangeRef = useRef(onControlsChange);
@@ -91,15 +89,13 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
     setSelected(null);
     setEvaluated(false);
     setScores([]);
-    reset();
-    start();
     onHudChangeRef.current?.({
       progress: {current: 1, total: TOTAL},
       requestTimer: 'start',
       subtitle: 'Beweise dein Wissen. ',
       isStartScreen: false,
     });
-  }, [reset, start]);
+  }, []);
 
   const resetQuestion = useCallback(() => {
     setSelected(null);
@@ -107,7 +103,6 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   }, []);
 
   const evaluate = useCallback(() => {
-    if (selected == null) return;
     setEvaluated(true);
     const correct = selected === QUESTIONS[qIndex].correctIndex ? 1 : 0;
     const entry: TaskStageScore = {
@@ -123,8 +118,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
     });
     if (qIndex === TOTAL - 1) {
       // finalize
-      stop();
-      const elapsedMs = getElapsed();
+      const elapsedMs = getElapsed?.() ?? 0;
       const filled = (() => {
         const base = [...scores];
         base[qIndex] = entry;
@@ -139,7 +133,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
         totalPossible,
       });
     }
-  }, [selected, qIndex, scores, stop, getElapsed]);
+  }, [selected, qIndex, scores, getElapsed]);
 
   const next = useCallback(() => {
     if (qIndex < TOTAL - 1) {

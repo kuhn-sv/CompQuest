@@ -19,6 +19,11 @@ export const useTimer = (): UseTimerReturn => {
   // Monotonic timestamp when the current run started (performance.now)
   const startPerfRef = useRef<number>(0);
 
+  // Mirror state into refs so getElapsed can read the *latest* values
+  // synchronously — even within the same event handler that called stop().
+  const isRunningRef = useRef<boolean>(false);
+  const timeRef = useRef<number>(0);
+
   // No interval needed; we compute live time via getElapsed
   useEffect(() => {
     return () => {
@@ -27,28 +32,36 @@ export const useTimer = (): UseTimerReturn => {
   }, []);
 
   const start = () => {
-    if (isRunning) return;
+    if (isRunningRef.current) return;
     // Continue from paused time
     startPerfRef.current = performance.now();
+    isRunningRef.current = true;
     setIsRunning(true);
   };
 
   const stop = () => {
-    if (!isRunning) return;
+    if (!isRunningRef.current) return;
     // Persist the elapsed time
-    setTime((prev) => prev + (performance.now() - startPerfRef.current));
+    const elapsed = timeRef.current + (performance.now() - startPerfRef.current);
+    timeRef.current = elapsed;
+    isRunningRef.current = false;
+    setTime(elapsed);
     setIsRunning(false);
   };
 
   const reset = () => {
+    timeRef.current = 0;
+    isRunningRef.current = false;
     setTime(0);
     setIsRunning(false);
     startPerfRef.current = performance.now();
   };
 
   const getElapsed = useCallback(() => {
-    return isRunning ? (time + (performance.now() - startPerfRef.current)) : time;
-  }, [isRunning, time]);
+    return isRunningRef.current
+      ? (timeRef.current + (performance.now() - startPerfRef.current))
+      : timeRef.current;
+  }, []);
 
   const formatTime = useCallback((timeInMs: number): string => {
     const totalSeconds = Math.floor(timeInMs / 1000);

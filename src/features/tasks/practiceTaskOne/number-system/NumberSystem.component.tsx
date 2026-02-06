@@ -19,7 +19,6 @@ import {DragOverlay} from '@dnd-kit/core';
 import type {SubTaskComponentProps} from '../interfaces';
 import {
   useConnectionLines,
-  useTimer,
   useFooterControls,
   useHudState,
   CONNECTION_LINE_PRESETS,
@@ -33,6 +32,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
   taskMeta,
   onTaskContextChange,
+  getElapsed,
 }) => {
   // Staged progression: Easy → Medium → Hard
   const stages: Difficulty[] = useMemo(
@@ -53,9 +53,6 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   // Final summary is reported to parent via onSummaryChange.
 
   // Per-task threshold/bonus handled centrally by TaskContainer via taskMeta
-
-  // Timer functionality
-  const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
   // Inform parent HUD about start screen visibility
   useEffect(() => {
@@ -151,8 +148,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   }, [rawConnectionLines, evaluated, tasks, assignments]);
 
   const startSetForStage = useCallback(
-    (idx: number, options?: {resetTimer?: boolean}) => {
-      const {resetTimer: shouldResetTimer = true} = options ?? {};
+    (idx: number) => {
       const difficulty = stages[idx];
       const {tasks, answerPool} = generateSet(difficulty);
       setTasks(tasks);
@@ -160,21 +156,23 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
       setEvaluated(false);
       setActiveTaskId(null);
-      // Start the timer when a new set begins
-      if (shouldResetTimer) {
-        reset();
-      }
-      start();
     },
-    [reset, start, stages],
+    [stages],
   );
 
   // Initial start handler: reveal tasks and kick off stage 1
   const handleInitialStart = useCallback(() => {
     setHasStarted(true);
     setStageIndex(0);
-    startSetForStage(0, {resetTimer: true});
-  }, [startSetForStage]);
+    startSetForStage(0);
+    // Tell the container to start/reset its timer
+    onHudChange?.({
+      progress: {current: 1, total: stages.length},
+      requestTimer: 'start',
+      subtitle: 'Datenfluss wiederherstellen',
+      isStartScreen: false,
+    });
+  }, [startSetForStage, onHudChange, stages.length]);
 
   const resetSet = useCallback(() => {
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
@@ -301,7 +299,6 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
-    stop();
 
     // Compute stage score
     const difficulty = stages[stageIndex];
@@ -320,7 +317,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
 
     // If this was the last stage, compute final result and emit to container
     if (stageIndex === stages.length - 1) {
-      const elapsedMs = getElapsed();
+      const elapsedMs = getElapsed?.() ?? 0;
       const perStage = (() => {
         const base = [...stageScores];
         base[stageIndex] = {difficulty, correct, total, points};
@@ -338,7 +335,6 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     stageIndex,
     stageScores,
     stages,
-    stop,
     tasks,
   ]);
 
@@ -347,7 +343,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       const nextIndex = stageIndex + 1;
       setStageIndex(nextIndex);
       // Resume timer: do not reset
-      startSetForStage(nextIndex, {resetTimer: false});
+      startSetForStage(nextIndex);
     }
   }, [stageIndex, stages, startSetForStage]);
 
@@ -372,10 +368,9 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     return {
       subtitle: 'Datenfluss wiederherstellen',
       progress: {current: stageIndex + 1, total: stages.length},
-      requestTimer: isRunning ? ('start' as const) : undefined,
       isStartScreen: false,
     };
-  }, [hasStarted, tasks.length, stageIndex, stages.length, isRunning]);
+  }, [hasStarted, tasks.length, stageIndex, stages.length]);
   useHudState(onHudChange, hudState);
 
   return (
