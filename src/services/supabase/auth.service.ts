@@ -3,7 +3,6 @@ import { UserProfile, UserPreferences, UserProgress } from '../../features/auth/
 
 type ErrorWithCode = Error & { code?: string };
 
-// Defaults similar to current Firebase implementation
 const defaultPreferences: UserPreferences = {
   theme: 'auto',
   language: 'de',
