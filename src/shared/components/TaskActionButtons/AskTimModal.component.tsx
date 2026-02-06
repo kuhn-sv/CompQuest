@@ -148,6 +148,8 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
           </button>
         </div>
 
+        <div className="asktim-separator" />
+
         <div className="asktim-content">
           <div className="asktim-panel">
             <div className="asktim-conversation" ref={conversationRef}>

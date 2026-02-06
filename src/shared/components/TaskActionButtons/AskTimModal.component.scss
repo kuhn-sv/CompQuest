@@ -21,12 +21,19 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0;
 
   h3 {
     margin: 0;
     font-size: 1.25rem;
   }
+}
+
+.asktim-separator {
+  height: 1px;
+  background: var(--surface-border);
+  margin: 1.25rem 0 2rem;
+  opacity: 0.6;
 }
 
 .asktim-header-left {
@@ -219,4 +226,18 @@
   right: 8px;
   border-width: 6px 0 0 6px;
   border-color: var(--primary, #48AEE2) transparent transparent transparent;
+}
+
+.task-action-btn {
+  &.primary {
+    color: var(--primary-btn-text);
+    background: var(--primary-btn-bg);
+    border-color: transparent;
+  }
+
+  &.secondary {
+    background: var(--secondary-btn-bg);
+    color: var(--secondary-btn-text);
+  }
+
 }
