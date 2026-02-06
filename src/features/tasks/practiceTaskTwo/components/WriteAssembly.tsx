@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './WriteAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -13,11 +13,16 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import { useTimer } from '../../../../shared/hooks';
+import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { useDndSensors } from '../../../../shared/hooks/dndSensors';
+import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {useDndSensors} from '../../../../shared/hooks/dndSensors';
 
 // Types
 interface WriteAssemblyTask {
@@ -45,7 +50,6 @@ const generateRounds = (): WriteAssemblyTask[] => {
   return selected;
 };
 
-
 const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
@@ -58,18 +62,26 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   const [roundIndex, setRoundIndex] = useState<number>(0);
   const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
-  
+
   // State for placed commands (slots in the program)
-  const [placedCommands, setPlacedCommands] = useState<({ command: AssemblyCommand; sourceIndex: number } | null)[]>([]);
-  
+  const [placedCommands, setPlacedCommands] = useState<
+    ({command: AssemblyCommand; sourceIndex: number} | null)[]
+  >([]);
+
   // State for available commands
-  const [availableCommands, setAvailableCommands] = useState<AssemblyCommand[]>([]);
-  
+  const [availableCommands, setAvailableCommands] = useState<AssemblyCommand[]>(
+    [],
+  );
+
   // Track which available command is selected for click-to-assign
-  const [selectedCommandIndex, setSelectedCommandIndex] = useState<number | null>(null);
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState<
+    number | null
+  >(null);
 
   // Track actively dragged command for DragOverlay
-  const [activeCommand, setActiveCommand] = useState<AssemblyCommand | null>(null);
+  const [activeCommand, setActiveCommand] = useState<AssemblyCommand | null>(
+    null,
+  );
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
@@ -89,15 +101,15 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   // Initialize round state when round changes
   useEffect(() => {
     if (!current) return;
-    
+
     // Initialize slots based on solution length
     const slots = new Array(current.commands.length).fill(null);
     setPlacedCommands(slots);
-    
+
     // Generate available commands
     const available = generateAvailableCommands(current);
     setAvailableCommands(available);
-    
+
     setEvaluated(false);
     setSelectedCommandIndex(null);
   }, [roundIndex, current]);
@@ -125,7 +137,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setHasStarted(true);
     reset();
     start();
-    
+
     // Initialize first round
     const slots = new Array(current.commands.length).fill(null);
     setPlacedCommands(slots);
@@ -154,7 +166,11 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     for (let i = 0; i < current.commands.length; i++) {
       const placed = placedCommands[i];
       const expected = current.commands[i];
-      if (placed && placed.command.op === expected.op && placed.command.arg === expected.arg) {
+      if (
+        placed &&
+        placed.command.op === expected.op &&
+        placed.command.arg === expected.arg
+      ) {
         correct++;
       }
     }
@@ -162,7 +178,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     const total = current.commands.length;
     const wrong = total - correct;
     const points = calculateScore(correct, wrong);
-    
+
     const difficulty = DIFFICULTY_MAP[current.difficulty] || Difficulty.Easy;
 
     setStageScores(prev => {
@@ -178,9 +194,18 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       base[roundIndex] = {difficulty, correct, total, points};
 
       // Calculate total points from all stages (sum of points, not correct answers)
-      const basePoints = base.reduce((sum, stage) => sum + (stage?.points ?? 0), 0);
-      const totalCorrect = base.reduce((sum, stage) => sum + (stage?.correct ?? 0), 0);
-      const totalPossible = base.reduce((sum, stage) => sum + (stage?.total ?? 0), 0);
+      const basePoints = base.reduce(
+        (sum, stage) => sum + (stage?.points ?? 0),
+        0,
+      );
+      const totalCorrect = base.reduce(
+        (sum, stage) => sum + (stage?.correct ?? 0),
+        0,
+      );
+      const totalPossible = base.reduce(
+        (sum, stage) => sum + (stage?.total ?? 0),
+        0,
+      );
 
       // Calculate time bonus
       const thresholdMs = taskMeta?.timeLimit ?? 3 * 60 * 1000; // default 3 minutes
@@ -246,11 +271,14 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
       // Select this command and auto-assign to first empty slot
       const firstEmptySlotIndex = placedCommands.findIndex(cmd => cmd === null);
-      
+
       if (firstEmptySlotIndex !== -1) {
         const cmd = availableCommands[availableIndex];
         const newPlaced = [...placedCommands];
-        newPlaced[firstEmptySlotIndex] = { command: cmd, sourceIndex: availableIndex };
+        newPlaced[firstEmptySlotIndex] = {
+          command: cmd,
+          sourceIndex: availableIndex,
+        };
         setPlacedCommands(newPlaced);
         setSelectedCommandIndex(null);
       } else {
@@ -316,7 +344,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
 
         const cmd = availableCommands[availableIndex];
         const newPlaced = [...placedCommands];
-        newPlaced[slotIndex] = { command: cmd, sourceIndex: availableIndex };
+        newPlaced[slotIndex] = {command: cmd, sourceIndex: availableIndex};
         setPlacedCommands(newPlaced);
         setSelectedCommandIndex(null);
       }
@@ -326,7 +354,8 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
         const fromSlotIndex = active.data.current?.fromSlot;
         const toSlotIndex = parseInt(overId.replace('slot-', ''), 10);
 
-        if (fromSlotIndex === undefined || fromSlotIndex === toSlotIndex) return;
+        if (fromSlotIndex === undefined || fromSlotIndex === toSlotIndex)
+          return;
 
         const newPlaced = [...placedCommands];
         const temp = newPlaced[fromSlotIndex];
@@ -356,11 +385,11 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       onReset: resetTask,
       onEvaluate: evaluate,
       onNext: next,
-      showReset: !evaluated,
-      showEvaluate: true,
+      showReset: true,
+      showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: evaluated || !allSlotsFilled,
+      disableEvaluate: !allSlotsFilled,
       disableNext: !evaluated,
     });
   }, [
@@ -408,16 +437,21 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
             statusTitle="Assembler-Programm schreiben"
             statusDescription={
               <>
-               Instruktionspfad korrupt!
-              Die Steuerlogik versteht nur noch Prosa – der Decoder kann keine gültigen Befehlsfolgen mehr erzeugen. Falsche Instruktionen stören den Takt, der Programmzähler driftet.
-                
+                Instruktionspfad korrupt! Die Steuerlogik versteht nur noch
+                Prosa – der Decoder kann keine gültigen Befehlsfolgen mehr
+                erzeugen. Falsche Instruktionen stören den Takt, der
+                Programmzähler driftet.
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Rekonstruiere aus der Prosa-Beschreibung ein korrektes Assembler-Programm: <br /> <br />
-              • Wähle nur passende Befehle aus dem Pool. <br />
-              • Ordne sie in die richtige Reihenfolge. <br />
-              • Filtere falsche/irrelevante Instruktionen konsequent heraus. <br /> <br />
-              Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den Datenpfad frei.
+                <strong>Deine Mission:</strong> Rekonstruiere aus der
+                Prosa-Beschreibung ein korrektes Assembler-Programm: <br />{' '}
+                <br />
+                • Wähle nur passende Befehle aus dem Pool. <br />
+                • Ordne sie in die richtige Reihenfolge. <br />
+                • Filtere falsche/irrelevante Instruktionen konsequent heraus.{' '}
+                <br /> <br />
+                Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den
+                Datenpfad frei.
               </>
             }
             taskCount={rounds.length}

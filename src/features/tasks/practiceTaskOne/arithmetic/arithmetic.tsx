@@ -394,10 +394,10 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       onReset: onResetStable,
       onEvaluate: onEvaluateStable,
       onNext: onNextStable,
-      showReset: !evaluated,
-      showEvaluate: true,
+      showReset: true,
+      showEvaluate: !evaluated,
       showNext: evaluated && stageIndex < stages.length - 1,
-      disableReset: !tasks.length,
+      disableReset: evaluated || !tasks.length,
       disableEvaluate: !allAssigned,
       disableNext: false,
     };

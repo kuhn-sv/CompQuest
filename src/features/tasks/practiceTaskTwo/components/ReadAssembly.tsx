@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
 import {useTimer} from '../../../../shared/hooks';
@@ -132,7 +132,8 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     stop();
 
     // Read current values from ref to avoid stale closure issues
-    const { selectedAnswer, correctIndex, roundIndex, roundsLength } = evaluationDataRef.current;
+    const {selectedAnswer, correctIndex, roundIndex, roundsLength} =
+      evaluationDataRef.current;
 
     const isCorrect = selectedAnswer === correctIndex;
     const correct = isCorrect ? 1 : 0;
@@ -143,24 +144,20 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     setStageScores(prev => {
       const next = [...prev];
       next[roundIndex] = {difficulty, correct, total, points};
-      
+
       // If last round, compute final result and emit to container using fresh state
       if (roundIndex === roundsLength - 1) {
         const elapsedMs = getElapsed();
-        
+
         onSummaryChange?.({
           elapsedMs,
           perStage: next.map(s => ({...s, difficulty: s.difficulty})),
         });
       }
-      
+
       return next;
     });
-  }, [
-    stop,
-    getElapsed,
-    onSummaryChange,
-  ]);
+  }, [stop, getElapsed, onSummaryChange]);
 
   const next = useCallback(() => {
     if (roundIndex < rounds.length - 1) {
@@ -183,11 +180,11 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
       onReset: resetTask,
       onEvaluate: evaluate,
       onNext: next,
-      showReset: !evaluated,
-      showEvaluate: true,
+      showReset: true,
+      showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: evaluated || selectedAnswer === null,
+      disableEvaluate: selectedAnswer === null,
       disableNext: !evaluated,
     });
   }, [
@@ -241,15 +238,25 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
             statusTitle="Instruktionsdecoder beschädigt!"
             statusDescription={
               <>
-                Der Mikrocode deines Prozessors ist korrupt – Befehle werden nicht mehr korrekt interpretiert. Die CPU versteht nur noch Fragmente aus alten Assembler-Instruktionen.
-              <br />
-              <br />
-                <strong>Deine Mission:</strong> Du musst du die verbleibenden Assemblerfragmente analysieren, um ihre Bedeutung zu rekonstruieren.
-              <br />
-              Beantworte Fragen wie:<br /><br />
-              • Was tut dieses Programm?<br />
-              • Welche Werte stehen am Ende in bestimmten Speicherzellen? <br /><br />
-              Nur wenn du die Logik der CPU wieder verstehst, kann der Prozessor korrekt kompilierte Befehle ausführen.
+                Der Mikrocode deines Prozessors ist korrupt – Befehle werden
+                nicht mehr korrekt interpretiert. Die CPU versteht nur noch
+                Fragmente aus alten Assembler-Instruktionen.
+                <br />
+                <br />
+                <strong>Deine Mission:</strong> Du musst du die verbleibenden
+                Assemblerfragmente analysieren, um ihre Bedeutung zu
+                rekonstruieren.
+                <br />
+                Beantworte Fragen wie:
+                <br />
+                <br />
+                • Was tut dieses Programm?
+                <br />
+                • Welche Werte stehen am Ende in bestimmten Speicherzellen?{' '}
+                <br />
+                <br />
+                Nur wenn du die Logik der CPU wieder verstehst, kann der
+                Prozessor korrekt kompilierte Befehle ausführen.
               </>
             }
             taskCount={rounds.length}
@@ -351,4 +358,3 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
 };
 
 export default ReadAssembly;
-

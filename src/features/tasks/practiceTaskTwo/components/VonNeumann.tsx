@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './VonNeumannQuiz.component.scss';
 import {VonNeumannRound} from './vonneumann.helper';
 import vonNeumannData from '../../../../data/tasks/von-neumann.json';
 import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import VonNeumannQuiz from './VonNeumannQuiz';
 import VonNeumannFunctions from './VonNeumannFunctions';
 import VonNeumannReconstruct from './VonNeumannReconstruct';
@@ -27,11 +27,21 @@ const generateRounds = (count: number): VonNeumannRound[] => {
   };
 
   const generateFunctionPairs = () => {
-    const poolIds = ['cpu', 'ram', 'peripherie', 'bus', 'alu', 'control', 'rom'];
+    const poolIds = [
+      'cpu',
+      'ram',
+      'peripherie',
+      'bus',
+      'alu',
+      'control',
+      'rom',
+    ];
     const shuffledIds = shuffle(poolIds);
     const chosenIds = shuffledIds.slice(0, 4);
     const leftItems = chosenIds.map(id => ({id, label: data.idToLabel[id]}));
-    const rightItems = shuffle(chosenIds.map(id => ({id, label: data.idToDesc[id]})));
+    const rightItems = shuffle(
+      chosenIds.map(id => ({id, label: data.idToDesc[id]})),
+    );
 
     return {left: leftItems, right: rightItems};
   };
@@ -101,18 +111,15 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   );
 
   // Reconstruct state
-  const [reconstructScore, setReconstructScore] = useState<TaskStageScore | null>(
-    null,
-  );
+  const [reconstructScore, setReconstructScore] =
+    useState<TaskStageScore | null>(null);
   const [reconstructResetKey, setReconstructResetKey] = useState<number>(0);
-  const [shuffledReconstructComponents, setShuffledReconstructComponents] = useState<
-    string[]
-  >([]);
+  const [shuffledReconstructComponents, setShuffledReconstructComponents] =
+    useState<string[]>([]);
 
   // Bus assignment state
-  const [busAssignmentScore, setBusAssignmentScore] = useState<TaskStageScore | null>(
-    null,
-  );
+  const [busAssignmentScore, setBusAssignmentScore] =
+    useState<TaskStageScore | null>(null);
   const [busAssignmentResetKey, setBusAssignmentResetKey] = useState<number>(0);
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
@@ -169,7 +176,8 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     if (current.type === 'quiz' && current.items) {
       taskContext = {
         ...baseContext,
-        question: 'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur aus.',
+        question:
+          'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur aus.',
         availableItems: current.items.map(item => item.label),
       };
     } else if (current.type === 'functions' && current.functionPairs) {
@@ -184,7 +192,8 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     } else if (current.type === 'reconstruct' && current.components) {
       taskContext = {
         ...baseContext,
-        question: 'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.',
+        question:
+          'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.',
         availableComponents: current.components,
       };
     } else if (current.type === 'busAssignment' && current.buses) {
@@ -324,11 +333,11 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       onReset: onResetStable,
       onEvaluate: onEvaluateStable,
       onNext: onNextStable,
-      showReset: !evaluated,
-      showEvaluate: true,
+      showReset: true,
+      showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: evaluated,
+      disableEvaluate: false,
       disableNext: !evaluated,
     };
   }, [
@@ -376,9 +385,11 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     if (current.type === 'functions') {
       subtitle = 'Den Kernkomponenten die jeweilige Funktion zuordnen';
     } else if (current.type === 'reconstruct') {
-      subtitle = 'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.';
+      subtitle =
+        'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.';
     } else if (current.type === 'busAssignment') {
-      subtitle = 'Verlege die Kommunikationsverbindungen zwischen den Komponenten';
+      subtitle =
+        'Verlege die Kommunikationsverbindungen zwischen den Komponenten';
     }
     onHudChangeRef.current?.({
       subtitle,
@@ -405,11 +416,15 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
             statusTitle="Systemkern fragmentiert!"
             statusDescription={
               <>
-                Ein Defekt in der Architektursteuerung hat den logischen Aufbau deines Rechners zerstört. Speicher, Rechenwerk und Steuerwerk sind isoliert – der Informationsfluss steht still.
+                Ein Defekt in der Architektursteuerung hat den logischen Aufbau
+                deines Rechners zerstört. Speicher, Rechenwerk und Steuerwerk
+                sind isoliert – der Informationsfluss steht still.
                 <br />
                 <br />
-                
-                <strong>Deine Mission:</strong> Identifiziere die Komponenten und ihre Funktionen, rekonstruiere die Von-Neumann-Architektur und verbinde die Komponenten miteinander, bis der Datenstrom wieder fließt.
+                <strong>Deine Mission:</strong> Identifiziere die Komponenten
+                und ihre Funktionen, rekonstruiere die Von-Neumann-Architektur
+                und verbinde die Komponenten miteinander, bis der Datenstrom
+                wieder fließt.
               </>
             }
             taskCount={rounds.length}

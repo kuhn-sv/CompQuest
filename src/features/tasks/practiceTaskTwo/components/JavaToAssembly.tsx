@@ -1,5 +1,5 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './JavaToAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -14,13 +14,18 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import { useTimer } from '../../../../shared/hooks';
+import {useTimer} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
-import { DndContext, DragEndEvent, DragOverlay, DragStartEvent } from '@dnd-kit/core';
-import { useDndSensors } from '../../../../shared/hooks/dndSensors';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import {
+  DndContext,
+  DragEndEvent,
+  DragOverlay,
+  DragStartEvent,
+} from '@dnd-kit/core';
+import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
+import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 // Types
 interface JavaToAssemblyTask {
@@ -81,7 +86,6 @@ const JavaCodeModal: React.FC<{
   );
 };
 
-
 const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
@@ -97,25 +101,29 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   const [showModal, setShowModal] = useState<boolean>(false);
 
   // State for placed commands (slots in the program)
-  const [placedCommands, setPlacedCommands] = useState<(AssemblyCommand | null)[]>(
+  const [placedCommands, setPlacedCommands] = useState<
+    (AssemblyCommand | null)[]
+  >([]);
+
+  // State for available commands
+  const [availableCommands, setAvailableCommands] = useState<AssemblyCommand[]>(
     [],
   );
 
-  // State for available commands
-  const [availableCommands, setAvailableCommands] = useState<AssemblyCommand[]>([]);
-
   // Track which available command index is placed in which slot (slotIndex -> availableIndex)
-  const [slotToAvailableMap, setSlotToAvailableMap] = useState<Map<number, number>>(
-    new Map(),
-  );
+  const [slotToAvailableMap, setSlotToAvailableMap] = useState<
+    Map<number, number>
+  >(new Map());
 
   // Track which available command is selected for click-to-assign
-  const [selectedCommandIndex, setSelectedCommandIndex] = useState<number | null>(
-    null,
-  );
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState<
+    number | null
+  >(null);
 
   // Track actively dragged command for DragOverlay
-  const [activeCommand, setActiveCommand] = useState<AssemblyCommand | null>(null);
+  const [activeCommand, setActiveCommand] = useState<AssemblyCommand | null>(
+    null,
+  );
 
   const {isRunning, start, stop, reset, getElapsed} = useTimer();
 
@@ -231,9 +239,18 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
       base[roundIndex] = {difficulty, correct, total, points};
 
       // Calculate total points from all stages (sum of points, not correct answers)
-      const basePoints = base.reduce((sum, stage) => sum + (stage?.points ?? 0), 0);
-      const totalCorrect = base.reduce((sum, stage) => sum + (stage?.correct ?? 0), 0);
-      const totalPossible = base.reduce((sum, stage) => sum + (stage?.total ?? 0), 0);
+      const basePoints = base.reduce(
+        (sum, stage) => sum + (stage?.points ?? 0),
+        0,
+      );
+      const totalCorrect = base.reduce(
+        (sum, stage) => sum + (stage?.correct ?? 0),
+        0,
+      );
+      const totalPossible = base.reduce(
+        (sum, stage) => sum + (stage?.total ?? 0),
+        0,
+      );
 
       // Calculate time bonus
       const thresholdMs = taskMeta?.timeLimit ?? 3 * 60 * 1000; // default 3 minutes
@@ -401,7 +418,8 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
         const fromSlotIndex = active.data.current?.fromSlot;
         const toSlotIndex = parseInt(overId.replace('slot-', ''), 10);
 
-        if (fromSlotIndex === undefined || fromSlotIndex === toSlotIndex) return;
+        if (fromSlotIndex === undefined || fromSlotIndex === toSlotIndex)
+          return;
 
         const newPlaced = [...placedCommands];
         const temp = newPlaced[fromSlotIndex];
@@ -452,11 +470,11 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
       onReset: resetTask,
       onEvaluate: evaluate,
       onNext: next,
-      showReset: !evaluated,
-      showEvaluate: true,
+      showReset: true,
+      showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: evaluated || !allSlotsFilled,
+      disableEvaluate: !allSlotsFilled,
       disableNext: !evaluated,
     });
   }, [
@@ -480,7 +498,8 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
       });
     } else {
       onHudChange?.({
-        subtitle: 'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen',
+        subtitle:
+          'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen',
         progress: {current: roundIndex + 1, total: rounds.length},
         requestTimer: isRunning ? 'start' : undefined,
       });
@@ -504,13 +523,19 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
             statusTitle="Compiler defekt!"
             statusDescription={
               <>
-              Der Hochsprachen-Parser liefert nur Fragmente – der Codegenerator zur CPU ist getrennt. Ohne korrekte Übersetzung bricht die Pipeline zwischen Java und Instruktionssatz.
+                Der Hochsprachen-Parser liefert nur Fragmente – der
+                Codegenerator zur CPU ist getrennt. Ohne korrekte Übersetzung
+                bricht die Pipeline zwischen Java und Instruktionssatz.
                 <br />
                 <br />
-                <strong>Deine Mission:</strong> Übersetze den gegebenen Java-Code in funktional äquivalenten Assembler:<br /><br />
-              • Wähle nur passende Befehle aus dem Pool. <br />
-              • Ordne sie in die richtige Reihenfolge. <br />
-              • Filtere falsche/irrelevante Instruktionen konsequent heraus. <br />
+                <strong>Deine Mission:</strong> Übersetze den gegebenen
+                Java-Code in funktional äquivalenten Assembler:
+                <br />
+                <br />
+                • Wähle nur passende Befehle aus dem Pool. <br />
+                • Ordne sie in die richtige Reihenfolge. <br />
+                • Filtere falsche/irrelevante Instruktionen konsequent heraus.{' '}
+                <br />
               </>
             }
             taskCount={rounds.length}
@@ -560,9 +585,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
                     </SyntaxHighlighter>
                   </div>
                   {current.hint && (
-                    <div className="java-to-assembly__hint">
-                      {current.hint}
-                    </div>
+                    <div className="java-to-assembly__hint">{current.hint}</div>
                   )}
                 </div>
               </div>
@@ -591,7 +614,9 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
 
               <div className="java-to-assembly__right">
                 <div className="java-to-assembly__program">
-                  <h3 className="java-to-assembly__slots-title">Dein Programm</h3>
+                  <h3 className="java-to-assembly__slots-title">
+                    Dein Programm
+                  </h3>
                   <div className="java-to-assembly__slots">
                     {placedCommands.map((command, index) => {
                       const correctCommands = getTaskCommands(current);
@@ -647,4 +672,3 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
 };
 
 export default JavaToAssembly;
-
