@@ -9,6 +9,26 @@
   justify-content: space-between;
 }
 
+.task-back-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface-border);
+  color: var(--text);
+  font-size: 30px;
+  font-weight: 500;
+  transition: background 0.18s ease, color 0.18s ease;
+  padding-bottom: 20px;
+
+  &:hover {
+    background: var(--primary);
+    color: #fff;
+  }
+}
+
 .task-container__header .header-row--bottom {
   margin-top: 0.5rem;
 }
