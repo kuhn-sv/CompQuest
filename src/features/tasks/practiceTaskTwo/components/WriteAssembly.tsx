@@ -157,9 +157,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     // Don't regenerate available commands on reset - keep the original shuffled order
     setEvaluated(false);
     setSelectedCommandIndex(null);
-    reset();
-    start();
-  }, [reset, start, current]);
+  }, [current]);
 
   const evaluate = useCallback(() => {
     setEvaluated(true);

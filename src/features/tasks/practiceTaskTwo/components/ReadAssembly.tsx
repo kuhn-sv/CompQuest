@@ -127,9 +127,7 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   const resetTask = useCallback(() => {
     setSelectedAnswer(null);
     setEvaluated(false);
-    reset();
-    start();
-  }, [reset, start]);
+  }, []);
 
   const evaluate = useCallback(() => {
     setEvaluated(true);

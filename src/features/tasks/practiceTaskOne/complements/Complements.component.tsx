@@ -68,9 +68,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   const resetTask = React.useCallback(() => {
     setBits(Array(current.bitCount).fill(0));
     setEvaluated(false);
-    reset();
-    start();
-  }, [current.bitCount, reset, start]);
+  }, [current.bitCount]);
 
   const evaluate = React.useCallback(() => {
     setEvaluated(true);

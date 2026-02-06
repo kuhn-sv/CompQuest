@@ -204,9 +204,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     setSlotToAvailableMap(new Map());
     setEvaluated(false);
     setSelectedCommandIndex(null);
-    reset();
-    start();
-  }, [reset, start, current]);
+  }, [current]);
 
   const evaluate = useCallback(() => {
     setEvaluated(true);

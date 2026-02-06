@@ -183,12 +183,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     // clear dnd-kit local state
     setDndDraggedAnswer(null);
     setDndDragOverTaskId(null);
-    // Reset and restart timer
-    reset();
-    if (tasks.length > 0) {
-      start();
-    }
-  }, [reset, start, tasks]);
+  }, [tasks]);
 
   // Wrapper function for assignment logic
   const assignAnswer = useCallback(

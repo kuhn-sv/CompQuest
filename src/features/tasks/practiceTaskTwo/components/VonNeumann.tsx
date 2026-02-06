@@ -230,9 +230,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     setBusAssignmentScore(null);
     setReconstructResetKey(prev => prev + 1);
     setBusAssignmentResetKey(prev => prev + 1);
-    reset();
-    start();
-  }, [reset, start]);
+  }, []);
 
   const evaluate = useCallback(() => {
     setEvaluated(true);
