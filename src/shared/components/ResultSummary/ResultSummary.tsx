@@ -8,6 +8,7 @@ export interface SummaryResultLike {
   totalCorrect: number;
   totalPossible: number;
   totalPoints: number;
+  timeBonus?: number;
 }
 
 interface ResultSummaryProps {
@@ -67,7 +68,15 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
         </div>
         <div className="metric">
           <span className="metric-label">Punkte</span>
-          <span className="metric-value">{result.totalPoints}</span>
+          <span className="metric-value">
+            {result.totalPoints - (result.timeBonus ?? 0)}
+            {(result.timeBonus ?? 0) > 0 && (
+              <span className="time-bonus">
+                {' '}
+                (+{result.timeBonus} Zeitbonus)
+              </span>
+            )}
+          </span>
         </div>
       </div>
 

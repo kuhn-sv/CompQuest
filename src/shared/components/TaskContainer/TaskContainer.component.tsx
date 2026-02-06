@@ -321,6 +321,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 totalCorrect: summaryState.totalCorrect,
                 totalPossible: summaryState.totalPossible,
                 totalPoints: summaryState.totalPoints,
+                timeBonus: summaryState.timeBonus,
               }}
               formatTime={formatTime}
               endHref={endHref}

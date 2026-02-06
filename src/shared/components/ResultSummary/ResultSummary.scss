@@ -103,6 +103,12 @@
 }
 .summary-btn:active { transform: translateY(1px); }
 
+.time-bonus {
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
 /* legacy rows kept hidden in new design */
 .summary-row { display: none; }
 .summary-stages { display: none; }
