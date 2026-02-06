@@ -1,8 +1,9 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import './Befehlhelfer.scss';
 import OperationMatcher from './components/OperationMatcher';
-import type { Operation } from './types';
+import type {Operation} from './types';
+import {useFooterControls, useHudState} from '../../../shared/hooks';
 
 // All 12 operations from the microprocessor instruction set
 const ALL_OPERATIONS: Operation[] = [
@@ -34,7 +35,8 @@ const ALL_OPERATIONS: Operation[] = [
   {
     id: 'add-direct',
     command: 'ADD (n)',
-    description: 'Erhöht den Akkumulatorinhalt um den Inhalt der Speicherstelle n',
+    description:
+      'Erhöht den Akkumulatorinhalt um den Inhalt der Speicherstelle n',
   },
   {
     id: 'sub-immediate',
@@ -44,7 +46,8 @@ const ALL_OPERATIONS: Operation[] = [
   {
     id: 'sub-direct',
     command: 'SUB (n)',
-    description: 'Erniedrigt den Akkumulatorinhalt um den Inhalt der Speicherstelle n',
+    description:
+      'Erniedrigt den Akkumulatorinhalt um den Inhalt der Speicherstelle n',
   },
   {
     id: 'jmp',
@@ -54,17 +57,20 @@ const ALL_OPERATIONS: Operation[] = [
   {
     id: 'brz',
     command: 'BRZ #n',
-    description: 'Addiert n auf den Instruktionszähler, falls das Zero-Bit gesetzt ist',
+    description:
+      'Addiert n auf den Instruktionszähler, falls das Zero-Bit gesetzt ist',
   },
   {
     id: 'brc',
     command: 'BRC #n',
-    description: 'Addiert n auf den Instruktionszähler, falls das Carry-Bit gesetzt ist',
+    description:
+      'Addiert n auf den Instruktionszähler, falls das Carry-Bit gesetzt ist',
   },
   {
     id: 'brn',
     command: 'BRN #n',
-    description: 'Addiert n auf den Instruktionszähler, falls das Negations-Bit gesetzt ist',
+    description:
+      'Addiert n auf den Instruktionszähler, falls das Negations-Bit gesetzt ist',
   },
 ];
 
@@ -90,57 +96,62 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
   // Generate new task: select 4 random operations and shuffle descriptions
   const newTask = useCallback(() => {
     setEvaluated(false);
-    
+
     // Select 4 random operations
     const shuffled = shuffle(ALL_OPERATIONS);
     const selected = shuffled.slice(0, 4);
-    
+
     // Create a mapping of description to original operation ID
     const descriptionMap = selected.map(op => ({
       description: op.description,
       originalId: op.id,
     }));
-    
+
     // Shuffle the descriptions (right side) independently
     const shuffledDescriptions = shuffle(descriptionMap);
-    
+
     // Create new operations with shuffled descriptions and track correct pairing
     const withShuffledDescriptions = selected.map((op, idx) => ({
       ...op,
       description: shuffledDescriptions[idx].description,
       correctDescriptionId: shuffledDescriptions[idx].originalId,
     }));
-    
+
     setCurrentOperations(withShuffledDescriptions);
   }, []);
 
-  // Setup controls and HUD
-  useEffect(() => {
-    onHudChange?.({
-      subtitle: 'Ordne Assembler-Begriffe ihren Beschreibungen zu',
-      progress: null,
-    });
-
-    onControlsChange?.({
-      onReset: () => newTask(),
-      onEvaluate: () => setEvaluated(true),
-      onNext: () => newTask(),
+  const handleReset = useCallback(() => newTask(), [newTask]);
+  const handleEvaluate = useCallback(() => setEvaluated(true), []);
+  const handleNext = useCallback(() => newTask(), [newTask]);
+  useFooterControls(
+    onControlsChange,
+    {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext},
+    {
       showReset: true,
       showEvaluate: true,
       showNext: true,
       disableReset: false,
       disableEvaluate: false,
       disableNext: false,
-    });
+    },
+    true,
+  );
 
+  const hudState = useMemo(
+    () => ({
+      subtitle: 'Ordne Assembler-Begriffe ihren Beschreibungen zu',
+      progress: null,
+    }),
+    [],
+  );
+  useHudState(onHudChange, hudState);
+
+  // Cleanup summary on unmount
+  useEffect(() => {
     return () => {
-      onHudChange?.(null);
-      onControlsChange?.(null);
       onSummaryChange?.(null);
     };
-    // Only run once on mount to set up controls
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [onSummaryChange]);
 
   // Initialize first task
   useEffect(() => {

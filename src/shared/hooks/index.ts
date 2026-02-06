@@ -5,3 +5,6 @@ export type { ConnectionLineCalculationProps, ConnectionLineSelectors, Connectio
 export { useTimer } from './useTimer';
 export { useOrientation } from './useOrientation';
 export { useDeviceType } from './useDeviceType';
+export { useFooterControls } from './useFooterControls';
+export type { FooterControlFlags, FooterControlHandlers } from './useFooterControls';
+export { useHudState } from './useHudState';

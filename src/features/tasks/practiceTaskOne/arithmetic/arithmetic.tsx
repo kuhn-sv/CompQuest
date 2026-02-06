@@ -10,6 +10,8 @@ import type {SubTaskComponentProps} from '../interfaces';
 import {
   useConnectionLines,
   useTimer,
+  useFooterControls,
+  useHudState,
   CONNECTION_LINE_PRESETS,
 } from '../../../../shared/hooks';
 import {EquationRow as SharedEquationRow} from '../../../../shared/components/equationrow/EquationRow';
@@ -292,11 +294,6 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     );
   }, [assignments]);
 
-  const allAssigned = useMemo(
-    () => tasks.length > 0 && tasks.every(t => assignments[t.id]),
-    [tasks, assignments],
-  );
-
   const evaluate = useCallback(() => {
     setEvaluated(true);
     stop();
@@ -357,94 +354,38 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     }
   }, [stageIndex, stages.length, startSetForStage]);
 
-  // Provide footer controls to parent (stabilized to avoid update loops)
-  // Keep latest handlers in refs to avoid changing identities in controls object
-  const resetSetRef = useRef(resetSet);
-  const evaluateRef = useRef(evaluate);
-  const goToNextStageRef = useRef(goToNextStage);
+  // Provide footer controls to parent (stabilised via hook)
   const onHudChangeRef = useRef(onHudChange);
-
-  useEffect(() => {
-    resetSetRef.current = resetSet;
-  }, [resetSet]);
-  useEffect(() => {
-    evaluateRef.current = evaluate;
-  }, [evaluate]);
-  useEffect(() => {
-    goToNextStageRef.current = goToNextStage;
-  }, [goToNextStage]);
   useEffect(() => {
     onHudChangeRef.current = onHudChange;
   }, [onHudChange]);
 
-  // Stable wrappers so callbacks in controls remain referentially stable
-  const onResetStable = useCallback(() => {
-    resetSetRef.current();
-  }, []);
-  const onEvaluateStable = useCallback(() => {
-    evaluateRef.current();
-  }, []);
-  const onNextStable = useCallback(() => {
-    goToNextStageRef.current();
-  }, []);
-
-  const controls = useMemo(() => {
-    if (!hasStarted || tasks.length === 0) return null;
-    return {
-      onReset: onResetStable,
-      onEvaluate: onEvaluateStable,
-      onNext: onNextStable,
+  useFooterControls(
+    onControlsChange,
+    {onReset: resetSet, onEvaluate: evaluate, onNext: goToNextStage},
+    {
       showReset: true,
       showEvaluate: !evaluated,
       showNext: evaluated && stageIndex < stages.length - 1,
       disableReset: evaluated || !tasks.length,
-      disableEvaluate: !allAssigned,
+      disableEvaluate: false,
       disableNext: false,
-    };
-  }, [
-    hasStarted,
-    tasks.length,
-    evaluated,
-    stageIndex,
-    stages.length,
-    allAssigned,
-    onResetStable,
-    onEvaluateStable,
-    onNextStable,
-  ]);
+    },
+    hasStarted && tasks.length > 0,
+  );
 
-  const prevControlsRef = useRef<typeof controls>(null);
-  useEffect(() => {
-    if (!onControlsChange) return;
-    // Only notify parent when the controls actually change reference
-    if (prevControlsRef.current !== controls) {
-      onControlsChange(controls);
-      prevControlsRef.current = controls;
-    }
-    return () => {
-      // Clear controls on unmount
-      if (prevControlsRef.current !== null) {
-        onControlsChange(null);
-        prevControlsRef.current = null;
-      }
-    };
-  }, [controls, onControlsChange]);
-
-  // Keep HUD progress/subtitle in sync when stage index or start state changes
-  useEffect(() => {
-    if (!hasStarted) return;
-    onHudChangeRef.current?.({
+  // HUD state (stabilised via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted) return {progress: null, isStartScreen: true} as const;
+    return {
       progress: {current: stageIndex + 1, total: stages.length},
       subtitle:
         arithmeticMode === 'twos-complement'
           ? 'Additionen im Zweierkomplement (3 Stufen)'
           : 'Positive Additionen und Subtraktionen (3 Stufen)',
-    });
-    // Cleanup resets HUD when component unmounts
-    return () => {
-      onHudChangeRef.current?.(null);
     };
   }, [hasStarted, stageIndex, stages.length, arithmeticMode]);
+  useHudState(onHudChange, hudState);
 
   return (
     <div className="number-system-container">

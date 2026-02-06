@@ -13,7 +13,11 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import {useTimer} from '../../../../shared/hooks';
+import {
+  useTimer,
+  useFooterControls,
+  useHudState,
+} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {
@@ -372,62 +376,37 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setActiveCommand(null);
   }, []);
 
-  // Update controls when state changes
-  useEffect(() => {
-    if (!hasStarted) {
-      onControlsChange?.(null);
-      return;
-    }
-
-    const allSlotsFilled = placedCommands.every(cmd => cmd !== null);
-
-    onControlsChange?.({
-      onReset: resetTask,
-      onEvaluate: evaluate,
-      onNext: next,
+  useFooterControls(
+    onControlsChange,
+    {onReset: resetTask, onEvaluate: evaluate, onNext: next},
+    {
       showReset: true,
       showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: !allSlotsFilled,
+      disableEvaluate: false,
       disableNext: !evaluated,
-    });
-  }, [
+    },
     hasStarted,
-    evaluated,
-    roundIndex,
-    rounds.length,
-    placedCommands,
-    resetTask,
-    evaluate,
-    next,
-    onControlsChange,
-  ]);
+  );
 
-  // Update HUD based on state
-  useEffect(() => {
-    if (!hasStarted) {
-      onHudChange?.({
-        progress: null,
-        isStartScreen: true,
-      });
-    } else {
-      onHudChange?.({
-        subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
-        progress: {current: roundIndex + 1, total: rounds.length},
-        requestTimer: isRunning ? 'start' : undefined,
-      });
-    }
-  }, [hasStarted, roundIndex, rounds.length, isRunning, onHudChange]);
+  // HUD state (reactive via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted) return {progress: null, isStartScreen: true} as const;
+    return {
+      subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
+      progress: {current: roundIndex + 1, total: rounds.length},
+      requestTimer: isRunning ? ('start' as const) : undefined,
+    };
+  }, [hasStarted, roundIndex, rounds.length, isRunning]);
+  useHudState(onHudChange, hudState);
 
-  // Cleanup on unmount
+  // Cleanup task context on unmount
   useEffect(() => {
     return () => {
-      onControlsChange?.(null);
-      onHudChange?.(null);
       onTaskContextChange?.(null);
     };
-  }, [onControlsChange, onHudChange, onTaskContextChange]);
+  }, [onTaskContextChange]);
 
   return (
     <div className="write-assembly">
@@ -447,9 +426,9 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
                 Prosa-Beschreibung ein korrektes Assembler-Programm: <br />{' '}
                 <br />
                 • Wähle nur passende Befehle aus dem Pool. <br />
-                • Ordne sie in die richtige Reihenfolge. <br />
-                • Filtere falsche/irrelevante Instruktionen konsequent heraus.{' '}
-                <br /> <br />
+                • Ordne sie in die richtige Reihenfolge. <br />• Filtere
+                falsche/irrelevante Instruktionen konsequent heraus. <br />{' '}
+                <br />
                 Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den
                 Datenpfad frei.
               </>

@@ -2,7 +2,11 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
-import {useTimer} from '../../../../shared/hooks';
+import {
+  useTimer,
+  useFooterControls,
+  useHudState,
+} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {shuffle} from './shared';
@@ -169,60 +173,38 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     }
   }, [roundIndex, rounds.length, start]);
 
-  // Update controls when state changes
-  useEffect(() => {
-    if (!hasStarted) {
-      onControlsChange?.(null);
-      return;
-    }
-
-    onControlsChange?.({
-      onReset: resetTask,
-      onEvaluate: evaluate,
-      onNext: next,
+  // Footer controls (stabilised via hook)
+  useFooterControls(
+    onControlsChange,
+    {onReset: resetTask, onEvaluate: evaluate, onNext: next},
+    {
       showReset: true,
       showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
       disableEvaluate: selectedAnswer === null,
       disableNext: !evaluated,
-    });
-  }, [
+    },
     hasStarted,
-    evaluated,
-    roundIndex,
-    rounds.length,
-    selectedAnswer,
-    resetTask,
-    evaluate,
-    next,
-    onControlsChange,
-  ]);
+  );
 
-  // Update HUD based on state
-  useEffect(() => {
-    if (!hasStarted) {
-      onHudChange?.({
-        progress: null,
-        isStartScreen: true,
-      });
-    } else {
-      onHudChange?.({
-        subtitle: 'Wähle die richtige Antwort aus.',
-        progress: {current: roundIndex + 1, total: rounds.length},
-        requestTimer: isRunning ? 'start' : undefined,
-      });
-    }
-  }, [hasStarted, roundIndex, rounds.length, isRunning, onHudChange]);
+  // HUD state (reactive via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted) return {progress: null, isStartScreen: true} as const;
+    return {
+      subtitle: 'Wähle die richtige Antwort aus.',
+      progress: {current: roundIndex + 1, total: rounds.length},
+      requestTimer: isRunning ? ('start' as const) : undefined,
+    };
+  }, [hasStarted, roundIndex, rounds.length, isRunning]);
+  useHudState(onHudChange, hudState);
 
-  // Cleanup on unmount
+  // Cleanup task context on unmount
   useEffect(() => {
     return () => {
-      onControlsChange?.(null);
-      onHudChange?.(null);
       onTaskContextChange?.(null);
     };
-  }, [onControlsChange, onHudChange, onTaskContextChange]);
+  }, [onTaskContextChange]);
 
   const handleAnswerSelect = (index: number) => {
     if (!evaluated) {
@@ -251,9 +233,8 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
                 <br />
                 <br />
                 • Was tut dieses Programm?
-                <br />
-                • Welche Werte stehen am Ende in bestimmten Speicherzellen?{' '}
-                <br />
+                <br />• Welche Werte stehen am Ende in bestimmten
+                Speicherzellen? <br />
                 <br />
                 Nur wenn du die Logik der CPU wieder verstehst, kann der
                 Prozessor korrekt kompilierte Befehle ausführen.

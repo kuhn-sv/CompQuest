@@ -1,9 +1,13 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './VonNeumannQuiz.component.scss';
 import {VonNeumannRound} from './vonneumann.helper';
 import vonNeumannData from '../../../../data/tasks/von-neumann.json';
-import {useTimer} from '../../../../shared/hooks';
+import {
+  useTimer,
+  useFooterControls,
+  useHudState,
+} from '../../../../shared/hooks';
 import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import VonNeumannQuiz from './VonNeumannQuiz';
@@ -302,85 +306,24 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     }
   }, [roundIndex, rounds.length, start]);
 
-  // Provide footer controls to parent (stabilized)
-  const resetRef = useRef(resetTask);
-  const evaluateRef = useRef(evaluate);
-  const nextRef = useRef(next);
-
-  useEffect(() => {
-    resetRef.current = resetTask;
-  }, [resetTask]);
-  useEffect(() => {
-    evaluateRef.current = evaluate;
-  }, [evaluate]);
-  useEffect(() => {
-    nextRef.current = next;
-  }, [next]);
-
-  const onResetStable = useCallback(() => {
-    resetRef.current();
-  }, []);
-  const onEvaluateStable = useCallback(() => {
-    evaluateRef.current();
-  }, []);
-  const onNextStable = useCallback(() => {
-    nextRef.current();
-  }, []);
-
-  const controls = useMemo(() => {
-    if (!hasStarted) return null;
-    return {
-      onReset: onResetStable,
-      onEvaluate: onEvaluateStable,
-      onNext: onNextStable,
+  // Footer controls (stabilised via hook)
+  useFooterControls(
+    onControlsChange,
+    {onReset: resetTask, onEvaluate: evaluate, onNext: next},
+    {
       showReset: true,
       showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
       disableEvaluate: false,
       disableNext: !evaluated,
-    };
-  }, [
+    },
     hasStarted,
-    evaluated,
-    roundIndex,
-    rounds.length,
-    onResetStable,
-    onEvaluateStable,
-    onNextStable,
-  ]);
+  );
 
-  const prevControlsRef = useRef<typeof controls>(null);
-  const onControlsChangeRef = useRef(onControlsChange);
-  const onHudChangeRef = useRef(onHudChange);
-
-  useEffect(() => {
-    onControlsChangeRef.current = onControlsChange;
-  }, [onControlsChange]);
-  useEffect(() => {
-    onHudChangeRef.current = onHudChange;
-  }, [onHudChange]);
-
-  useEffect(() => {
-    if (!onControlsChangeRef.current) return;
-    if (prevControlsRef.current !== controls) {
-      onControlsChangeRef.current(controls);
-      prevControlsRef.current = controls;
-    }
-  }, [controls]);
-
-  // Unmount-only cleanup
-  useEffect(() => {
-    return () => {
-      onControlsChangeRef.current?.(null);
-      onHudChangeRef.current?.(null);
-      onTaskContextChange?.(null);
-    };
-  }, [onTaskContextChange]);
-
-  // Update HUD in parent: subtitle + progress + timer control
-  useEffect(() => {
-    if (!hasStarted) return;
+  // HUD state (reactive via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted) return {progress: null, isStartScreen: true} as const;
     let subtitle = 'Kernkomponenten der Von-Neumann Architektur identifizieren';
     if (current.type === 'functions') {
       subtitle = 'Den Kernkomponenten die jeweilige Funktion zuordnen';
@@ -391,21 +334,20 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       subtitle =
         'Verlege die Kommunikationsverbindungen zwischen den Komponenten';
     }
-    onHudChangeRef.current?.({
+    return {
       subtitle,
       progress: {current: roundIndex + 1, total: rounds.length},
-      requestTimer: isRunning ? 'start' : undefined,
-    });
+      requestTimer: isRunning ? ('start' as const) : undefined,
+    };
   }, [hasStarted, roundIndex, rounds.length, isRunning, current.type]);
+  useHudState(onHudChange, hudState);
 
-  // Inform parent HUD about start screen visibility before task starts
+  // Cleanup task context on unmount
   useEffect(() => {
-    if (hasStarted) return;
-    onHudChangeRef.current?.({
-      progress: null,
-      isStartScreen: true,
-    });
-  }, [hasStarted]);
+    return () => {
+      onTaskContextChange?.(null);
+    };
+  }, [onTaskContextChange]);
 
   return (
     <div

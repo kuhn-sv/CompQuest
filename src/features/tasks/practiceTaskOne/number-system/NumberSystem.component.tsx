@@ -20,6 +20,8 @@ import type {SubTaskComponentProps} from '../interfaces';
 import {
   useConnectionLines,
   useTimer,
+  useFooterControls,
+  useHudState,
   CONNECTION_LINE_PRESETS,
 } from '../../../../shared/hooks';
 // dnd-kit event types are referenced inline where needed; no top-level type import
@@ -359,91 +361,27 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     }
   }, [stageIndex, stages, startSetForStage]);
 
-  // Provide footer controls to parent (stabilized)
-  const resetSetRef = useRef(resetSet);
-  const evaluateRef = useRef(evaluate);
-  const goToNextStageRef = useRef(goToNextStage);
+  // Footer controls (stabilised via hook)
+  useFooterControls(onControlsChange, {onReset: resetSet, onEvaluate: evaluate, onNext: goToNextStage}, {
+    showReset: true,
+    showEvaluate: !evaluated,
+    showNext: evaluated && stageIndex < stages.length - 1,
+    disableReset: evaluated || !tasks.length,
+    disableEvaluate: !allAssigned,
+    disableNext: false,
+  }, hasStarted && tasks.length > 0);
 
-  useEffect(() => {
-    resetSetRef.current = resetSet;
-  }, [resetSet]);
-  useEffect(() => {
-    evaluateRef.current = evaluate;
-  }, [evaluate]);
-  useEffect(() => {
-    goToNextStageRef.current = goToNextStage;
-  }, [goToNextStage]);
-
-  const onResetStable = useCallback(() => {
-    resetSetRef.current();
-  }, []);
-  const onEvaluateStable = useCallback(() => {
-    evaluateRef.current();
-  }, []);
-  const onNextStable = useCallback(() => {
-    goToNextStageRef.current();
-  }, []);
-
-  const controls = useMemo(() => {
-    if (!hasStarted || tasks.length === 0) return null;
+  // HUD state (stabilised via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted || tasks.length === 0) return {progress: null, isStartScreen: true} as const;
     return {
-      onReset: onResetStable,
-      onEvaluate: onEvaluateStable,
-      onNext: onNextStable,
-      showReset: true,
-      showEvaluate: !evaluated,
-      showNext: evaluated && stageIndex < stages.length - 1,
-      disableReset: evaluated || !tasks.length,
-      disableEvaluate: !allAssigned,
-      disableNext: false,
-    };
-  }, [
-    hasStarted,
-    tasks.length,
-    evaluated,
-    stageIndex,
-    stages.length,
-    allAssigned,
-    onResetStable,
-    onEvaluateStable,
-    onNextStable,
-  ]);
-
-  const prevControlsRef = useRef<typeof controls>(null);
-  const onControlsChangeRef = useRef(onControlsChange);
-  const onHudChangeRef = useRef(onHudChange);
-  useEffect(() => {
-    onControlsChangeRef.current = onControlsChange;
-  }, [onControlsChange]);
-  useEffect(() => {
-    onHudChangeRef.current = onHudChange;
-  }, [onHudChange]);
-  useEffect(() => {
-    if (!onControlsChangeRef.current) return;
-    if (prevControlsRef.current !== controls) {
-      onControlsChangeRef.current(controls);
-      prevControlsRef.current = controls;
-    }
-  }, [controls]);
-
-  // Unmount-only cleanup for controls and HUD
-  useEffect(() => {
-    return () => {
-      onControlsChangeRef.current?.(null);
-      onHudChangeRef.current?.(null);
-    };
-  }, []);
-
-  // Update HUD in parent header
-  useEffect(() => {
-    if (!hasStarted || tasks.length === 0) return;
-    onHudChangeRef.current?.({
       subtitle: 'Datenfluss wiederherstellen',
       progress: {current: stageIndex + 1, total: stages.length},
-      requestTimer: isRunning ? 'start' : undefined,
+      requestTimer: isRunning ? 'start' as const : undefined,
       isStartScreen: false,
-    });
+    };
   }, [hasStarted, tasks.length, stageIndex, stages.length, isRunning]);
+  useHudState(onHudChange, hudState);
 
   return (
     <div className="number-system-container">

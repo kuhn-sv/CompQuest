@@ -53,9 +53,21 @@ export interface TaskFooterControls {
 
 export interface TaskHudState {
   progress: { current: number; total: number } | null;
+  /**
+   * Request an initial timer action (e.g. `'start'` after a start-screen,
+   * `'reset'` when a new stage begins).
+   *
+   * **Note:** Evaluate / Next timer control is handled exclusively by
+   * `TaskContainer` — subtasks should *not* send `'stop'` as part of their
+   * evaluation flow.
+   */
   requestTimer?: 'start' | 'stop' | 'reset';
-  subtitle?: string; // optional subtitle shown under title
-  // When true, a start screen is being shown by the child task and the footer should be hidden
+  /** Optional subtitle shown under the task title in the HUD. */
+  subtitle?: string;
+  /**
+   * When `true`, a start screen is being shown by the child task and the
+   * footer buttons should be hidden by `TaskContainer`.
+   */
   isStartScreen?: boolean;
 }
 

@@ -5,6 +5,7 @@ import { DigitsRow } from '../../../shared/components';
 import './Potenzrechner.scss';
 import ValueExpression from './components/PotenzValueExpression.component';
 import TabRow from '../../../shared/components/tabRow/TabRow.component';
+import { useFooterControls, useHudState } from '../../../shared/hooks';
 
 type Mode = 'binary' | 'octal' | 'hex';
 
@@ -49,30 +50,32 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
     if (m === 'hex') setHexDigits(Array(DIGITS_HEX).fill(0));
   }, []);
 
+  // Footer controls (stabilised via hook — always active)
+  const handleReset = useCallback(() => newTask(mode), [newTask, mode]);
+  const handleEvaluate = useCallback(() => setEvaluated(true), []);
+  const handleNext = useCallback(() => newTask(mode), [newTask, mode]);
+  useFooterControls(onControlsChange, {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext}, {
+    showReset: true,
+    showEvaluate: true,
+    showNext: true,
+    disableReset: false,
+    disableEvaluate: false,
+    disableNext: false,
+  }, true);
+
+  // HUD state (reactive to mode + target)
+  const hudState = useMemo(() => ({
+    subtitle: 'Aufgabe: Stelle die Zahl ' + target + ' in ' + (mode === 'binary' ? 'binär' : mode === 'octal' ? 'oktal' : 'hexadezimal') + ' dar.',
+    progress: null,
+  }), [mode, target]);
+  useHudState(onHudChange, hudState);
+
+  // Cleanup summary on unmount
   useEffect(() => {
-    onHudChange?.({
-      subtitle: 'Aufgabe: Stelle die Zahl ' + target + ' in ' + (mode === 'binary' ? 'binär' : mode === 'octal' ? 'oktal' : 'hexadezimal') + ' dar.',
-      progress: null, // standalone helper has no rounds
-    });
-
-    onControlsChange?.({
-  onReset: () => newTask(mode),
-      onEvaluate: () => setEvaluated(true),
-  onNext: () => newTask(mode),
-      showReset: true,
-      showEvaluate: true,
-      showNext: true,
-      disableReset: false,
-      disableEvaluate: false,
-      disableNext: false,
-    });
-
     return () => {
-      onHudChange?.(null);
-      onControlsChange?.(null);
       onSummaryChange?.(null);
     };
-  }, [mode, target, newTask, onControlsChange, onHudChange, onSummaryChange]);
+  }, [onSummaryChange]);
 
   // initialize first task
   const initializedRef = useRef(false);

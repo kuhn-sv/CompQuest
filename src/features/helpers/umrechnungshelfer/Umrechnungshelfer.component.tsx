@@ -8,6 +8,7 @@ import './components/StepPanel/StepPanel.scss';
 import './components/PlaceValueInputGrid/PlaceValueInputGrid.scss';
 import Step1Box from './components/Step1Box/Step1Box';
 import Step2Box from './components/Step2Box/Step2Box';
+import {useFooterControls, useHudState} from '../../../shared/hooks';
 import ResultLine from './components/ResultLine/ResultLine';
 import {useBaseConvert} from './hooks/useBaseConvert';
 import {useStepperExpanded} from './hooks/useStepperExpanded';
@@ -88,30 +89,27 @@ const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({
     }
   }, [newTask]);
 
-  useEffect(() => {
+  // Footer controls (stabilised via hook — always active)
+  const handleReset = useCallback(() => newTask(), [newTask]);
+  const handleEvaluate = useCallback(() => setEvaluated(true), []);
+  const handleNext = useCallback(() => newTask(), [newTask]);
+  useFooterControls(onControlsChange, {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext}, {
+    showReset: true,
+    showEvaluate: true,
+    showNext: true,
+  }, true);
+
+  // HUD state (reactive to tab)
+  const hudState = useMemo(() => {
     const subtitle =
       tab === 'binhex'
         ? 'Modus: Binär ↔ Hexadezimal'
         : tab === 'binoct'
           ? 'Modus: Binär ↔ Oktal'
           : 'Modus: Oktal ↔ Hexadezimal';
-    onHudChange?.({
-      subtitle,
-      progress: null,
-    });
-    onControlsChange?.({
-      onReset: () => newTask(),
-      onEvaluate: () => setEvaluated(true),
-      onNext: () => newTask(),
-      showReset: true,
-      showEvaluate: true,
-      showNext: true,
-    });
-    return () => {
-      onHudChange?.(null);
-      onControlsChange?.(null);
-    };
-  }, [onControlsChange, onHudChange, newTask, tab]);
+    return {subtitle, progress: null};
+  }, [tab]);
+  useHudState(onHudChange, hudState);
 
   const setEntry = (idx: number, val: 0 | 1 | null) =>
     setEntries(prev => prev.map((v, i) => (i === idx ? val : v)));
