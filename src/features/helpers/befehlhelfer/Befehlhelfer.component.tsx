@@ -131,7 +131,6 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
       showEvaluate: true,
       showNext: true,
       disableReset: false,
-      disableEvaluate: false,
       disableNext: false,
     },
     true,

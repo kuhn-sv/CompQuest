@@ -24,7 +24,6 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
   showEvaluate = true,
   showNext = false,
   disableReset = false,
-  disableEvaluate = false,
   disableNext = false,
   taskMeta,
   taskContext,
@@ -51,10 +50,7 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
           </button>
         )}
         {showEvaluate && (
-          <button
-            className="task-action-btn primary"
-            onClick={onEvaluate}
-            disabled={disableEvaluate}>
+          <button className="task-action-btn primary" onClick={onEvaluate}>
             Auswerten
           </button>
         )}

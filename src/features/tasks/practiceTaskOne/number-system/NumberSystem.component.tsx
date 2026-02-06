@@ -304,11 +304,6 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     );
   }, [assignments]);
 
-  const allAssigned = useMemo(
-    () => tasks.length > 0 && tasks.every(t => assignments[t.id]),
-    [tasks, assignments],
-  );
-
   const evaluate = useCallback(() => {
     setEvaluated(true);
     stop();
@@ -362,22 +357,27 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   }, [stageIndex, stages, startSetForStage]);
 
   // Footer controls (stabilised via hook)
-  useFooterControls(onControlsChange, {onReset: resetSet, onEvaluate: evaluate, onNext: goToNextStage}, {
-    showReset: true,
-    showEvaluate: !evaluated,
-    showNext: evaluated && stageIndex < stages.length - 1,
-    disableReset: evaluated || !tasks.length,
-    disableEvaluate: !allAssigned,
-    disableNext: false,
-  }, hasStarted && tasks.length > 0);
+  useFooterControls(
+    onControlsChange,
+    {onReset: resetSet, onEvaluate: evaluate, onNext: goToNextStage},
+    {
+      showReset: true,
+      showEvaluate: !evaluated,
+      showNext: evaluated && stageIndex < stages.length - 1,
+      disableReset: evaluated || !tasks.length,
+      disableNext: false,
+    },
+    hasStarted && tasks.length > 0,
+  );
 
   // HUD state (stabilised via hook)
   const hudState = useMemo(() => {
-    if (!hasStarted || tasks.length === 0) return {progress: null, isStartScreen: true} as const;
+    if (!hasStarted || tasks.length === 0)
+      return {progress: null, isStartScreen: true} as const;
     return {
       subtitle: 'Datenfluss wiederherstellen',
       progress: {current: stageIndex + 1, total: stages.length},
-      requestTimer: isRunning ? 'start' as const : undefined,
+      requestTimer: isRunning ? ('start' as const) : undefined,
       isStartScreen: false,
     };
   }, [hasStarted, tasks.length, stageIndex, stages.length, isRunning]);

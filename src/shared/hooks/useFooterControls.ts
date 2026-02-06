@@ -11,7 +11,6 @@ export interface FooterControlFlags {
   showEvaluate?: boolean;
   showNext?: boolean;
   disableReset?: boolean;
-  disableEvaluate?: boolean;
   disableNext?: boolean;
 }
 
@@ -75,7 +74,6 @@ export function useFooterControls(
       showEvaluate: flags.showEvaluate,
       showNext: flags.showNext,
       disableReset: flags.disableReset,
-      disableEvaluate: flags.disableEvaluate,
       disableNext: flags.disableNext,
     };
   }, [
@@ -84,7 +82,6 @@ export function useFooterControls(
     flags.showEvaluate,
     flags.showNext,
     flags.disableReset,
-    flags.disableEvaluate,
     flags.disableNext,
     onResetStable,
     onEvaluateStable,

@@ -155,7 +155,6 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: evaluated,
       disableNext: !evaluated,
     };
   }, [

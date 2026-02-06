@@ -168,7 +168,6 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
       showEvaluate: !evaluated,
       showNext: evaluated && qIndex < TOTAL - 1,
       disableReset: selected == null || evaluated,
-      disableEvaluate: selected == null || evaluated,
       disableNext: !evaluated,
     };
   }, [

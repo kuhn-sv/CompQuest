@@ -315,7 +315,6 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: false,
       disableNext: !evaluated,
     },
     hasStarted,

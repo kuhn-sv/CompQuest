@@ -182,7 +182,6 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
       showEvaluate: !evaluated,
       showNext: evaluated && roundIndex < rounds.length - 1,
       disableReset: evaluated,
-      disableEvaluate: selectedAnswer === null,
       disableNext: !evaluated,
     },
     hasStarted,

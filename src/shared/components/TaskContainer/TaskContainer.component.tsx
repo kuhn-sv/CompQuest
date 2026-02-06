@@ -122,7 +122,6 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
       a.showEvaluate === b.showEvaluate &&
       a.showNext === b.showNext &&
       a.disableReset === b.disableReset &&
-      a.disableEvaluate === b.disableEvaluate &&
       a.disableNext === b.disableNext
     );
   };
@@ -299,7 +298,12 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
       onTaskContextChange: handleTaskContextChange,
       onSummaryChange: handleSummaryChange,
     }),
-    [handleControlsChange, handleHudChange, handleTaskContextChange, handleSummaryChange],
+    [
+      handleControlsChange,
+      handleHudChange,
+      handleTaskContextChange,
+      handleSummaryChange,
+    ],
   );
 
   // progressPercent is now handled inside TaskContainerHeader
@@ -413,7 +417,6 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 showEvaluate={footerControls?.showEvaluate ?? false}
                 showNext={footerControls?.showNext || hasPendingSummary}
                 disableReset={footerControls?.disableReset ?? false}
-                disableEvaluate={footerControls?.disableEvaluate ?? false}
                 disableNext={footerControls?.disableNext ?? false}
                 taskMeta={taskMeta}
                 taskContext={taskContext}

@@ -47,7 +47,6 @@ export interface TaskFooterControls {
   showEvaluate?: boolean;
   showNext?: boolean;
   disableReset?: boolean;
-  disableEvaluate?: boolean;
   disableNext?: boolean;
 }
 

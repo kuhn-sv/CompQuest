@@ -1,11 +1,11 @@
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { SubTaskComponentProps } from '../../../shared/interfaces/tasking.interfaces';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
-import { DigitsRow } from '../../../shared/components';
+import {DigitsRow} from '../../../shared/components';
 import './Potenzrechner.scss';
 import ValueExpression from './components/PotenzValueExpression.component';
 import TabRow from '../../../shared/components/tabRow/TabRow.component';
-import { useFooterControls, useHudState } from '../../../shared/hooks';
+import {useFooterControls, useHudState} from '../../../shared/hooks';
 
 type Mode = 'binary' | 'octal' | 'hex';
 
@@ -13,32 +13,54 @@ const BITS_BINARY = 8; // 8 bits -> 0..255
 const DIGITS_OCTAL = 4;
 const DIGITS_HEX = 3;
 
-const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHudChange, onSummaryChange }) => {
+const Potenzrechner: React.FC<SubTaskComponentProps> = ({
+  onControlsChange,
+  onHudChange,
+  onSummaryChange,
+}) => {
   const [mode, setMode] = useState<Mode>('binary');
   const [bits, setBits] = useState<number[]>(Array(BITS_BINARY).fill(0));
-  const [octDigits, setOctDigits] = useState<number[]>(Array(DIGITS_OCTAL).fill(0));
-  const [hexDigits, setHexDigits] = useState<number[]>(Array(DIGITS_HEX).fill(0));
+  const [octDigits, setOctDigits] = useState<number[]>(
+    Array(DIGITS_OCTAL).fill(0),
+  );
+  const [hexDigits, setHexDigits] = useState<number[]>(
+    Array(DIGITS_HEX).fill(0),
+  );
   const [target, setTarget] = useState<number>(0);
   const [evaluated, setEvaluated] = useState(false);
 
   // Calculate 2^n labels for binary mode (LSB right)
-  const powers = useMemo(() => Array.from({ length: BITS_BINARY }, (_, i) => 2 ** (BITS_BINARY - 1 - i)), []);
+  const powers = useMemo(
+    () =>
+      Array.from({length: BITS_BINARY}, (_, i) => 2 ** (BITS_BINARY - 1 - i)),
+    [],
+  );
 
   // Precompute base powers for each mode (descending powers)
-  const octPowers = useMemo(() => Array.from({ length: DIGITS_OCTAL }, (_, i) => 8 ** (DIGITS_OCTAL - 1 - i)), []);
-  const hexPowers = useMemo(() => Array.from({ length: DIGITS_HEX }, (_, i) => 16 ** (DIGITS_HEX - 1 - i)), []);
+  const octPowers = useMemo(
+    () =>
+      Array.from({length: DIGITS_OCTAL}, (_, i) => 8 ** (DIGITS_OCTAL - 1 - i)),
+    [],
+  );
+  const hexPowers = useMemo(
+    () =>
+      Array.from({length: DIGITS_HEX}, (_, i) => 16 ** (DIGITS_HEX - 1 - i)),
+    [],
+  );
 
   // Compute current value from user input per mode
   const currentValue = useMemo(() => {
-    if (mode === 'binary') return bits.reduce((sum, b, idx) => sum + b * powers[idx], 0);
-    if (mode === 'octal') return octDigits.reduce((sum, d, idx) => sum + d * octPowers[idx], 0);
+    if (mode === 'binary')
+      return bits.reduce((sum, b, idx) => sum + b * powers[idx], 0);
+    if (mode === 'octal')
+      return octDigits.reduce((sum, d, idx) => sum + d * octPowers[idx], 0);
     return hexDigits.reduce((sum, d, idx) => sum + d * hexPowers[idx], 0);
   }, [bits, powers, mode, octDigits, octPowers, hexDigits, hexPowers]);
 
   const randomTarget = (m: Mode) => {
-    if (m === 'binary') return Math.floor(Math.random() * (2 ** BITS_BINARY)); // 0..255
-    if (m === 'octal') return Math.floor(Math.random() * (8 ** DIGITS_OCTAL));
-    return Math.floor(Math.random() * (16 ** DIGITS_HEX));
+    if (m === 'binary') return Math.floor(Math.random() * 2 ** BITS_BINARY); // 0..255
+    if (m === 'octal') return Math.floor(Math.random() * 8 ** DIGITS_OCTAL);
+    return Math.floor(Math.random() * 16 ** DIGITS_HEX);
   };
 
   // Initialize task UI in HUD and footer controls
@@ -54,20 +76,36 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
   const handleReset = useCallback(() => newTask(mode), [newTask, mode]);
   const handleEvaluate = useCallback(() => setEvaluated(true), []);
   const handleNext = useCallback(() => newTask(mode), [newTask, mode]);
-  useFooterControls(onControlsChange, {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext}, {
-    showReset: true,
-    showEvaluate: true,
-    showNext: true,
-    disableReset: false,
-    disableEvaluate: false,
-    disableNext: false,
-  }, true);
+  useFooterControls(
+    onControlsChange,
+    {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext},
+    {
+      showReset: true,
+      showEvaluate: true,
+      showNext: true,
+      disableReset: false,
+      disableNext: false,
+    },
+    true,
+  );
 
   // HUD state (reactive to mode + target)
-  const hudState = useMemo(() => ({
-    subtitle: 'Aufgabe: Stelle die Zahl ' + target + ' in ' + (mode === 'binary' ? 'binär' : mode === 'octal' ? 'oktal' : 'hexadezimal') + ' dar.',
-    progress: null,
-  }), [mode, target]);
+  const hudState = useMemo(
+    () => ({
+      subtitle:
+        'Aufgabe: Stelle die Zahl ' +
+        target +
+        ' in ' +
+        (mode === 'binary'
+          ? 'binär'
+          : mode === 'octal'
+            ? 'oktal'
+            : 'hexadezimal') +
+        ' dar.',
+      progress: null,
+    }),
+    [mode, target],
+  );
   useHudState(onHudChange, hudState);
 
   // Cleanup summary on unmount
@@ -83,7 +121,7 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
     if (!initializedRef.current) {
       initializedRef.current = true;
       newTask('binary');
-      onHudChange?.({ progress: null, requestTimer: 'reset' });
+      onHudChange?.({progress: null, requestTimer: 'reset'});
     }
   }, [newTask, onHudChange]);
 
@@ -96,11 +134,11 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
       <TabRow
         value={mode}
         items={[
-          { value: 'binary', label: 'Binär' },
-          { value: 'octal', label: 'Oktal' },
-          { value: 'hex', label: 'Hexadezimal' },
+          {value: 'binary', label: 'Binär'},
+          {value: 'octal', label: 'Oktal'},
+          {value: 'hex', label: 'Hexadezimal'},
         ]}
-        onSelect={(m) => {
+        onSelect={m => {
           setMode(m);
           newTask(m);
         }}
@@ -108,15 +146,24 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
       />
       <div className="potenzrechner__body">
         <div className="task-statement">
-        Aufgabe: Stelle die Zahl <strong>{target}</strong> in {mode === 'binary' ? 'binär' : mode === 'octal' ? 'oktal' : 'hexadezimal'} dar.
-        <div className="hint">
-          {mode === 'binary' && 'Nutze die 2er-Potenz unter den Bits als Hilfestellung.'}
-          {mode === 'octal' && 'Nutze die 8er-Potenzen unter den Ziffern als Hilfestellung.'}
-          {mode === 'hex' && 'Nutze die 16er-Potenzen unter den Ziffern als Hilfestellung.'}
+          Aufgabe: Stelle die Zahl <strong>{target}</strong> in{' '}
+          {mode === 'binary'
+            ? 'binär'
+            : mode === 'octal'
+              ? 'oktal'
+              : 'hexadezimal'}{' '}
+          dar.
+          <div className="hint">
+            {mode === 'binary' &&
+              'Nutze die 2er-Potenz unter den Bits als Hilfestellung.'}
+            {mode === 'octal' &&
+              'Nutze die 8er-Potenzen unter den Ziffern als Hilfestellung.'}
+            {mode === 'hex' &&
+              'Nutze die 16er-Potenzen unter den Ziffern als Hilfestellung.'}
+          </div>
         </div>
-        </div>
-      <div className="potenzrechner__content">
-        {mode === 'binary' && (
+        <div className="potenzrechner__content">
+          {mode === 'binary' && (
             <BitToggleRow
               bits={bits}
               onChange={setBits}
@@ -124,47 +171,47 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({ onControlsChange, onHu
               showPowers
               powerLabels={powers}
             />
-        )}
+          )}
 
-        {mode === 'octal' && (
-          <div className="digits-board octal">
-            <DigitsRow
-              digits={octDigits}
-              onChange={setOctDigits}
-              base={8}
-              className="digits-row"
-              showPowers
-              powerLabels={octPowers}
-            />
-          </div>
-        )}
+          {mode === 'octal' && (
+            <div className="digits-board octal">
+              <DigitsRow
+                digits={octDigits}
+                onChange={setOctDigits}
+                base={8}
+                className="digits-row"
+                showPowers
+                powerLabels={octPowers}
+              />
+            </div>
+          )}
 
-        {mode === 'hex' && (
-          <div className="digits-board hex">
-            <DigitsRow
-              digits={hexDigits}
-              onChange={setHexDigits}
-              base={16}
-              className="digits-row"
-              showPowers
-              powerLabels={hexPowers}
-            />
-          </div>
-        )}
-      </div>
+          {mode === 'hex' && (
+            <div className="digits-board hex">
+              <DigitsRow
+                digits={hexDigits}
+                onChange={setHexDigits}
+                base={16}
+                className="digits-row"
+                showPowers
+                powerLabels={hexPowers}
+              />
+            </div>
+          )}
+        </div>
 
-      <ValueExpression
-        mode={mode}
-        bits={bits}
-        octDigits={octDigits}
-        hexDigits={hexDigits}
-        powers={powers}
-        octPowers={octPowers}
-        hexPowers={hexPowers}
-        currentValue={currentValue}
-        evaluated={evaluated}
-        isCorrect={isCorrect}
-      />
+        <ValueExpression
+          mode={mode}
+          bits={bits}
+          octDigits={octDigits}
+          hexDigits={hexDigits}
+          powers={powers}
+          octPowers={octPowers}
+          hexPowers={hexPowers}
+          currentValue={currentValue}
+          evaluated={evaluated}
+          isCorrect={isCorrect}
+        />
       </div>
     </div>
   );
