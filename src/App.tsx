@@ -8,7 +8,9 @@ import {
   useLocation,
 } from 'react-router-dom';
 import TopNavbar from './shared/components/TopNavbar/TopNavbar.component';
-import {AuthProvider, ProtectedRoute} from './features/auth';
+import {AuthProvider, ProtectedRoute, useAuth} from './features/auth';
+import {BadgeNotificationProvider} from './shared/context/BadgeNotificationContext';
+import BadgeCelebrationPopup from './shared/components/BadgeCelebrationPopup/BadgeCelebrationPopup.component';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
 import AuthPage from './features/auth/auth.page';
@@ -37,12 +39,28 @@ const App: React.FC = () => {
 
   return (
     <AuthProvider>
+      <AppShell shouldShowOrientationOverlay={shouldShowOrientationOverlay} />
+    </AuthProvider>
+  );
+};
+
+/**
+ * Inner shell that has access to AuthContext so we can pass
+ * `isAuthenticated` to the BadgeNotificationProvider.
+ */
+const AppShell: React.FC<{shouldShowOrientationOverlay: boolean}> = ({
+  shouldShowOrientationOverlay,
+}) => {
+  const {user} = useAuth();
+
+  return (
+    <BadgeNotificationProvider isAuthenticated={!!user}>
       <Router>
-        {/* Theme toggle removed; app runs in dark mode */}
         {shouldShowOrientationOverlay && <OrientationOverlay />}
+        <BadgeCelebrationPopup />
         <AppWithNavbar />
       </Router>
-    </AuthProvider>
+    </BadgeNotificationProvider>
   );
 };
 

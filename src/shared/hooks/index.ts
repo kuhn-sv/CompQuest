@@ -10,3 +10,4 @@ export type { FooterControlFlags, FooterControlHandlers } from './useFooterContr
 export { useHudState } from './useHudState';
 export { useGameStartScreen } from './useGameStartScreen';
 export type { UseGameStartScreenOptions, UseGameStartScreenResult } from './useGameStartScreen';
+export { useBadgeNotification } from './useBadgeNotification';

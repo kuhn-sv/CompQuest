@@ -1,0 +1,156 @@
+@use '../../../styles/variables' as *;
+
+// ---------------------------------------------------------------------------
+// Overlay (full-viewport backdrop)
+// ---------------------------------------------------------------------------
+.badge-popup__overlay {
+  position: fixed;
+  inset: 0;
+  z-index: $z-index-modal + 10; // 1060 – above ResultSummary / ConfirmModal
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  animation: badge-popup-fade-in 0.25s ease;
+}
+
+// ---------------------------------------------------------------------------
+// Card
+// ---------------------------------------------------------------------------
+.badge-popup__card {
+  background: var(--background);
+  border: 1px solid var(--surface-border);
+  border-radius: 20px;
+  padding: 2.25rem 2rem 1.75rem;
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.25);
+  animation: badge-popup-slide-up 0.3s ease;
+}
+
+// ---------------------------------------------------------------------------
+// Icon wrapper (circle with level-specific glow)
+// ---------------------------------------------------------------------------
+.badge-popup__icon-wrapper {
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--surface-border);
+
+  // Level-specific accent colours
+  &--bronze {
+    border-color: #cd7f32;
+    box-shadow: 0 0 20px rgba(205, 127, 50, 0.3);
+  }
+  &--silver {
+    border-color: #c0c0c0;
+    box-shadow: 0 0 20px rgba(192, 192, 192, 0.3);
+  }
+  &--gold {
+    border-color: #ffd700;
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+  }
+  &--platinum {
+    border-color: var(--accent);
+    box-shadow: 0 0 24px var(--accent30);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Icon emoji (bouncing animation)
+// ---------------------------------------------------------------------------
+.badge-popup__icon {
+  font-size: 2.8rem;
+  line-height: 1;
+  animation: badge-bounce 2s ease-in-out infinite;
+}
+
+// ---------------------------------------------------------------------------
+// Title
+// ---------------------------------------------------------------------------
+.badge-popup__title {
+  margin: 0 0 0.65rem;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+// ---------------------------------------------------------------------------
+// Message
+// ---------------------------------------------------------------------------
+.badge-popup__message {
+  margin: 0 0 1.5rem;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  line-height: 1.55;
+
+  strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Button
+// ---------------------------------------------------------------------------
+.badge-popup__btn {
+  display: block;
+  width: 100%;
+  padding: 0.85rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--background);
+  font-size: 1.05rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+
+  &:hover {
+    opacity: 0.9;
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Keyframes
+// ---------------------------------------------------------------------------
+@keyframes badge-popup-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes badge-popup-slide-up {
+  from {
+    transform: translateY(16px) scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes badge-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
