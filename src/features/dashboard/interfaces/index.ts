@@ -11,3 +11,4 @@ export type {
 } from './levels.interfaces';
 export { QualityLevel } from './performance.types';
 export type { QualitySettings, PerformanceMetrics } from './performance.types';
+export type { Exercise } from './exercise.interface';

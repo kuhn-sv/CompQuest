@@ -10,33 +10,8 @@ import {
 import {GameStartScreen} from '../../../../shared/components';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {shuffle} from './shared';
-
-interface AssemblyInstruction {
-  addr: string;
-  op: string;
-  arg: string;
-}
-
-interface AssemblyTask {
-  id: string;
-  variant: 1 | 2;
-  question: string;
-  program: AssemblyInstruction[];
-  options: string[];
-  correct_index: number;
-  initial_values?: Record<string, number>;
-}
-
-const generateRounds = (): AssemblyTask[] => {
-  const tasks = readAssemblyTasksData as AssemblyTask[];
-  const variant1Tasks = tasks.filter(t => t.variant === 1);
-  const variant2Tasks = tasks.filter(t => t.variant === 2);
-
-  const selected1 = shuffle(variant1Tasks).slice(0, 2);
-  const selected2 = shuffle(variant2Tasks).slice(0, 2);
-
-  return shuffle([...selected1, ...selected2]);
-};
+import type {AssemblyInstruction, AssemblyTask} from './readAssembly.interfaces';
+import {generateRounds} from './readAssembly.utils';
 
 const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,

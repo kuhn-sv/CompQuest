@@ -4,6 +4,7 @@ import './WriteAssembly.component.scss';
 import {
   generateAvailableCommands,
   AssemblyCommand,
+  WriteAssemblyTask,
 } from './writeAssembly.helper';
 import writeAssemblyTasksData from '../../../../data/tasks/write-assembly.json';
 import {
@@ -27,32 +28,7 @@ import {
   DragStartEvent,
 } from '@dnd-kit/core';
 import {useDndSensors} from '../../../../shared/hooks/dndSensors';
-
-// Types
-interface WriteAssemblyTask {
-  id: string;
-  prosa_text: string;
-  difficulty: string;
-  commands: AssemblyCommand[];
-}
-
-// Generate rounds from JSON data
-const generateRounds = (): WriteAssemblyTask[] => {
-  const tasks = writeAssemblyTasksData as WriteAssemblyTask[];
-
-  // Select tasks by difficulty: 2x leicht, 1x mittel, 1x schwer
-  const leichtTasks = tasks.filter(t => t.difficulty === 'leicht');
-  const mittelTasks = tasks.filter(t => t.difficulty === 'mittel');
-  const schwerTasks = tasks.filter(t => t.difficulty === 'schwer');
-
-  const selected = [
-    ...shuffle(leichtTasks).slice(0, 2),
-    ...shuffle(mittelTasks).slice(0, 1),
-    ...shuffle(schwerTasks).slice(0, 1),
-  ];
-
-  return selected;
-};
+import {generateRounds} from './writeAssembly.utils';
 
 const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,

@@ -16,34 +16,12 @@ import {
   UserProfile,
   AuthContextType,
 } from '../interfaces/auth.interface.ts';
-
-// --- Lightweight local cache for user profile to speed up hydration (module scope) ---
-const PROFILE_CACHE_KEY = (uid: string) => `cq_profile:${uid}:v1`;
-const loadProfileFromCache = (uid: string): UserProfile | null => {
-  try {
-    const raw = localStorage.getItem(PROFILE_CACHE_KEY(uid));
-    if (!raw) return null;
-    return JSON.parse(raw) as UserProfile;
-  } catch {
-    return null;
-  }
-};
-const saveProfileToCache = (uid: string, profile: UserProfile | null) => {
-  try {
-    if (!profile) return localStorage.removeItem(PROFILE_CACHE_KEY(uid));
-    localStorage.setItem(PROFILE_CACHE_KEY(uid), JSON.stringify(profile));
-  } catch {
-    // ignore quota/availability issues
-  }
-};
-const clearProfileCache = (uid: string | null) => {
-  try {
-    if (!uid) return;
-    localStorage.removeItem(PROFILE_CACHE_KEY(uid));
-  } catch {
-    // ignore
-  }
-};
+import {
+  loadProfileFromCache,
+  saveProfileToCache,
+  clearProfileCache,
+} from './profileCache.utils';
+import {getErrorMessage} from './authError.utils';
 
 // Create the Authentication Context
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -331,35 +309,3 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
 
 // Export AuthContext for use in hooks
 export {AuthContext};
-
-// Helper function to get user-friendly error messages
-const getErrorMessage = (error: unknown): string => {
-  if (error && typeof error === 'object' && 'code' in error) {
-    const e = error as {code: string; message: string};
-    switch (e.code) {
-      case 'invalid_credentials':
-      case 'auth/invalid-credentials':
-        return 'E-Mail oder Passwort ist falsch.';
-      case 'user_not_found':
-        return 'Kein Benutzer mit dieser E-Mail-Adresse gefunden.';
-      case 'email_exists':
-      case 'auth/email-already-in-use':
-        return 'Diese E-Mail-Adresse wird bereits verwendet.';
-      case 'weak_password':
-      case 'auth/weak-password':
-        return 'Das Passwort ist zu schwach.';
-      case 'invalid_email':
-      case 'auth/invalid-email':
-        return 'Ungültige E-Mail-Adresse.';
-      case 'too_many_requests':
-      case 'auth/too-many-requests':
-        return 'Zu viele Anfragen. Bitte versuchen Sie es später erneut.';
-      default:
-        return `Authentifizierungsfehler: ${e.message}`;
-    }
-  }
-  if (error && typeof error === 'object' && 'message' in error) {
-    return (error as {message: string}).message;
-  }
-  return 'Ein unbekannter Fehler ist aufgetreten.';
-};

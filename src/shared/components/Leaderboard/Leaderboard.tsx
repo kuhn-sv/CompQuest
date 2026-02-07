@@ -5,23 +5,8 @@ import {
   LeaderboardResult,
 } from '../../../services/supabase/training.service';
 import './Leaderboard.scss';
-
-const PAGE_SIZE = 5;
-
-const RANK_ICONS: Record<number, string> = {
-  1: '🥇',
-  2: '🥈',
-  3: '🥉',
-};
-
-const formatTime = (ms: number): string => {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const m = Math.floor(totalSeconds / 60)
-    .toString()
-    .padStart(2, '0');
-  const s = (totalSeconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-};
+import {formatDuration} from '../../utils/formatTime.utils';
+import {PAGE_SIZE, RANK_ICONS} from './leaderboard.constants';
 
 interface LeaderboardProps {
   taskId: string;
@@ -166,7 +151,7 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
         {Math.round(entry.bestAccuracy)}%
       </td>
       <td className="leaderboard__cell leaderboard__cell--time">
-        {formatTime(entry.bestTimeMs)}
+        {formatDuration(entry.bestTimeMs)}
       </td>
     </tr>
   );

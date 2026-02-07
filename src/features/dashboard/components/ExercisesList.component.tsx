@@ -1,25 +1,14 @@
 import React from 'react';
 import './ExercisesList.component.scss';
 import {Link} from 'react-router-dom';
-import {getBadgeLevelForAccuracy} from '../../../shared/interfaces';
+import type {Exercise} from '../interfaces/exercise.interface';
+import {getProgressClass} from '../utils/progressClass.utils';
 
-export interface Exercise {
-  id: string;
-  title: string;
-  description: string;
-  path: string;
-  progressPercent?: number;
-  disabled?: boolean;
-}
+export type {Exercise} from '../interfaces/exercise.interface';
 
 interface ExercisesListProps {
   exercises: Exercise[];
 }
-
-const getProgressClass = (percent: number): string => {
-  const level = getBadgeLevelForAccuracy(percent);
-  return level !== 'none' ? `dashboard__exercise-progress--${level}` : '';
-};
 
 const ExercisesList: React.FC<ExercisesListProps> = ({exercises}) => (
   <div className="dashboard__exercises">

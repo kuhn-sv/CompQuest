@@ -11,6 +11,7 @@ import {
   BadgeNotificationContext,
   type BadgeUpgradeNotification,
 } from './badgeNotification.context';
+import {DISPLAY_DELAY_MS, BADGE_RANK} from './badgeNotification.constants';
 
 // Re-export types & context so existing imports keep working
 export type {
@@ -18,21 +19,6 @@ export type {
   BadgeNotificationContextType,
 } from './badgeNotification.context';
 export {BadgeNotificationContext} from './badgeNotification.context';
-
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-/** Delay (ms) before showing a badge popup so the ResultSummary can appear first. */
-const DISPLAY_DELAY_MS = 600;
-
-const BADGE_RANK: Record<BadgeLevel, number> = {
-  none: 0,
-  bronze: 1,
-  silver: 2,
-  gold: 3,
-  platinum: 4,
-};
 
 // ---------------------------------------------------------------------------
 // Provider

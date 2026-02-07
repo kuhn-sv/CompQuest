@@ -24,13 +24,7 @@ import type {ArithmeticMode} from '../interfaces';
 import {TaskId} from '../../../../shared/enums/taskId.enum';
 import DndProvider from '../../../../shared/components/DndProvider';
 import {DragOverlay} from '@dnd-kit/core';
-
-interface PAStageScore {
-  difficulty: Difficulty;
-  correct: number;
-  total: number;
-  points: number;
-}
+import type {PAStageScore} from './arithmetic.interfaces';
 
 const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,

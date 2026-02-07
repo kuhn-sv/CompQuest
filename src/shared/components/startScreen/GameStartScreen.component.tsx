@@ -3,47 +3,16 @@ import React, {useEffect, useState} from 'react';
 import './GameStartScreen.component.scss';
 import {trainingService} from '../../../services/supabase/training.service';
 import {Leaderboard} from '../Leaderboard/Leaderboard';
+import {formatDuration} from '../../utils/formatTime.utils';
+import type {
+  BestAttempt,
+  GameStartScreenProps,
+} from './gameStartScreen.interfaces';
 
-export interface BestAttempt {
-  timeMs: number;
-  accuracyPercent: number; // 0-100
-  points: number;
-  // Optional metadata for later use
-  date?: string | Date;
-}
-
-export interface GameStartScreenProps {
-  // Main status block on the left
-  statusTitle: string;
-  statusDescription: string | React.ReactNode;
-
-  // Quick facts on the right
-  taskCount: number;
-  estimatedTime: string; // display-ready, e.g. "~5 min"
-
-  // Optional best attempt summary
-  bestAttempt?: BestAttempt | null;
-
-  // Optional: When provided, the component will try to load the user's best attempt
-  // for this task from the database (ignored if bestAttempt is explicitly passed).
-  fetchBestAttempt?: boolean;
-  taskId?: string;
-
-  // Start CTA
-  onStart: () => void;
-  startLabel?: string; // default: "Mission starten"
-
-  className?: string;
-}
-
-const formatDuration = (ms: number) => {
-  const totalSeconds = Math.max(0, Math.floor(ms / 1000));
-  const m = Math.floor(totalSeconds / 60)
-    .toString()
-    .padStart(2, '0');
-  const s = (totalSeconds % 60).toString().padStart(2, '0');
-  return `${m}:${s}`;
-};
+export type {
+  BestAttempt,
+  GameStartScreenProps,
+} from './gameStartScreen.interfaces';
 
 export const GameStartScreen: React.FC<GameStartScreenProps> = ({
   statusTitle,
@@ -114,7 +83,6 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
                   <div className="gss-status-title-icon">
                     <img src="/error_logo.svg" alt="Error Zeichen" />
                   </div>
-
                   <div className="gss-status-title-text">{statusTitle}</div>
                 </div>
                 <div className="gss-status-desc">{statusDescription}</div>

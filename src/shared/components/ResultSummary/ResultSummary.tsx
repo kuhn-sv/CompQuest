@@ -3,14 +3,9 @@ import './ResultSummary.scss';
 import {generateFeedback} from './resultSummary.helper';
 import {Link} from 'react-router-dom';
 import {Leaderboard} from '../Leaderboard/Leaderboard';
+import type {SummaryResultLike} from './resultSummary.interfaces';
 
-export interface SummaryResultLike {
-  elapsedMs: number;
-  totalCorrect: number;
-  totalPossible: number;
-  totalPoints: number;
-  timeBonus?: number;
-}
+export type {SummaryResultLike} from './resultSummary.interfaces';
 
 interface ResultSummaryProps {
   result: SummaryResultLike;

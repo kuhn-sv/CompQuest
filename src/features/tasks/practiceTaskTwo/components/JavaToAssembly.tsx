@@ -5,13 +5,12 @@ import {
   generateAvailableCommands,
   AssemblyCommand,
   getTaskCommands,
+  JavaToAssemblyTask,
 } from './JavaToAssembly.helper';
-import javaToAssemblyTasksData from '../../../../data/tasks/java-to-assembly.json';
 import {
   AssemblyDraggableCommand,
   AssemblyDroppableSlot,
   calculateScore,
-  shuffle,
   DIFFICULTY_MAP,
 } from './shared';
 import {
@@ -30,35 +29,7 @@ import {
 import {useDndSensors} from '../../../../shared/hooks/dndSensors';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
-
-// Types
-interface JavaToAssemblyTask {
-  id: string;
-  topic: string;
-  java: string;
-  addresses: string[];
-  assembler: string[];
-  difficulty: string;
-  hint?: string;
-}
-
-// Generate rounds from JSON data
-const generateRounds = (): JavaToAssemblyTask[] => {
-  const tasks = javaToAssemblyTasksData as JavaToAssemblyTask[];
-
-  // Select tasks by difficulty: 2x leicht, 1x mittel, 1x schwer
-  const leichtTasks = tasks.filter(t => t.difficulty === 'leicht');
-  const mittelTasks = tasks.filter(t => t.difficulty === 'mittel');
-  const schwerTasks = tasks.filter(t => t.difficulty === 'schwer');
-
-  const selected = [
-    ...shuffle(leichtTasks).slice(0, 2),
-    ...shuffle(mittelTasks).slice(0, 1),
-    ...shuffle(schwerTasks).slice(0, 1),
-  ];
-
-  return selected;
-};
+import {generateRounds} from './javaToAssembly.utils';
 
 // Modal Component for expanded Java code
 const JavaCodeModal: React.FC<{
