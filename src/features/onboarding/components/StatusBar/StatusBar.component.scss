@@ -1,0 +1,39 @@
+@use '../../../../styles/variables' as *;
+
+.status-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-2xl;
+  padding: $spacing-md $spacing-lg;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(6px);
+  z-index: 10;
+
+  &__item {
+    display: flex;
+    align-items: center;
+    gap: $spacing-sm;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+
+    &--critical {
+      color: var(--error);
+    }
+
+    &--warning {
+      color: var(--warning);
+    }
+  }
+
+  &__icon {
+    font-size: 14px;
+  }
+}

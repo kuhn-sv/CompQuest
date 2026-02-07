@@ -16,6 +16,7 @@ import ResetPasswordPage from './features/auth/reset.page';
 import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
 import PracticeTaskTwoPage from './features/tasks/practiceTaskTwo/PracticeTaskTwo.page';
 import HelperModulePage from './features/helpers/HelperModule.page';
+import OnboardingPage from './features/onboarding/onboarding.page';
 import {TaskId} from './shared/enums/taskId.enum';
 import {useOrientation} from './shared/hooks/useOrientation';
 import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
@@ -23,16 +24,17 @@ import OrientationOverlay from './shared/components/OrientationOverlay/Orientati
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)
   useTheme();
-  
+
   // Check device orientation - show overlay on mobile/tablet devices in portrait mode
   const {isPortrait} = useOrientation();
-  const isMobileOrTablet = typeof window !== 'undefined' && 
-    window.matchMedia && 
-    (window.matchMedia('(max-width: 1024px)').matches || 
-     window.matchMedia('(pointer: coarse)').matches);
-  
+  const isMobileOrTablet =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    (window.matchMedia('(max-width: 1024px)').matches ||
+      window.matchMedia('(pointer: coarse)').matches);
+
   const shouldShowOrientationOverlay = isMobileOrTablet && isPortrait;
-  
+
   return (
     <AuthProvider>
       <Router>
@@ -46,7 +48,7 @@ const App: React.FC = () => {
 
 const AppWithNavbar: React.FC = () => {
   const location = useLocation();
-  const hideNavbarOn = ['/dashboard'];
+  const hideNavbarOn = ['/dashboard', '/onboarding'];
 
   return (
     <>
@@ -75,6 +77,16 @@ const AppWithNavbar: React.FC = () => {
           element={
             <ProtectedRoute requireAuth={false}>
               <ResetPasswordPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Onboarding – shown once before the first dashboard visit */}
+        <Route
+          path="/onboarding"
+          element={
+            <ProtectedRoute>
+              <OnboardingPage />
             </ProtectedRoute>
           }
         />

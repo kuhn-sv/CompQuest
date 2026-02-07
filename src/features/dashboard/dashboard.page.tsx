@@ -1,5 +1,5 @@
 import React, {useState, useEffect, Suspense} from 'react';
-import {useLocation} from 'react-router-dom';
+import {useLocation, useNavigate} from 'react-router-dom';
 import ExercisesModal from './components/ExercisesModal.component';
 import {useAuth} from '../auth';
 import './dashboard.page.scss';
@@ -15,7 +15,16 @@ const VIEW_MODE_STORAGE_KEY = 'compquest-view-mode';
 
 const DashboardPage: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [showExercises, setShowExercises] = useState(false);
+
+  const {user, signOut, userProfile} = useAuth();
+
+  useEffect(() => {
+    if (userProfile && !userProfile.progress?.hasCompletedOnboarding) {
+      navigate('/onboarding', {replace: true});
+    }
+  }, [userProfile, navigate]);
 
   // Auto-open exercises modal when navigated with state (e.g. from ResultSummary "Beenden")
   useEffect(() => {
@@ -29,7 +38,6 @@ const DashboardPage: React.FC = () => {
   // Default to 2D to avoid heavy 3D loading on lower-end devices
   const [is3DView, setIs3DView] = useState(false);
   const [showPerformanceWarning, setShowPerformanceWarning] = useState(false);
-  const {user, signOut} = useAuth();
   const {isTablet} = useDeviceType();
 
   // Load saved view mode from localStorage on mount

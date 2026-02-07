@@ -28,13 +28,13 @@ export interface UserPreferences {
 }
 
 export interface UserProgress {
-  // High-level stats (can be derived but kept for fast UI)
+
   totalPoints: number;
-  level: number; // current component index or derived level
+  level: number;
   achievements: Achievement[];
-  // Detailed progress tracking keys
-  completedTasks: string[]; // task ids completed at least once
+  completedTasks: string[];
   currentTask?: string;
+  hasCompletedOnboarding?: boolean;
   statistics: {
     tasksCompleted: number;
     timeSpent: number; // minutes
