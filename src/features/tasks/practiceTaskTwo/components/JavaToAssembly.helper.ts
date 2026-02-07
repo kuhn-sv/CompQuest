@@ -8,6 +8,8 @@ import {
  * Task interface for Java to Assembly conversion exercises
  */
 export interface JavaToAssemblyTask extends BaseAssemblyTask {
+  /** Optional hint text displayed below the Java code */
+  hint?: string;
   /** Topic/title of the task */
   topic: string;
   /** Java code to convert */

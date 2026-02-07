@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
-import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
 import {
   useFooterControls,
   useHudState,
@@ -9,8 +8,7 @@ import {
 } from '../../../../shared/hooks';
 import {GameStartScreen} from '../../../../shared/components';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
-import {shuffle} from './shared';
-import type {AssemblyInstruction, AssemblyTask} from './readAssembly.interfaces';
+import type {AssemblyTask} from './readAssembly.interfaces';
 import {generateRounds} from './readAssembly.utils';
 
 const ReadAssembly: React.FC<SubTaskComponentProps> = ({
