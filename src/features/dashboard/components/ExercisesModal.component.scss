@@ -48,11 +48,24 @@
   margin-bottom: 2rem;
 }
 
+.dashboard__section-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
 .dashboard__section-title {
   font-size: 1.25rem;
   font-weight: 600;
   color: var(--text-secondary);
-  margin-bottom: 1rem;
+}
+
+.dashboard__section-avg {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  opacity: 0.8;
 }
 
 .dashboard__section-separator {
@@ -111,6 +124,47 @@
   }
 }
 
+.dashboard__badge-legend {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.6rem 1rem;
+  margin-bottom: 1rem;
+  border-radius: 8px;
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  font-size: 0.8rem;
+  flex-wrap: wrap;
+
+  &-label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+  }
+
+  &-info {
+    font-size: 0.9rem;
+    opacity: 0.7;
+  }
+
+  &-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    white-space: nowrap;
+
+    &--bronze { color: #cd7f32; }
+    &--silver { color: #b0b0b0; }
+    &--gold   { color: #d4a800; }
+    &--platinum { color: #7ee8fa; }
+  }
+}
+
 .dashboard__accordion {
   .dashboard__accordion-item {
     border: 1px solid var(--surface-border);
@@ -133,9 +187,73 @@
       text-align: left;
     }
 
+    .dashboard__accordion-title-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex: 1;
+      min-width: 0;
+    }
+
     .dashboard__accordion-toggle {
       margin-left: 1rem;
       color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .dashboard__topic-badges {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dashboard__topic-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      line-height: 1.4;
+
+      &-icon {
+        font-size: 0.75rem;
+        line-height: 1;
+      }
+
+      &--completed {
+        background: rgba(100, 229, 147, 0.15);
+        color: var(--success);
+        border: 1px solid rgba(100, 229, 147, 0.3);
+      }
+
+      &--bronze {
+        background: rgba(205, 127, 50, 0.12);
+        color: #cd7f32;
+        border: 1px solid rgba(205, 127, 50, 0.3);
+      }
+
+      &--silver {
+        background: rgba(192, 192, 192, 0.12);
+        color: #b0b0b0;
+        border: 1px solid rgba(192, 192, 192, 0.3);
+      }
+
+      &--gold {
+        background: rgba(255, 215, 0, 0.12);
+        color: #d4a800;
+        border: 1px solid rgba(255, 215, 0, 0.25);
+      }
+
+      &--platinum {
+        background: rgba(185, 242, 255, 0.12);
+        color: #7ee8fa;
+        border: 1px solid rgba(185, 242, 255, 0.3);
+      }
     }
 
     .dashboard__accordion-body {

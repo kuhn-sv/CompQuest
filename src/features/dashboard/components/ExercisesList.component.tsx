@@ -1,6 +1,7 @@
 import React from 'react';
 import './ExercisesList.component.scss';
 import {Link} from 'react-router-dom';
+import {getBadgeLevelForAccuracy} from '../../../shared/interfaces';
 
 export interface Exercise {
   id: string;
@@ -15,6 +16,11 @@ interface ExercisesListProps {
   exercises: Exercise[];
 }
 
+const getProgressClass = (percent: number): string => {
+  const level = getBadgeLevelForAccuracy(percent);
+  return level !== 'none' ? `dashboard__exercise-progress--${level}` : '';
+};
+
 const ExercisesList: React.FC<ExercisesListProps> = ({exercises}) => (
   <div className="dashboard__exercises">
     {exercises.map(exercise =>
@@ -27,7 +33,7 @@ const ExercisesList: React.FC<ExercisesListProps> = ({exercises}) => (
           aria-disabled="true">
           {typeof exercise.progressPercent === 'number' && (
             <div
-              className="dashboard__exercise-progress"
+              className={`dashboard__exercise-progress ${getProgressClass(exercise.progressPercent)}`}
               aria-label="Fortschritt">
               {exercise.progressPercent}%
             </div>
@@ -47,7 +53,7 @@ const ExercisesList: React.FC<ExercisesListProps> = ({exercises}) => (
           className="dashboard__exercise-card">
           {typeof exercise.progressPercent === 'number' && (
             <div
-              className="dashboard__exercise-progress"
+              className={`dashboard__exercise-progress ${getProgressClass(exercise.progressPercent)}`}
               aria-label="Fortschritt">
               {exercise.progressPercent}%
             </div>

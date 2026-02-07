@@ -3,6 +3,8 @@ import './ExercisesModal.component.scss';
 import ExercisesList, {type Exercise} from './ExercisesList.component';
 import {trainingService} from '../../../services/supabase/training.service';
 import {helperModules} from '../../helpers/registry';
+import type {UserTopicBadge} from '../../../shared/interfaces';
+import {BADGE_CONFIG, BADGE_LEGEND_TIERS} from '../../../shared/interfaces';
 
 interface ExercisesModalProps {
   show: boolean;
@@ -22,6 +24,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
   const [missionsWithProgress, setMissionsWithProgress] =
     useState<Exercise[]>(missions);
   const [helpersList, setHelpersList] = useState<Exercise[]>(helpers);
+  const [badges, setBadges] = useState<Record<string, UserTopicBadge>>({});
   // accordion state: which panels are open
   const [openPanels, setOpenPanels] = useState<Record<string, boolean>>({
     '1-zahlendarstellung': false,
@@ -106,11 +109,17 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
     if (!show) return; // avoid work when modal hidden
     (async () => {
-      const [m, h, mm] = await Promise.all([
+      const [m, h, mm, badgeData] = await Promise.all([
         loadProgress(missions, true),
         loadProgress(helpers, false),
         loadProgress(microMissions, true),
+        trainingService.getUserBadges().catch(() => [] as UserTopicBadge[]),
       ]);
+      // Index badges by category for quick lookup
+      const badgeMap: Record<string, UserTopicBadge> = {};
+      for (const b of badgeData) {
+        badgeMap[b.category] = b;
+      }
       // Inject two placeholder items (hard-coded) for upcoming content
       const placeholderMissions: Exercise[] = [
         {
@@ -140,6 +149,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
         setMissionsWithProgress(missionsWithPlaceholders);
         setHelpersList(helpersWithPlaceholders);
         setMicroMissionsWithProgress(microWithPlaceholders);
+        setBadges(badgeMap);
       }
     })();
     return () => {
@@ -151,6 +161,36 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
   const togglePanel = (key: string) => {
     setOpenPanels(prev => ({...prev, [key]: !prev[key]}));
+  };
+
+  const renderTopicBadges = (category: string) => {
+    const badge = badges[category];
+    if (!badge) return null;
+
+    const isCompleted =
+      badge.completedTasks >= badge.totalTasks &&
+      badge.totalTasks > 0 &&
+      badge.badgeLevel !== 'none';
+
+    return (
+      <span className="dashboard__topic-badges">
+        {isCompleted && (
+          <span className="dashboard__topic-badge dashboard__topic-badge--completed">
+            <span className="dashboard__topic-badge-icon">✓</span>
+            Abgeschlossen
+          </span>
+        )}
+        {badge.badgeLevel !== 'none' && (
+          <span
+            className={`dashboard__topic-badge dashboard__topic-badge--${badge.badgeLevel}`}>
+            <span className="dashboard__topic-badge-icon">
+              {BADGE_CONFIG[badge.badgeLevel].icon}
+            </span>
+            {BADGE_CONFIG[badge.badgeLevel].label}
+          </span>
+        )}
+      </span>
+    );
   };
 
   return (
@@ -166,6 +206,20 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
           </button>
         </div>
 
+        <div className="dashboard__badge-legend">
+          <span className="dashboard__badge-legend-label">
+            <span className="dashboard__badge-legend-info">ⓘ</span>
+            Badge-System:
+          </span>
+          {BADGE_LEGEND_TIERS.map(tier => (
+            <span
+              key={tier.level}
+              className={`dashboard__badge-legend-item dashboard__badge-legend-item--${tier.level}`}>
+              {tier.icon} {tier.label} ({tier.description})
+            </span>
+          ))}
+        </div>
+
         <div className="dashboard__accordion">
           {/* Accordion 1: Zahlendarstellung - contains missions + helpers (current behavior) */}
           <div className="dashboard__accordion-item">
@@ -173,7 +227,10 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
               className="dashboard__accordion-header"
               onClick={() => togglePanel('1-zahlendarstellung')}
               aria-expanded={!!openPanels['1-zahlendarstellung']}>
-              <span>1. Zahlendarstellung</span>
+              <span className="dashboard__accordion-title-row">
+                <span>1. Zahlendarstellung</span>
+                {renderTopicBadges('zahlendarstellung')}
+              </span>
               <span className="dashboard__accordion-toggle">
                 {openPanels['1-zahlendarstellung'] ? '▾' : '▸'}
               </span>
@@ -182,7 +239,15 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
               className={`dashboard__accordion-body ${openPanels['1-zahlendarstellung'] ? 'is-open' : ''}`}
               aria-hidden={!openPanels['1-zahlendarstellung']}>
               <div className="dashboard__section">
-                <div className="dashboard__section-title">Missionen</div>
+                <div className="dashboard__section-title-row">
+                  <span className="dashboard__section-title">Missionen</span>
+                  {badges['zahlendarstellung'] && (
+                    <span className="dashboard__section-avg">
+                      Ø Genauigkeit:{' '}
+                      {Math.round(badges['zahlendarstellung'].avgAccuracy)}%
+                    </span>
+                  )}
+                </div>
                 <ExercisesList exercises={missionsWithProgress} />
               </div>
 
@@ -201,7 +266,10 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
               className="dashboard__accordion-header"
               onClick={() => togglePanel('2-mikroprozessortechnik')}
               aria-expanded={!!openPanels['2-mikroprozessortechnik']}>
-              <span>2. Mikroprozessortechnik</span>
+              <span className="dashboard__accordion-title-row">
+                <span>2. Mikroprozessortechnik</span>
+                {renderTopicBadges('mikroprozessortechnik')}
+              </span>
               <span className="dashboard__accordion-toggle">
                 {openPanels['2-mikroprozessortechnik'] ? '▾' : '▸'}
               </span>
@@ -210,7 +278,15 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
               className={`dashboard__accordion-body ${openPanels['2-mikroprozessortechnik'] ? 'is-open' : ''}`}
               aria-hidden={!openPanels['2-mikroprozessortechnik']}>
               <div className="dashboard__section">
-                <div className="dashboard__section-title">Missionen</div>
+                <div className="dashboard__section-title-row">
+                  <span className="dashboard__section-title">Missionen</span>
+                  {badges['mikroprozessortechnik'] && (
+                    <span className="dashboard__section-avg">
+                      Ø Genauigkeit:{' '}
+                      {Math.round(badges['mikroprozessortechnik'].avgAccuracy)}%
+                    </span>
+                  )}
+                </div>
                 <ExercisesList exercises={microMissionsWithProgress} />
               </div>
 
@@ -222,7 +298,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
                   exercises={Object.values(helperModules).map(module => ({
                     id: module.slug,
                     title: `Hilfsmodul: ${module.title}`,
-                    description: module.description,
+                    description: module.description || '',
                     path: `/hilfsmodul/${module.slug}`,
                     progressPercent: undefined,
                     disabled: false,

@@ -1,4 +1,5 @@
 import supabase from './client';
+import type {BadgeLevel, UserTopicBadge} from '../../shared/interfaces';
 
 export interface AttemptMetrics {
   timeMs: number;
@@ -218,5 +219,27 @@ export const trainingService = {
     }
 
     return { entries, currentUser, totalCount };
+  },
+
+  // Fetch topic badges (avg accuracy + badge level per category) for the current user
+  getUserBadges: async (): Promise<UserTopicBadge[]> => {
+    const { data, error } = await supabase.rpc('get_user_badges');
+    if (error) throw error;
+
+    const rows = (data ?? []) as Array<{
+      category: string;
+      avg_accuracy: number;
+      badge_level: string;
+      completed_tasks: number;
+      total_tasks: number;
+    }>;
+
+    return rows.map(row => ({
+      category: row.category,
+      avgAccuracy: Number(row.avg_accuracy),
+      badgeLevel: row.badge_level as BadgeLevel,
+      completedTasks: row.completed_tasks,
+      totalTasks: row.total_tasks,
+    }));
   },
 };

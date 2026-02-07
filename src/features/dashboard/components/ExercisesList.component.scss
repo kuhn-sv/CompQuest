@@ -55,6 +55,31 @@
   padding: 0.25rem 0.5rem;
   border-radius: 8px;
   font-size: 0.9rem;
+  font-weight: 600;
+
+  &--bronze {
+    background: rgba(205, 127, 50, 0.2);
+    border-color: rgba(205, 127, 50, 0.4);
+    color: #cd7f32;
+  }
+
+  &--silver {
+    background: rgba(192, 192, 192, 0.2);
+    border-color: rgba(192, 192, 192, 0.4);
+    color: #b0b0b0;
+  }
+
+  &--gold {
+    background: rgba(255, 215, 0, 0.2);
+    border-color: rgba(255, 215, 0, 0.35);
+    color: #d4a800;
+  }
+
+  &--platinum {
+    background: rgba(185, 242, 255, 0.2);
+    border-color: rgba(185, 242, 255, 0.4);
+    color: #7ee8fa;
+  }
 }
 
 .dashboard__exercise-description {

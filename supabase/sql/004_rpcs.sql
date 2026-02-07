@@ -311,3 +311,32 @@ as $$
 $$;
 
 grant execute on function public.get_leaderboard(text, int, int) to authenticated;
+
+-- =============================================================
+-- 7) Get topic badges for the current user
+--    Returns one row per category with avg accuracy & badge level
+-- =============================================================
+create or replace function public.get_user_badges()
+returns table (
+  category        text,
+  avg_accuracy    numeric(5,2),
+  badge_level     text,
+  completed_tasks int,
+  total_tasks     int
+)
+language sql
+security definer
+set search_path = public
+as $$
+  select
+    utb.category,
+    utb.avg_accuracy,
+    utb.badge_level,
+    utb.completed_tasks,
+    utb.total_tasks
+  from public.user_topic_badges utb
+  where utb.user_id = auth.uid()
+  order by utb.category;
+$$;
+
+grant execute on function public.get_user_badges() to authenticated;
