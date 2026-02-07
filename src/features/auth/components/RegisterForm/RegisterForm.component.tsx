@@ -98,12 +98,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
     }
 
     if (!formData.gamertag.trim()) {
-      errors.gamertag = 'Gamertag ist erforderlich';
+      errors.gamertag = 'Benutzername ist erforderlich';
     } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(formData.gamertag)) {
       errors.gamertag =
-        'Gamertag muss 3–20 Zeichen lang sein (Buchstaben, Zahlen, Unterstrich)';
+        'Benutzername muss 3–20 Zeichen lang sein (Buchstaben, Zahlen, Unterstrich)';
     } else if (gamertagAvailable === false) {
-      errors.gamertag = 'Dieser Gamertag ist bereits vergeben';
+      errors.gamertag = 'Dieser Benutzername ist bereits vergeben';
     }
 
     if (!formData.matrikelnummer.trim()) {
@@ -235,7 +235,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
 
               <div className="register-form__field">
                 <label htmlFor="gamertag" className="register-form__label">
-                  Gamertag
+                  Benutzername
                 </label>
                 <input
                   type="text"
@@ -244,13 +244,13 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
                   value={formData.gamertag}
                   onChange={handleInputChange}
                   className={`register-form__input ${formErrors.gamertag ? 'register-form__input--error' : ''} ${gamertagAvailable === true && !formErrors.gamertag ? 'register-form__input--success' : ''}`}
-                  placeholder="DragonSlayer99"
+                  placeholder="Compquester42"
                   autoComplete="username"
                   disabled={loading}
                   maxLength={20}
                 />
                 <span className="register-form__gamertag-hint">
-                  ℹ️ Dein Gamertag wird im Leaderboard für andere Nutzer
+                  ℹ️ Dein Benutzername wird im Leaderboard für andere Nutzer
                   sichtbar sein.
                 </span>
                 {gamertagChecking && (
@@ -262,12 +262,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
                   gamertagAvailable === true &&
                   formData.gamertag.length >= 3 && (
                     <span className="register-form__gamertag-status register-form__gamertag-status--available">
-                      ✓ Gamertag ist verfügbar
+                      ✓ Benutzername ist verfügbar
                     </span>
                   )}
                 {!gamertagChecking && gamertagAvailable === false && (
                   <span className="register-form__gamertag-status register-form__gamertag-status--taken">
-                    ✗ Dieser Gamertag ist bereits vergeben
+                    ✗ Dieser Benutzername ist bereits vergeben
                   </span>
                 )}
                 {formErrors.gamertag && (

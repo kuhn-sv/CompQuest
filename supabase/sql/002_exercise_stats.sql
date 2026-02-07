@@ -1,30 +1,22 @@
--- Exercise stats table, RLS, and triggers
--- Run this in Supabase SQL Editor
+-- ============================================================
+-- 002 – Exercise stats table, RLS, trigger
+-- ============================================================
+-- Run order: 2 of 5  (depends on: 001 for is_admin())
+-- ============================================================
 
--- Optional: ensure pgcrypto is available for gen_random_uuid()
--- create extension if not exists pgcrypto;
-
+-- 1. Table
 create table if not exists public.exercise_stats (
-  user_id uuid not null references auth.users(id) on delete cascade,
-  -- Stable ID of the exercise/task coming from the frontend (slug, key, etc.)
-  task_id text not null,
-  task_title text not null,
-
-  -- Total attempts a user has made for this task
+  user_id        uuid not null references auth.users(id) on delete cascade,
+  task_id        text not null,
+  task_title     text not null,
   attempts_count int not null default 0,
-
-  -- Best attempt metrics (denormalized for fast reads)
-  best_time_ms int,
-  best_accuracy numeric(5,2), -- e.g., 0..100 (%), adjust to your scale
-  best_points int,
-
-  -- Total number of questions asked to Tim for this task (denormalized)
+  best_time_ms   int,
+  best_accuracy  numeric(5,2),
+  best_points    int,
   questions_count int not null default 0,
-
-  -- Timestamps
   last_attempt_at timestamptz,
-  created_at timestamptz not null default now(),
-  updated_at timestamptz not null default now(),
+  created_at     timestamptz not null default now(),
+  updated_at     timestamptz not null default now(),
 
   primary key (user_id, task_id)
 );
@@ -32,9 +24,10 @@ create table if not exists public.exercise_stats (
 create index if not exists exercise_stats_user_task_idx
   on public.exercise_stats (user_id, task_id);
 
+-- 2. Enable RLS
 alter table public.exercise_stats enable row level security;
 
--- RLS: users can see and manage their own rows; admins can see/manage all
+-- 3. RLS policies
 drop policy if exists "exercise_stats_select" on public.exercise_stats;
 create policy "exercise_stats_select" on public.exercise_stats
 for select to authenticated
@@ -56,7 +49,7 @@ create policy "exercise_stats_delete_admin" on public.exercise_stats
 for delete to authenticated
 using (public.is_admin());
 
--- Utility trigger to keep updated_at fresh
+-- 4. Trigger: keep updated_at fresh
 create or replace function public.set_updated_at()
 returns trigger
 language plpgsql

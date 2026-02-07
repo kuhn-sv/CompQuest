@@ -1,6 +1,14 @@
--- RPCs for recording attempts and Tim messages (with limits)
+-- ============================================================
+-- 004 – RPCs (exercise attempts, Tim messages, leaderboard)
+-- ============================================================
+-- Run order: 4 of 5  (depends on: 002, 003 tables)
+-- ============================================================
 
--- Record an exercise attempt and update aggregates safely
+-- =============================================================
+-- 1) Record an exercise attempt
+--    Priority: accuracy > points > lower time
+--    All best_* fields are updated together from the same attempt
+-- =============================================================
 create or replace function public.record_exercise_attempt(
   p_task_id text,
   p_task_title text,
@@ -18,11 +26,13 @@ declare
   v_best_time int;
   v_best_accuracy numeric(5,2);
   v_best_points int;
+  v_is_better boolean;
 begin
   if v_user is null then
     raise exception 'not authenticated';
   end if;
 
+  -- Upsert row and increment attempts, capture current best metrics
   insert into public.exercise_stats as es (
     user_id, task_id, task_title, attempts_count, best_time_ms, best_accuracy, best_points, last_attempt_at
   ) values (
@@ -36,25 +46,35 @@ begin
   returning best_time_ms, best_accuracy, best_points
   into v_best_time, v_best_accuracy, v_best_points;
 
+  -- Decide if the new attempt is better: accuracy > points > lower time
+  v_is_better := (
+    v_best_accuracy is null or p_accuracy > v_best_accuracy
+    or (
+      p_accuracy = coalesce(v_best_accuracy, p_accuracy)
+      and (
+        p_points > coalesce(v_best_points, p_points)
+        or (
+          p_points = coalesce(v_best_points, p_points)
+          and p_time_ms < coalesce(v_best_time, p_time_ms)
+        )
+      )
+    )
+  );
+
+  -- If better, promote all best_* from this single attempt (no partial updates)
   update public.exercise_stats
-  set best_points = case when (v_best_points is null or p_points > v_best_points) then p_points else best_points end,
-      best_accuracy = case
-        when (v_best_points is null or p_points > v_best_points) then p_accuracy
-        when (p_points = coalesce(v_best_points, p_points) and (v_best_accuracy is null or p_accuracy > v_best_accuracy)) then p_accuracy
-        else best_accuracy
-      end,
-      best_time_ms = case
-        when (v_best_points is null or p_points > v_best_points) then p_time_ms
-        when (p_points = coalesce(v_best_points, p_points) and p_accuracy = coalesce(v_best_accuracy, p_accuracy) and (v_best_time is null or p_time_ms < v_best_time)) then p_time_ms
-        else best_time_ms
-      end
+  set best_points   = case when v_is_better then p_points   else best_points   end,
+      best_accuracy = case when v_is_better then p_accuracy else best_accuracy end,
+      best_time_ms  = case when v_is_better then p_time_ms  else best_time_ms  end
   where user_id = v_user and task_id = p_task_id;
 end;
 $$;
 
 grant execute on function public.record_exercise_attempt(text, text, int, numeric, int) to authenticated;
 
--- Record a Tim message; returns the created message ID
+-- =============================================================
+-- 2) Record a Tim message (basic, no limit)
+-- =============================================================
 create or replace function public.record_tim_message(
   p_task_id text,
   p_task_title text,
@@ -85,7 +105,9 @@ $$;
 
 grant execute on function public.record_tim_message(text, text, text, text, text, text) to authenticated;
 
--- Per-task daily limit
+-- =============================================================
+-- 3) Record a Tim message with per-task daily limit
+-- =============================================================
 create or replace function public.record_tim_message_with_limit(
   p_task_id text,
   p_task_title text,
@@ -138,7 +160,9 @@ $$;
 
 grant execute on function public.record_tim_message_with_limit(text, text, text, text, text, text, int) to authenticated;
 
--- Global per-user daily limit (across all tasks)
+-- =============================================================
+-- 4) Record a Tim message with global daily limit (all tasks)
+-- =============================================================
 create or replace function public.record_tim_message_with_global_limit(
   p_task_id text,
   p_task_title text,
@@ -188,7 +212,9 @@ $$;
 
 grant execute on function public.record_tim_message_with_global_limit(text, text, text, text, text, text, int) to authenticated;
 
--- Remaining credits helper
+-- =============================================================
+-- 5) Remaining daily credits for Tim messages
+-- =============================================================
 create or replace function public.get_tim_remaining_credits(
   p_task_id text,
   p_task_daily_limit int,
@@ -230,3 +256,58 @@ end;
 $$;
 
 grant execute on function public.get_tim_remaining_credits(text, int, int) to authenticated;
+
+-- =============================================================
+-- 6) Leaderboard RPC
+--    Paginated, ranked by accuracy then time
+--    Always includes the current user's row
+-- =============================================================
+create or replace function public.get_leaderboard(
+  p_task_id text,
+  p_limit int default 5,
+  p_offset int default 0
+)
+returns table (
+  gamertag text,
+  best_accuracy numeric(5,2),
+  best_time_ms int,
+  rank bigint,
+  is_current_user boolean,
+  total_count bigint
+)
+language sql
+security definer
+set search_path = public
+as $$
+  with ranked as (
+    select
+      p.gamertag,
+      es.best_accuracy,
+      es.best_time_ms,
+      es.user_id,
+      row_number() over (
+        order by es.best_accuracy desc nulls last, es.best_time_ms asc nulls last
+      ) as rank
+    from public.exercise_stats es
+    inner join public.profiles p on p.id = es.user_id
+    where es.task_id = p_task_id
+      and es.best_accuracy is not null
+  ),
+  total as (
+    select count(*) as cnt from ranked
+  )
+  select
+    r.gamertag,
+    r.best_accuracy,
+    r.best_time_ms,
+    r.rank,
+    (r.user_id = auth.uid()) as is_current_user,
+    t.cnt as total_count
+  from ranked r
+  cross join total t
+  where r.rank > p_offset and r.rank <= (p_offset + p_limit)
+     or r.user_id = auth.uid()
+  order by r.rank;
+$$;
+
+grant execute on function public.get_leaderboard(text, int, int) to authenticated;

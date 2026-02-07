@@ -126,12 +126,12 @@ export const authService = {
     if (error) throw error;
   },
 
-  // Check if a gamertag is available (not taken by another user)
+  // Check if a gamertag is available (not taken by another user, case-insensitive)
   checkGamertagAvailability: async (gamertag: string): Promise<boolean> => {
     const { data, error } = await supabase
       .from('profiles')
       .select('id')
-      .eq('gamertag', gamertag)
+      .ilike('gamertag', gamertag)
       .maybeSingle();
     if (error) {
       console.error('Error checking gamertag availability:', error);
