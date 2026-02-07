@@ -2,6 +2,7 @@ import React from 'react';
 import './ResultSummary.scss';
 import {generateFeedback} from './resultSummary.helper';
 import {Link} from 'react-router-dom';
+import {Leaderboard} from '../Leaderboard/Leaderboard';
 
 export interface SummaryResultLike {
   elapsedMs: number;
@@ -105,6 +106,10 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
           </button>
         )}
       </div>
+
+      {taskId && (
+        <Leaderboard taskId={taskId} className="summary-leaderboard" />
+      )}
     </div>
   );
 };

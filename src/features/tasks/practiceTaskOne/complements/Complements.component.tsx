@@ -2,9 +2,10 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
 import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow.tsx';
-import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
+import {GameStartScreen} from '../../../../shared/components';
 // Footer buttons rendered by parent
 import type {SubTaskComponentProps} from '../interfaces';
+import {useGameStartScreen, useHudState} from '../../../../shared/hooks';
 import {
   generateRounds,
   ComplementRound,
@@ -33,7 +34,13 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   const [roundIndex, setRoundIndex] = useState<number>(0);
   const [bits, setBits] = useState<number[]>(Array(DEFAULT_BIT_COUNT).fill(0));
   const [evaluated, setEvaluated] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
+
+  // Start-screen lifecycle
+  const {hasStarted, startTask} = useGameStartScreen({
+    onHudChange,
+    totalTasks: rounds.length,
+    subtitle: 'Datenfluss wiederherstellen',
+  });
 
   // Accumulate per-round scores and final summary
   const [stageScores, setStageScores] = useState<
@@ -55,17 +62,11 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   const isCorrect =
     evaluated && bitsToString(bits) === bitsToString(expectedBits);
 
-  const startTask = React.useCallback(() => {
-    setHasStarted(true);
+  const startTaskHandler = React.useCallback(() => {
+    startTask();
     setBits(Array(current.bitCount).fill(0));
     setEvaluated(false);
-    // Tell container to start its timer
-    onHudChangeRef.current?.({
-      subtitle: 'Datenfluss wiederherstellen',
-      progress: {current: 1, total: rounds.length},
-      requestTimer: 'start',
-    });
-  }, [current.bitCount, rounds.length]);
+  }, [startTask, current.bitCount]);
 
   const resetTask = React.useCallback(() => {
     setBits(Array(current.bitCount).fill(0));
@@ -166,13 +167,9 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
   const prevControlsRef = useRef<typeof controls>(null);
   const onControlsChangeRef = useRef(onControlsChange);
-  const onHudChangeRef = useRef(onHudChange);
   useEffect(() => {
     onControlsChangeRef.current = onControlsChange;
   }, [onControlsChange]);
-  useEffect(() => {
-    onHudChangeRef.current = onHudChange;
-  }, [onHudChange]);
   useEffect(() => {
     if (!onControlsChangeRef.current) return;
     if (prevControlsRef.current !== controls) {
@@ -185,27 +182,18 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   useEffect(() => {
     return () => {
       onControlsChangeRef.current?.(null);
-      onHudChangeRef.current?.(null);
     };
   }, []);
 
-  // Update HUD in parent: subtitle + progress + timer control
-  useEffect(() => {
-    if (!hasStarted) return;
-    onHudChangeRef.current?.({
+  // HUD state (stabilised via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted) return {progress: null, isStartScreen: true} as const;
+    return {
       subtitle: 'Datenfluss wiederherstellen',
       progress: {current: roundIndex + 1, total: rounds.length},
-    });
+    };
   }, [hasStarted, roundIndex, rounds.length]);
-
-  // Inform parent HUD about start screen visibility before task starts
-  useEffect(() => {
-    if (hasStarted) return;
-    onHudChangeRef.current?.({
-      progress: null,
-      isStartScreen: true,
-    });
-  }, [hasStarted]);
+  useHudState(onHudChange, hudState);
 
   // Provide current round context to AskTim
   useEffect(() => {
@@ -276,29 +264,27 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       {/* Controls moved to parent footer */}
 
       {!hasStarted && (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Bit-Inversion erforderlich!"
-            statusDescription={
-              <>
-                Einige Speicherzellen enthalten defekte oder invertierte Werte.
-                Um die Signale wieder korrekt zu interpretieren, musst du ihre
-                Komplementdarstellungen erzeugen.
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Entsprechend dem Modus erzeuge
-                die Einer-/ Zweierkomplement, um den Speicher wieder
-                funktionsfähig zu machen.
-              </>
-            }
-            taskCount={rounds.length}
-            estimatedTime="~5 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={startTask}
-            startLabel="Mission starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Bit-Inversion erforderlich!"
+          statusDescription={
+            <>
+              Einige Speicherzellen enthalten defekte oder invertierte Werte. Um
+              die Signale wieder korrekt zu interpretieren, musst du ihre
+              Komplementdarstellungen erzeugen.
+              <br />
+              <br />
+              <strong>Deine Mission:</strong> Entsprechend dem Modus erzeuge die
+              Einer-/ Zweierkomplement, um den Speicher wieder funktionsfähig zu
+              machen.
+            </>
+          }
+          taskCount={rounds.length}
+          estimatedTime="~5 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={startTaskHandler}
+          startLabel="Mission starten"
+        />
       )}
 
       {/* Summary overlay moved to container */}

@@ -3,6 +3,10 @@
   display: grid;
   place-items: center;
   padding: 24px;
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 
 .summary-card {
@@ -102,6 +106,10 @@
   color: var(--secondary-btn-text);
 }
 .summary-btn:active { transform: translateY(1px); }
+
+.summary-leaderboard {
+  margin-top: 1rem;
+}
 
 .time-bonus {
   color: var(--text);

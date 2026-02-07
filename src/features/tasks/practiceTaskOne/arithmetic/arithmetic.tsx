@@ -11,6 +11,7 @@ import {
   useConnectionLines,
   useFooterControls,
   useHudState,
+  useGameStartScreen,
   CONNECTION_LINE_PRESETS,
 } from '../../../../shared/hooks';
 import {EquationRow as SharedEquationRow} from '../../../../shared/components/equationrow/EquationRow';
@@ -56,9 +57,18 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
     null,
   ) as React.RefObject<HTMLDivElement>;
   const [evaluated, setEvaluated] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [stageScores, setStageScores] = useState<PAStageScore[]>([]);
   // final summary is lifted to container
+
+  // Start-screen lifecycle
+  const {hasStarted, startTask} = useGameStartScreen({
+    onHudChange,
+    totalTasks: stages.length,
+    subtitle:
+      arithmeticMode === 'twos-complement'
+        ? 'Additionen im Zweierkomplement (3 Stufen)'
+        : 'Positive Additionen und Subtraktionen (3 Stufen)',
+  });
 
   // dnd-kit PoC state/handlers are used; ResultsSection and DndProvider handle draggables
 
@@ -114,19 +124,10 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
 
   // Initial start handler
   const handleInitialStart = useCallback(() => {
-    setHasStarted(true);
+    startTask();
     setStageIndex(0);
     startSetForStage(0);
-    // Start parent HUD timer and set initial progress
-    onHudChangeRef.current?.({
-      progress: {current: 1, total: stages.length},
-      requestTimer: 'start',
-      subtitle:
-        arithmeticMode === 'twos-complement'
-          ? 'Additionen im Zweierkomplement (3 Stufen)'
-          : 'Positive Additionen und Subtraktionen (3 Stufen)',
-    });
-  }, [startSetForStage, arithmeticMode, stages.length]);
+  }, [startTask, startSetForStage]);
 
   // Provide compact context for AskTim: which stage and a sample task
   useEffect(() => {
@@ -508,51 +509,48 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
       )}
 
       {!hasStarted && (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle={
-              arithmeticMode === 'twos-complement'
-                ? 'Rechenfehler erkannt!'
-                : 'Rechenmodul offline!'
-            }
-            statusDescription={
-              arithmeticMode === 'twos-complement' ? (
-                <>
-                  Beim Addieren negativer Zahlen im Zweierkomplement wurde der
-                  Datenfluss gesprengt. Der Prozessor kann nicht mehr korrekt
-                  mit negativen Zahlen umgehen.
-                  <strong>Deine Mission: </strong> Verbinde zusammengehörige
-                  Operationen im Zweierkomplement präzise und erkenne, wann ein
-                  Überlauf entsteht. So stellst du sicher, dass der Datenfluss
-                  wiederhergestellt wird und der Prozessor fehlerfrei rechnen
-                  kann.
-                </>
-              ) : (
-                <>
-                  Der zentrale Rechenkern ist abgestürzt, weil Zahlen
-                  unterschiedlicher Systeme nicht mehr korrekt miteinander
-                  interagieren.
-                  <strong>Deine Mission: </strong>Führe die
-                  Grundrechenoperationen in Binär-, Oktal- und
-                  Hexadezimaldarstellung korrekt durch, indem du jeder Rechnung
-                  das passende Gegenstück zuordnest. Stelle sicher, dass alle
-                  Zahlensysteme wieder synchron rechnen – nur dann kann der
-                  Rechenkern neu starten.
-                </>
-              )
-            }
-            taskCount={4}
-            estimatedTime="~5 min"
-            fetchBestAttempt
-            taskId={
-              arithmeticMode === 'twos-complement'
-                ? TaskId.TwosComplementArithmetic
-                : TaskId.PositiveArithmetic
-            }
-            onStart={handleInitialStart}
-            startLabel="Mission starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle={
+            arithmeticMode === 'twos-complement'
+              ? 'Rechenfehler erkannt!'
+              : 'Rechenmodul offline!'
+          }
+          statusDescription={
+            arithmeticMode === 'twos-complement' ? (
+              <>
+                Beim Addieren negativer Zahlen im Zweierkomplement wurde der
+                Datenfluss gesprengt. Der Prozessor kann nicht mehr korrekt mit
+                negativen Zahlen umgehen.
+                <strong>Deine Mission: </strong> Verbinde zusammengehörige
+                Operationen im Zweierkomplement präzise und erkenne, wann ein
+                Überlauf entsteht. So stellst du sicher, dass der Datenfluss
+                wiederhergestellt wird und der Prozessor fehlerfrei rechnen
+                kann.
+              </>
+            ) : (
+              <>
+                Der zentrale Rechenkern ist abgestürzt, weil Zahlen
+                unterschiedlicher Systeme nicht mehr korrekt miteinander
+                interagieren.
+                <strong>Deine Mission: </strong>Führe die Grundrechenoperationen
+                in Binär-, Oktal- und Hexadezimaldarstellung korrekt durch,
+                indem du jeder Rechnung das passende Gegenstück zuordnest.
+                Stelle sicher, dass alle Zahlensysteme wieder synchron rechnen –
+                nur dann kann der Rechenkern neu starten.
+              </>
+            )
+          }
+          taskCount={4}
+          estimatedTime="~5 min"
+          fetchBestAttempt
+          taskId={
+            arithmeticMode === 'twos-complement'
+              ? TaskId.TwosComplementArithmetic
+              : TaskId.PositiveArithmetic
+          }
+          onStart={handleInitialStart}
+          startLabel="Mission starten"
+        />
       )}
     </div>
   );

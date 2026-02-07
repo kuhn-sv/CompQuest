@@ -1,6 +1,7 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {useAuth} from '../../hooks/useAuth';
 import {RegisterData} from '../../interfaces/auth.interface';
+import {authService} from '../../../../services/supabase';
 import './RegisterForm.component.scss';
 
 interface RegisterFormProps {
@@ -16,9 +17,17 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
     confirmPassword: '',
     displayName: '',
     matrikelnummer: '',
+    gamertag: '',
   });
   const [formErrors, setFormErrors] = useState<Partial<RegisterData>>({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [gamertagChecking, setGamertagChecking] = useState(false);
+  const [gamertagAvailable, setGamertagAvailable] = useState<boolean | null>(
+    null,
+  );
+  const gamertagDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
 
   const slides = [
     '/register-slide-1.png',
@@ -35,6 +44,24 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
     return () => clearInterval(interval);
   }, [slides.length]);
 
+  // Debounced gamertag availability check
+  const checkGamertagAvailability = useCallback(async (tag: string) => {
+    if (!tag || !/^[a-zA-Z0-9_]{3,20}$/.test(tag)) {
+      setGamertagAvailable(null);
+      setGamertagChecking(false);
+      return;
+    }
+    setGamertagChecking(true);
+    try {
+      const available = await authService.checkGamertagAvailability(tag);
+      setGamertagAvailable(available);
+    } catch {
+      setGamertagAvailable(null);
+    } finally {
+      setGamertagChecking(false);
+    }
+  }, []);
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const {name, value} = e.target;
     setFormData(prev => ({
@@ -49,6 +76,16 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
         [name]: undefined,
       }));
     }
+
+    // Debounced gamertag availability check
+    if (name === 'gamertag') {
+      setGamertagAvailable(null);
+      if (gamertagDebounceRef.current)
+        clearTimeout(gamertagDebounceRef.current);
+      gamertagDebounceRef.current = setTimeout(() => {
+        checkGamertagAvailability(value);
+      }, 500);
+    }
   };
 
   const validateForm = (): boolean => {
@@ -58,6 +95,15 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
       errors.displayName = 'Name ist erforderlich';
     } else if (formData.displayName.trim().length < 2) {
       errors.displayName = 'Name muss mindestens 2 Zeichen lang sein';
+    }
+
+    if (!formData.gamertag.trim()) {
+      errors.gamertag = 'Gamertag ist erforderlich';
+    } else if (!/^[a-zA-Z0-9_]{3,20}$/.test(formData.gamertag)) {
+      errors.gamertag =
+        'Gamertag muss 3–20 Zeichen lang sein (Buchstaben, Zahlen, Unterstrich)';
+    } else if (gamertagAvailable === false) {
+      errors.gamertag = 'Dieser Gamertag ist bereits vergeben';
     }
 
     if (!formData.matrikelnummer.trim()) {
@@ -101,6 +147,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
         formData.password,
         formData.displayName,
         formData.matrikelnummer,
+        formData.gamertag,
       );
       setShowSuccessMessage(true);
       // Don't call onSuccess immediately as user needs to verify email first
@@ -182,6 +229,50 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
                 {formErrors.displayName && (
                   <span className="register-form__field-error">
                     {formErrors.displayName}
+                  </span>
+                )}
+              </div>
+
+              <div className="register-form__field">
+                <label htmlFor="gamertag" className="register-form__label">
+                  Gamertag
+                </label>
+                <input
+                  type="text"
+                  id="gamertag"
+                  name="gamertag"
+                  value={formData.gamertag}
+                  onChange={handleInputChange}
+                  className={`register-form__input ${formErrors.gamertag ? 'register-form__input--error' : ''} ${gamertagAvailable === true && !formErrors.gamertag ? 'register-form__input--success' : ''}`}
+                  placeholder="DragonSlayer99"
+                  autoComplete="username"
+                  disabled={loading}
+                  maxLength={20}
+                />
+                <span className="register-form__gamertag-hint">
+                  ℹ️ Dein Gamertag wird im Leaderboard für andere Nutzer
+                  sichtbar sein.
+                </span>
+                {gamertagChecking && (
+                  <span className="register-form__gamertag-status register-form__gamertag-status--checking">
+                    Wird geprüft…
+                  </span>
+                )}
+                {!gamertagChecking &&
+                  gamertagAvailable === true &&
+                  formData.gamertag.length >= 3 && (
+                    <span className="register-form__gamertag-status register-form__gamertag-status--available">
+                      ✓ Gamertag ist verfügbar
+                    </span>
+                  )}
+                {!gamertagChecking && gamertagAvailable === false && (
+                  <span className="register-form__gamertag-status register-form__gamertag-status--taken">
+                    ✗ Dieser Gamertag ist bereits vergeben
+                  </span>
+                )}
+                {formErrors.gamertag && (
+                  <span className="register-form__field-error">
+                    {formErrors.gamertag}
                   </span>
                 )}
               </div>

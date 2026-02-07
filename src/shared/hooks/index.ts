@@ -8,3 +8,5 @@ export { useDeviceType } from './useDeviceType';
 export { useFooterControls } from './useFooterControls';
 export type { FooterControlFlags, FooterControlHandlers } from './useFooterControls';
 export { useHudState } from './useHudState';
+export { useGameStartScreen } from './useGameStartScreen';
+export type { UseGameStartScreenOptions, UseGameStartScreenResult } from './useGameStartScreen';

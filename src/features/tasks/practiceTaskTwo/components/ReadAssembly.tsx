@@ -2,8 +2,12 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
-import {useFooterControls, useHudState} from '../../../../shared/hooks';
-import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
+import {
+  useFooterControls,
+  useHudState,
+  useGameStartScreen,
+} from '../../../../shared/hooks';
+import {GameStartScreen} from '../../../../shared/components';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {shuffle} from './shared';
 
@@ -45,9 +49,15 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   const rounds: AssemblyTask[] = useMemo(() => generateRounds(), []);
 
   const [roundIndex, setRoundIndex] = useState<number>(0);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
+
+  // Start-screen lifecycle
+  const {hasStarted, startTask: baseStart} = useGameStartScreen({
+    onHudChange,
+    totalTasks: rounds.length,
+    subtitle: 'Wähle die richtige Antwort aus.',
+  });
 
   // Accumulate per-round scores (used via setStageScores updater function)
   const [_stageScores, setStageScores] = useState<
@@ -112,17 +122,10 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
-    setHasStarted(true);
+    baseStart();
     setSelectedAnswer(null);
     setEvaluated(false);
-    // Tell container to start its timer
-    onHudChange?.({
-      progress: {current: 1, total: rounds.length},
-      requestTimer: 'start',
-      subtitle: 'Wähle die richtige Antwort aus.',
-      isStartScreen: false,
-    });
-  }, [onHudChange, rounds.length]);
+  }, [baseStart]);
 
   const resetTask = useCallback(() => {
     setSelectedAnswer(null);
@@ -209,39 +212,37 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   return (
     <div className="read-assembly">
       {!hasStarted ? (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Instruktionsdecoder beschädigt!"
-            statusDescription={
-              <>
-                Der Mikrocode deines Prozessors ist korrupt – Befehle werden
-                nicht mehr korrekt interpretiert. Die CPU versteht nur noch
-                Fragmente aus alten Assembler-Instruktionen.
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Du musst du die verbleibenden
-                Assemblerfragmente analysieren, um ihre Bedeutung zu
-                rekonstruieren.
-                <br />
-                Beantworte Fragen wie:
-                <br />
-                <br />
-                • Was tut dieses Programm?
-                <br />• Welche Werte stehen am Ende in bestimmten
-                Speicherzellen? <br />
-                <br />
-                Nur wenn du die Logik der CPU wieder verstehst, kann der
-                Prozessor korrekt kompilierte Befehle ausführen.
-              </>
-            }
-            taskCount={rounds.length}
-            estimatedTime="~8 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={startTask}
-            startLabel="Quiz starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Instruktionsdecoder beschädigt!"
+          statusDescription={
+            <>
+              Der Mikrocode deines Prozessors ist korrupt – Befehle werden nicht
+              mehr korrekt interpretiert. Die CPU versteht nur noch Fragmente
+              aus alten Assembler-Instruktionen.
+              <br />
+              <br />
+              <strong>Deine Mission:</strong> Du musst du die verbleibenden
+              Assemblerfragmente analysieren, um ihre Bedeutung zu
+              rekonstruieren.
+              <br />
+              Beantworte Fragen wie:
+              <br />
+              <br />
+              • Was tut dieses Programm?
+              <br />• Welche Werte stehen am Ende in bestimmten Speicherzellen?{' '}
+              <br />
+              <br />
+              Nur wenn du die Logik der CPU wieder verstehst, kann der Prozessor
+              korrekt kompilierte Befehle ausführen.
+            </>
+          }
+          taskCount={rounds.length}
+          estimatedTime="~8 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={startTask}
+          startLabel="Quiz starten"
+        />
       ) : (
         <div className="read-assembly__content">
           <div className="read-assembly__left">

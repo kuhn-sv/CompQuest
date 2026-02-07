@@ -14,8 +14,12 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import {useFooterControls, useHudState} from '../../../../shared/hooks';
-import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
+import {
+  useFooterControls,
+  useHudState,
+  useGameStartScreen,
+} from '../../../../shared/hooks';
+import {GameStartScreen} from '../../../../shared/components';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {
   DndContext,
@@ -97,9 +101,16 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   const rounds: JavaToAssemblyTask[] = useMemo(() => generateRounds(), []);
 
   const [roundIndex, setRoundIndex] = useState<number>(0);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
+
+  // Start-screen lifecycle
+  const {hasStarted, startTask: baseStart} = useGameStartScreen({
+    onHudChange,
+    totalTasks: rounds.length,
+    subtitle:
+      'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen',
+  });
 
   // State for placed commands (slots in the program)
   const [placedCommands, setPlacedCommands] = useState<
@@ -178,7 +189,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
-    setHasStarted(true);
+    baseStart();
 
     // Initialize first round
     const slots = new Array(current.assembler.length).fill(null);
@@ -188,15 +199,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     setSlotToAvailableMap(new Map());
     setEvaluated(false);
     setSelectedCommandIndex(null);
-    // Tell container to start its timer
-    onHudChange?.({
-      progress: {current: 1, total: rounds.length},
-      requestTimer: 'start',
-      subtitle:
-        'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen',
-      isStartScreen: false,
-    });
-  }, [current, onHudChange, rounds.length]);
+  }, [baseStart, current]);
 
   const resetTask = useCallback(() => {
     const slots = new Array(current.assembler.length).fill(null);
@@ -491,33 +494,31 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
   return (
     <div className="java-to-assembly">
       {!hasStarted ? (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Compiler defekt!"
-            statusDescription={
-              <>
-                Der Hochsprachen-Parser liefert nur Fragmente – der
-                Codegenerator zur CPU ist getrennt. Ohne korrekte Übersetzung
-                bricht die Pipeline zwischen Java und Instruktionssatz.
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Übersetze den gegebenen
-                Java-Code in funktional äquivalenten Assembler:
-                <br />
-                <br />
-                • Wähle nur passende Befehle aus dem Pool. <br />
-                • Ordne sie in die richtige Reihenfolge. <br />• Filtere
-                falsche/irrelevante Instruktionen konsequent heraus. <br />
-              </>
-            }
-            taskCount={rounds.length}
-            estimatedTime="~8 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={startTask}
-            startLabel="Quiz starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Compiler defekt!"
+          statusDescription={
+            <>
+              Der Hochsprachen-Parser liefert nur Fragmente – der Codegenerator
+              zur CPU ist getrennt. Ohne korrekte Übersetzung bricht die
+              Pipeline zwischen Java und Instruktionssatz.
+              <br />
+              <br />
+              <strong>Deine Mission:</strong> Übersetze den gegebenen Java-Code
+              in funktional äquivalenten Assembler:
+              <br />
+              <br />
+              • Wähle nur passende Befehle aus dem Pool. <br />
+              • Ordne sie in die richtige Reihenfolge. <br />• Filtere
+              falsche/irrelevante Instruktionen konsequent heraus. <br />
+            </>
+          }
+          taskCount={rounds.length}
+          estimatedTime="~8 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={startTask}
+          startLabel="Quiz starten"
+        />
       ) : (
         <>
           <DndContext

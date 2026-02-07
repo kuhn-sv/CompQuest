@@ -105,8 +105,9 @@
 
   &__task-content {
     flex: 1;
-    // Important: allow native dropdowns/popovers to render outside the content box
-    overflow: hidden;
+    // Allow content to scroll when it exceeds available height (e.g. with leaderboard)
+    overflow-y: auto;
+    overflow-x: hidden;
     padding-top: 20px;
     place-items: center; // center on both axes
     min-height: 0; // allow the grid to size within the container
@@ -118,12 +119,6 @@
       .ns-header {
         display: none; // Hidden in container mode since we have our own header
       }
-    }
-
-    // Ensure complements container also centers nicely without stretching
-    .complements-container {
-      width: 100%;
-      max-width: 1000px; // keep reasonable reading width
     }
   }
 

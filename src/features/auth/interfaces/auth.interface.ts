@@ -9,6 +9,7 @@ export interface UserProfile {
   email: string;
   displayName: string;
   matrikelnummer: string;
+  gamertag: string;
   // 'student' | 'admin'
   role?: 'student' | 'admin';
   createdAt: string;
@@ -60,7 +61,7 @@ export interface AuthContextType {
   error: string | null;
   emailVerificationRequired: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string, matrikelnummer: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string, matrikelnummer: string, gamertag: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   resendEmailVerification: (email: string) => Promise<void>;
@@ -76,5 +77,6 @@ export interface LoginCredentials {
 export interface RegisterData extends LoginCredentials {
   displayName: string;
   matrikelnummer: string;
+  gamertag: string;
   confirmPassword: string;
 }

@@ -2,6 +2,7 @@
 import React, {useEffect, useState} from 'react';
 import './GameStartScreen.component.scss';
 import {trainingService} from '../../../services/supabase/training.service';
+import {Leaderboard} from '../Leaderboard/Leaderboard';
 
 export interface BestAttempt {
   timeMs: number;
@@ -104,82 +105,87 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
   const attemptToShow = bestAttempt !== undefined ? bestAttempt : loadedBest;
   return (
     <div className={`game-start-screen ${className ?? ''}`.trim()}>
-      <div className="gss-card">
-        <div className="gss-left">
-          <div className="gss-status">
-            <div className="gss-status-texts">
-              <div className="gss-status-title">
-                <div className="gss-status-title-icon">
-                  <img src="/error_logo.svg" alt="Error Zeichen" />
-                </div>
+      <div className="gss-content">
+        <div className="gss-card">
+          <div className="gss-left">
+            <div className="gss-status">
+              <div className="gss-status-texts">
+                <div className="gss-status-title">
+                  <div className="gss-status-title-icon">
+                    <img src="/error_logo.svg" alt="Error Zeichen" />
+                  </div>
 
-                <div className="gss-status-title-text">{statusTitle}</div>
+                  <div className="gss-status-title-text">{statusTitle}</div>
+                </div>
+                <div className="gss-status-desc">{statusDescription}</div>
               </div>
-              <div className="gss-status-desc">{statusDescription}</div>
+            </div>
+            <div className="gss-character" aria-hidden>
+              <img src="/timothy.svg" alt="" />
             </div>
           </div>
-          <div className="gss-character" aria-hidden>
-            <img src="/timothy.svg" alt="" />
+
+          <div className="gss-right">
+            <div className="gss-facts">
+              <div className="gss-fact">
+                <div className="gss-fact-icon" aria-hidden>
+                  🎯
+                </div>
+                <div className="gss-fact-text">
+                  <div className="label">Aufgaben</div>
+                  <div className="value">{taskCount}</div>
+                </div>
+              </div>
+              <div className="gss-fact">
+                <div className="gss-fact-icon">⏱️</div>
+                <div className="gss-fact-text">
+                  <div className="label">Geschätzte Zeit</div>
+                  <div className="value">{estimatedTime}</div>
+                </div>
+              </div>
+            </div>
+
+            <div className="gss-best">
+              <div className="gss-best-title">
+                <img src="/trophy.svg" alt="" />
+                Bester Versuch
+              </div>
+              {attemptToShow ? (
+                <div className="gss-best-stats">
+                  <div className="stat">
+                    <span>Zeit</span>
+                    <strong>{formatDuration(attemptToShow.timeMs)}</strong>
+                  </div>
+                  <div className="stat">
+                    <span>Genauigkeit</span>
+                    <strong>
+                      {Math.round(attemptToShow.accuracyPercent)}%
+                    </strong>
+                  </div>
+                  <div className="stat">
+                    <span>Punkte</span>
+                    <strong>{attemptToShow.points}</strong>
+                  </div>
+                </div>
+              ) : (
+                <div className="gss-best-empty">
+                  Noch keinen Versuch gestartet
+                </div>
+              )}
+            </div>
+
+            <div className="gss-actions">
+              <button
+                className="gss-start-button"
+                onClick={onStart}
+                aria-label={startLabel}>
+                {startLabel}
+                <span>→</span>
+              </button>
+            </div>
           </div>
         </div>
-
-        <div className="gss-right">
-          <div className="gss-facts">
-            <div className="gss-fact">
-              <div className="gss-fact-icon" aria-hidden>
-                🎯
-              </div>
-              <div className="gss-fact-text">
-                <div className="label">Aufgaben</div>
-                <div className="value">{taskCount}</div>
-              </div>
-            </div>
-            <div className="gss-fact">
-              <div className="gss-fact-icon">⏱️</div>
-              <div className="gss-fact-text">
-                <div className="label">Geschätzte Zeit</div>
-                <div className="value">{estimatedTime}</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="gss-best">
-            <div className="gss-best-title">
-              <img src="/trophy.svg" alt="" />
-              Bester Versuch
-            </div>
-            {attemptToShow ? (
-              <div className="gss-best-stats">
-                <div className="stat">
-                  <span>Zeit</span>
-                  <strong>{formatDuration(attemptToShow.timeMs)}</strong>
-                </div>
-                <div className="stat">
-                  <span>Genauigkeit</span>
-                  <strong>{Math.round(attemptToShow.accuracyPercent)}%</strong>
-                </div>
-                <div className="stat">
-                  <span>Punkte</span>
-                  <strong>{attemptToShow.points}</strong>
-                </div>
-              </div>
-            ) : (
-              <div className="gss-best-empty">
-                Noch keinen Versuch gestartet
-              </div>
-            )}
-          </div>
-
-          <div className="gss-actions">
-            <button
-              className="gss-start-button"
-              onClick={onStart}
-              aria-label={startLabel}>
-              {startLabel}
-              <span>→</span>
-            </button>
-          </div>
-        </div>
+        {taskId && <Leaderboard taskId={taskId} className="gss-leaderboard" />}
       </div>
     </div>
   );

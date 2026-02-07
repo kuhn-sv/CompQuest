@@ -21,6 +21,7 @@ import {
   useConnectionLines,
   useFooterControls,
   useHudState,
+  useGameStartScreen,
   CONNECTION_LINE_PRESETS,
 } from '../../../../shared/hooks';
 // dnd-kit event types are referenced inline where needed; no top-level type import
@@ -48,19 +49,17 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     null,
   ) as React.RefObject<HTMLDivElement>;
   const [evaluated, setEvaluated] = useState<boolean>(false);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [stageScores, setStageScores] = useState<StageScore[]>([]);
   // Final summary is reported to parent via onSummaryChange.
 
-  // Per-task threshold/bonus handled centrally by TaskContainer via taskMeta
+  // Start-screen lifecycle (manages hasStarted state + HUD start signal)
+  const {hasStarted, startTask} = useGameStartScreen({
+    onHudChange,
+    totalTasks: stages.length,
+    subtitle: 'Datenfluss wiederherstellen',
+  });
 
-  // Inform parent HUD about start screen visibility
-  useEffect(() => {
-    if (!onHudChange) return;
-    if (!hasStarted) {
-      onHudChange({progress: null, isStartScreen: true});
-    }
-  }, [hasStarted, onHudChange]);
+  // Per-task threshold/bonus handled centrally by TaskContainer via taskMeta
 
   // Provide a compact context describing the visible task set to AskTim
   useEffect(() => {
@@ -162,17 +161,10 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
 
   // Initial start handler: reveal tasks and kick off stage 1
   const handleInitialStart = useCallback(() => {
-    setHasStarted(true);
+    startTask();
     setStageIndex(0);
     startSetForStage(0);
-    // Tell the container to start/reset its timer
-    onHudChange?.({
-      progress: {current: 1, total: stages.length},
-      requestTimer: 'start',
-      subtitle: 'Datenfluss wiederherstellen',
-      isStartScreen: false,
-    });
-  }, [startSetForStage, onHudChange, stages.length]);
+  }, [startTask, startSetForStage]);
 
   const resetSet = useCallback(() => {
     setAssignments(Object.fromEntries(tasks.map(t => [t.id, null])));
@@ -491,30 +483,28 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
 
       {/* Initial start overlay with a large round button */}
       {!hasStarted && (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Datenfluss gestört!"
-            statusDescription={
-              <>
-                "Ein Fehler in der Systemkonvertierung hat den Informationsfluss
-                unterbrochen. Die Zahlenpakete liegen jetzt in unterschiedlichen
-                Systemen vor – einige in Binär, andere in Dezimal."
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Stelle den Datenfluss wieder
-                her, indem du jede Zahl mit ihrem passenden Gegenstück
-                verbindest. Nur wenn die Systeme korrekt gekoppelt sind, kann
-                die Datenübertragung weiterlaufen.
-              </>
-            }
-            taskCount={4}
-            estimatedTime="~5 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={handleInitialStart}
-            startLabel="Mission starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Datenfluss gestört!"
+          statusDescription={
+            <>
+              "Ein Fehler in der Systemkonvertierung hat den Informationsfluss
+              unterbrochen. Die Zahlenpakete liegen jetzt in unterschiedlichen
+              Systemen vor – einige in Binär, andere in Dezimal."
+              <br />
+              <br />
+              <strong>Deine Mission:</strong> Stelle den Datenfluss wieder her,
+              indem du jede Zahl mit ihrem passenden Gegenstück verbindest. Nur
+              wenn die Systeme korrekt gekoppelt sind, kann die Datenübertragung
+              weiterlaufen.
+            </>
+          }
+          taskCount={4}
+          estimatedTime="~5 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={handleInitialStart}
+          startLabel="Mission starten"
+        />
       )}
 
       {/* Summary overlay moved to container */}

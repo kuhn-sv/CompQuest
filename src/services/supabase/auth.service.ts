@@ -25,7 +25,7 @@ const defaultProgress: UserProgress = {
 const nowIso = () => new Date().toISOString();
 
 // Ensure a profile row exists for the given auth user id
-const ensureUserProfile = async (uid: string, email: string, displayName?: string | null, matrikelnummer?: string) => {
+const ensureUserProfile = async (uid: string, email: string, displayName?: string | null, matrikelnummer?: string, gamertag?: string) => {
   const { data, error } = await supabase
     .from('profiles')
     .select('id')
@@ -42,6 +42,7 @@ const ensureUserProfile = async (uid: string, email: string, displayName?: strin
       email,
       displayName: displayName || '',
       matrikelnummer: matrikelnummer || '',
+      gamertag: gamertag || '',
       createdAt: nowIso(),
       lastLoginAt: nowIso(),
       preferences: defaultPreferences,
@@ -53,6 +54,7 @@ const ensureUserProfile = async (uid: string, email: string, displayName?: strin
       email: profile.email,
       display_name: profile.displayName,
       matrikelnummer: profile.matrikelnummer,
+      gamertag: profile.gamertag,
       preferences: profile.preferences,
       progress: profile.progress,
       created_at: profile.createdAt,
@@ -72,14 +74,14 @@ const ensureUserProfile = async (uid: string, email: string, displayName?: strin
 
 export const authService = {
   // Sign up new user (no session until email confirmed if confirm required)
-  signUp: async (email: string, password: string, displayName: string, matrikelnummer: string): Promise<void> => {
+  signUp: async (email: string, password: string, displayName: string, matrikelnummer: string, gamertag: string): Promise<void> => {
     const redirectTo = (import.meta.env.VITE_AUTH_LOGIN_REDIRECT as string) || `${window.location.origin}/auth/login`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectTo,
-        data: { displayName, matrikelnummer },
+        data: { displayName, matrikelnummer, gamertag },
       },
     });
     if (error) {
@@ -101,7 +103,7 @@ export const authService = {
     const user = data.user;
     if (user) {
       // If project requires confirmed email, unconfirmed users won't get a session
-      await ensureUserProfile(user.id, user.email || '', user.user_metadata?.displayName, user.user_metadata?.matrikelnummer);
+      await ensureUserProfile(user.id, user.email || '', user.user_metadata?.displayName, user.user_metadata?.matrikelnummer, user.user_metadata?.gamertag);
     }
   },
 
@@ -124,11 +126,26 @@ export const authService = {
     if (error) throw error;
   },
 
+  // Check if a gamertag is available (not taken by another user)
+  checkGamertagAvailability: async (gamertag: string): Promise<boolean> => {
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('gamertag', gamertag)
+      .maybeSingle();
+    if (error) {
+      console.error('Error checking gamertag availability:', error);
+      return false;
+    }
+    return data === null; // Available if no row found
+  },
+
   // Update user profile (top-level fields)
   updateUserProfile: async (uid: string, data: Partial<UserProfile>): Promise<void> => {
     const payload: Record<string, unknown> = { updated_at: new Date().toISOString() };
     if (data.displayName !== undefined) payload.display_name = data.displayName;
     if (data.matrikelnummer !== undefined) payload.matrikelnummer = data.matrikelnummer;
+    if (data.gamertag !== undefined) payload.gamertag = data.gamertag;
     if (data.email !== undefined) payload.email = data.email;
     if (data.lastLoginAt !== undefined) payload.last_login_at = data.lastLoginAt;
     if (data.preferences !== undefined) payload.preferences = data.preferences;
@@ -157,6 +174,7 @@ export const userProfileService = {
           email: data.email,
           displayName: data.display_name,
           matrikelnummer: data.matrikelnummer,
+          gamertag: data.gamertag ?? '',
           role: (data.role as 'student' | 'admin' | undefined) ?? 'student',
           createdAt: data.created_at,
           lastLoginAt: data.last_login_at,

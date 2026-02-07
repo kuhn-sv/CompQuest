@@ -6,6 +6,20 @@ export interface AttemptMetrics {
   points: number;
 }
 
+export interface LeaderboardEntry {
+  gamertag: string;
+  bestAccuracy: number;
+  bestTimeMs: number;
+  rank: number;
+  isCurrentUser: boolean;
+}
+
+export interface LeaderboardResult {
+  entries: LeaderboardEntry[];
+  currentUser: LeaderboardEntry | null;
+  totalCount: number;
+}
+
 export interface ExerciseStatsRow {
   user_id: string;
   task_id: string;
@@ -161,5 +175,48 @@ export const trainingService = {
     // Supabase returns an array for setof/table; ensure we handle both array and single-row
     const row = Array.isArray(data) ? data[0] : data;
     return row as { task_used: number; global_used: number; task_remaining: number; global_remaining: number };
+  },
+
+  // Fetch leaderboard for a task (paginated, always includes current user)
+  getLeaderboard: async (taskId: string, limit = 5, offset = 0): Promise<LeaderboardResult> => {
+    const { data, error } = await supabase.rpc('get_leaderboard', {
+      p_task_id: taskId,
+      p_limit: limit,
+      p_offset: offset,
+    });
+    if (error) throw error;
+
+    const rows = (data ?? []) as Array<{
+      gamertag: string;
+      best_accuracy: number;
+      best_time_ms: number;
+      rank: number;
+      is_current_user: boolean;
+      total_count: number;
+    }>;
+
+    const totalCount = rows.length > 0 ? Number(rows[0].total_count) : 0;
+
+    const entries: LeaderboardEntry[] = [];
+    let currentUser: LeaderboardEntry | null = null;
+
+    for (const row of rows) {
+      const entry: LeaderboardEntry = {
+        gamertag: row.gamertag,
+        bestAccuracy: Number(row.best_accuracy),
+        bestTimeMs: row.best_time_ms,
+        rank: Number(row.rank),
+        isCurrentUser: row.is_current_user,
+      };
+      if (row.is_current_user) {
+        currentUser = entry;
+      }
+      // Only include in paginated entries if within the requested range
+      if (row.rank > offset && row.rank <= offset + limit) {
+        entries.push(entry);
+      }
+    }
+
+    return { entries, currentUser, totalCount };
   },
 };

@@ -13,8 +13,12 @@ import {
   shuffle,
   DIFFICULTY_MAP,
 } from './shared';
-import {useFooterControls, useHudState} from '../../../../shared/hooks';
-import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
+import {
+  useFooterControls,
+  useHudState,
+  useGameStartScreen,
+} from '../../../../shared/hooks';
+import {GameStartScreen} from '../../../../shared/components';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {
   DndContext,
@@ -61,8 +65,14 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   const rounds: WriteAssemblyTask[] = useMemo(() => generateRounds(), []);
 
   const [roundIndex, setRoundIndex] = useState<number>(0);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
+
+  // Start-screen lifecycle
+  const {hasStarted, startTask: baseStart} = useGameStartScreen({
+    onHudChange,
+    totalTasks: rounds.length,
+    subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
+  });
 
   // State for placed commands (slots in the program)
   const [placedCommands, setPlacedCommands] = useState<
@@ -133,7 +143,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
-    setHasStarted(true);
+    baseStart();
 
     // Initialize first round
     const slots = new Array(current.commands.length).fill(null);
@@ -142,14 +152,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     setAvailableCommands(available);
     setEvaluated(false);
     setSelectedCommandIndex(null);
-    // Tell container to start its timer
-    onHudChange?.({
-      progress: {current: 1, total: rounds.length},
-      requestTimer: 'start',
-      subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
-      isStartScreen: false,
-    });
-  }, [current, onHudChange, rounds.length]);
+  }, [baseStart, current]);
 
   const resetTask = useCallback(() => {
     const slots = new Array(current.commands.length).fill(null);
@@ -404,36 +407,31 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
   return (
     <div className="write-assembly">
       {!hasStarted ? (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Assembler-Programm schreiben"
-            statusDescription={
-              <>
-                Instruktionspfad korrupt! Die Steuerlogik versteht nur noch
-                Prosa – der Decoder kann keine gültigen Befehlsfolgen mehr
-                erzeugen. Falsche Instruktionen stören den Takt, der
-                Programmzähler driftet.
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Rekonstruiere aus der
-                Prosa-Beschreibung ein korrektes Assembler-Programm: <br />{' '}
-                <br />
-                • Wähle nur passende Befehle aus dem Pool. <br />
-                • Ordne sie in die richtige Reihenfolge. <br />• Filtere
-                falsche/irrelevante Instruktionen konsequent heraus. <br />{' '}
-                <br />
-                Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den
-                Datenpfad frei.
-              </>
-            }
-            taskCount={rounds.length}
-            estimatedTime="~8 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={startTask}
-            startLabel="Quiz starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Assembler-Programm schreiben"
+          statusDescription={
+            <>
+              Instruktionspfad korrupt! Die Steuerlogik versteht nur noch Prosa
+              – der Decoder kann keine gültigen Befehlsfolgen mehr erzeugen.
+              Falsche Instruktionen stören den Takt, der Programmzähler driftet.
+              <br />
+              <br />
+              <strong>Deine Mission:</strong> Rekonstruiere aus der
+              Prosa-Beschreibung ein korrektes Assembler-Programm: <br /> <br />
+              • Wähle nur passende Befehle aus dem Pool. <br />
+              • Ordne sie in die richtige Reihenfolge. <br />• Filtere
+              falsche/irrelevante Instruktionen konsequent heraus. <br /> <br />
+              Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den
+              Datenpfad frei.
+            </>
+          }
+          taskCount={rounds.length}
+          estimatedTime="~8 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={startTask}
+          startLabel="Quiz starten"
+        />
       ) : (
         <DndContext
           sensors={sensors}

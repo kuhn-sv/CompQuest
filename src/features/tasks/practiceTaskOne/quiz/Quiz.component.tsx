@@ -1,8 +1,8 @@
-// filepath: c:\Users\Nutzer\Desktop\Uni\Neuer Ordner\CompQuest\src\features\tasks\practiceTaskOne\quiz\Quiz.component.tsx
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import './quiz.page.scss';
 import {GameStartScreen} from '../../../../shared/components';
 import type {SubTaskComponentProps, TaskStageScore} from '../interfaces';
+import {useGameStartScreen, useHudState} from '../../../../shared/hooks';
 
 interface QuizQuestion {
   id: string;
@@ -52,50 +52,50 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   onTaskContextChange,
   getElapsed,
 }) => {
-  const [hasStarted, setHasStarted] = useState(false);
   const [qIndex, setQIndex] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [evaluated, setEvaluated] = useState(false);
   const [scores, setScores] = useState<TaskStageScore[]>([]);
 
+  // Start-screen lifecycle
+  const {hasStarted, startTask} = useGameStartScreen({
+    onHudChange,
+    totalTasks: TOTAL,
+    subtitle: 'Beweise dein Wissen. ',
+  });
+
   // refs for stable callbacks to parent
   const onControlsChangeRef = useRef(onControlsChange);
-  const onHudChangeRef = useRef(onHudChange);
   const onSummaryChangeRef = useRef(onSummaryChange);
   useEffect(() => {
     onControlsChangeRef.current = onControlsChange;
   }, [onControlsChange]);
   useEffect(() => {
-    onHudChangeRef.current = onHudChange;
-  }, [onHudChange]);
-  useEffect(() => {
     onSummaryChangeRef.current = onSummaryChange;
   }, [onSummaryChange]);
 
-  // Start HUD state before quiz begins
-  useEffect(() => {
-    if (!hasStarted) {
-      onHudChangeRef.current?.({
+  // HUD state (stabilised via hook)
+  const hudState = useMemo(() => {
+    if (!hasStarted)
+      return {
         progress: null,
         isStartScreen: true,
         subtitle: 'Beweise dein Wissen. ',
-      });
-    }
-  }, [hasStarted]);
+      } as const;
+    return {
+      subtitle: 'Beweise dein Wissen. ',
+      progress: {current: qIndex + 1, total: TOTAL},
+    };
+  }, [hasStarted, qIndex]);
+  useHudState(onHudChange, hudState);
 
   const handleStart = useCallback(() => {
-    setHasStarted(true);
+    startTask();
     setQIndex(0);
     setSelected(null);
     setEvaluated(false);
     setScores([]);
-    onHudChangeRef.current?.({
-      progress: {current: 1, total: TOTAL},
-      requestTimer: 'start',
-      subtitle: 'Beweise dein Wissen. ',
-      isStartScreen: false,
-    });
-  }, []);
+  }, [startTask]);
 
   const resetQuestion = useCallback(() => {
     setSelected(null);
@@ -141,9 +141,6 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
       setQIndex(nextIdx);
       setSelected(null);
       setEvaluated(false);
-      onHudChangeRef.current?.({
-        progress: {current: nextIdx + 1, total: TOTAL},
-      });
     }
   }, [qIndex]);
 
@@ -247,23 +244,21 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
           </div>
         </div>
       ) : (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Timothy braucht deine Hilfe!"
-            statusDescription={
-              <>
-                Beantworte Tims Fragen korrekt und hilf ihm, sein Wissen über
-                Zahlendarstellung zu festigen.
-              </>
-            }
-            taskCount={TOTAL}
-            estimatedTime="~2 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={handleStart}
-            startLabel="Mission starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Timothy braucht deine Hilfe!"
+          statusDescription={
+            <>
+              Beantworte Tims Fragen korrekt und hilf ihm, sein Wissen über
+              Zahlendarstellung zu festigen.
+            </>
+          }
+          taskCount={TOTAL}
+          estimatedTime="~2 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={handleStart}
+          startLabel="Mission starten"
+        />
       )}
     </div>
   );

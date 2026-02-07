@@ -193,6 +193,42 @@
     margin-top: clamp(0.2rem, 0.4vw, 0.25rem);
   }
 
+  &__gamertag-hint {
+    display: block;
+    color: var(--text-secondary);
+    font-size: clamp(0.75rem, 1.2vw, 0.8rem);
+    margin-top: clamp(0.25rem, 0.5vw, 0.35rem);
+    line-height: 1.4;
+  }
+
+  &__gamertag-status {
+    display: block;
+    font-size: clamp(0.75rem, 1.2vw, 0.8rem);
+    margin-top: clamp(0.2rem, 0.4vw, 0.25rem);
+
+    &--checking {
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    &--available {
+      color: #22c55e;
+    }
+
+    &--taken {
+      color: #ff4444;
+    }
+  }
+
+  &__input--success {
+    border-color: #22c55e;
+
+    &:focus {
+      border-color: #22c55e;
+      box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
+    }
+  }
+
   &__actions {
     margin-bottom: clamp(1.2rem, 2vw, 1.5rem);
   }

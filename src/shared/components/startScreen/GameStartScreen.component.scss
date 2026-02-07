@@ -1,20 +1,27 @@
-// filepath: c:\Users\Nutzer\Desktop\Uni\Neuer Ordner\CompQuest\src\shared\components\startScreen\GameStartScreen.component.scss
-
 .game-start-screen {
   display: flex;
+  justify-content: center;
+  padding-bottom: 24px;
+}
+
+.gss-content {
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
   box-sizing: border-box;
+  gap: 24px;
+  padding: 0 16px;
+  max-width: 1000px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .gss-card {
-  /* Use CSS Grid for more control on responsive breakpoints */
   display: grid;
   grid-template-columns: 1.2fr 1fr;
   gap: 24px;
-  width: min(100%, 1100px);
+  width: 100%;
+  max-width: 1000px;
   padding: 24px;
   color: #e8f0f4;
   align-items: start;

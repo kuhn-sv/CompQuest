@@ -3,8 +3,12 @@ import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.
 import './VonNeumannQuiz.component.scss';
 import {VonNeumannRound} from './vonneumann.helper';
 import vonNeumannData from '../../../../data/tasks/von-neumann.json';
-import {useFooterControls, useHudState} from '../../../../shared/hooks';
-import GameStartScreen from '../../../../shared/components/startScreen/GameStartScreen.component.tsx';
+import {
+  useFooterControls,
+  useHudState,
+  useGameStartScreen,
+} from '../../../../shared/hooks';
+import {GameStartScreen} from '../../../../shared/components';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import VonNeumannQuiz from './VonNeumannQuiz';
 import VonNeumannFunctions from './VonNeumannFunctions';
@@ -97,8 +101,13 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   );
 
   const [roundIndex, setRoundIndex] = useState<number>(0);
-  const [hasStarted, setHasStarted] = useState<boolean>(false);
   const [evaluated, setEvaluated] = useState<boolean>(false);
+
+  // Start-screen lifecycle
+  const {hasStarted, startTask: baseStart} = useGameStartScreen({
+    onHudChange,
+    totalTasks: rounds.length,
+  });
 
   // Quiz state
   const [quizScore, setQuizScore] = useState<TaskStageScore | null>(null);
@@ -207,19 +216,13 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
 
   const startTask = useCallback(() => {
-    setHasStarted(true);
+    baseStart();
     setQuizScore(null);
     setEvaluated(false);
     setFunctionsScore(null);
     setReconstructScore(null);
     setBusAssignmentScore(null);
-    // Tell container to start its timer
-    onHudChange?.({
-      progress: {current: 1, total: rounds.length},
-      requestTimer: 'start',
-      isStartScreen: false,
-    });
-  }, [onHudChange, rounds.length]);
+  }, [baseStart]);
 
   const resetTask = useCallback(() => {
     setQuizScore(null);
@@ -345,30 +348,28 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     <div
       className={`von-quizz ${evaluated && current.type === 'quiz' ? 'is-submitted' : ''}`}>
       {!hasStarted ? (
-        <div className="ns-start-overlay">
-          <GameStartScreen
-            statusTitle="Systemkern fragmentiert!"
-            statusDescription={
-              <>
-                Ein Defekt in der Architektursteuerung hat den logischen Aufbau
-                deines Rechners zerstört. Speicher, Rechenwerk und Steuerwerk
-                sind isoliert – der Informationsfluss steht still.
-                <br />
-                <br />
-                <strong>Deine Mission:</strong> Identifiziere die Komponenten
-                und ihre Funktionen, rekonstruiere die Von-Neumann-Architektur
-                und verbinde die Komponenten miteinander, bis der Datenstrom
-                wieder fließt.
-              </>
-            }
-            taskCount={rounds.length}
-            estimatedTime="~8 min"
-            fetchBestAttempt
-            taskId={taskMeta?.id}
-            onStart={startTask}
-            startLabel="Quiz starten"
-          />
-        </div>
+        <GameStartScreen
+          statusTitle="Systemkern fragmentiert!"
+          statusDescription={
+            <>
+              Ein Defekt in der Architektursteuerung hat den logischen Aufbau
+              deines Rechners zerstört. Speicher, Rechenwerk und Steuerwerk sind
+              isoliert – der Informationsfluss steht still.
+              <br />
+              <br />
+              <strong>Deine Mission:</strong> Identifiziere die Komponenten und
+              ihre Funktionen, rekonstruiere die Von-Neumann-Architektur und
+              verbinde die Komponenten miteinander, bis der Datenstrom wieder
+              fließt.
+            </>
+          }
+          taskCount={rounds.length}
+          estimatedTime="~8 min"
+          fetchBestAttempt
+          taskId={taskMeta?.id}
+          onStart={startTask}
+          startLabel="Quiz starten"
+        />
       ) : current.type === 'quiz' && current.items ? (
         <VonNeumannQuiz
           items={shuffledItems}
