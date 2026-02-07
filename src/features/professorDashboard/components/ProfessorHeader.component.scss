@@ -1,0 +1,84 @@
+.prof-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24px 40px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+  &__brand-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: var(--text);
+  }
+
+  &__brand-icon {
+    width: 48px;
+    height: 48px;
+  }
+
+  &__brand-text {
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+  }
+
+  &__subtitle {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    margin-top: 2px;
+  }
+
+  &__tabs {
+    flex-shrink: 0;
+  }
+
+  // Override default TabRow styles for pill-shaped appearance
+  &__tab-row.tabs {
+    margin-bottom: 0;
+    padding-top: 0;
+    gap: 0;
+    width: auto;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 12px;
+    border: 1px solid var(--primary10);
+    padding: 4px;
+
+    .tab {
+      border: none;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.4px;
+      padding: 8px 20px;
+      height: auto;
+      white-space: nowrap;
+      transition: background 0.2s ease, color 0.2s ease;
+
+      &.active {
+        background: var(--primary);
+        color: var(--background);
+      }
+
+      &:not(.active) {
+        background: transparent;
+        color: var(--text-secondary);
+
+        &:hover {
+          color: var(--text);
+          background: rgba(255, 255, 255, 0.04);
+        }
+      }
+    }
+  }
+}

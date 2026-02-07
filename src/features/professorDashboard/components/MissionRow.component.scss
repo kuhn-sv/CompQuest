@@ -1,0 +1,48 @@
+.mission-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+  &--clickable {
+    cursor: pointer;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+  }
+
+  td {
+    padding: 20px 16px;
+    vertical-align: middle;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  &__name {
+    font-weight: 600;
+    padding-left: 32px !important;
+  }
+
+  &__participants {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: 0.5px;
+  }
+
+  &__accuracy {
+    text-align: center;
+
+    // center the ring
+    .accuracy-ring {
+      margin: 0 auto;
+    }
+  }
+
+  &__time {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__no-data {
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+}

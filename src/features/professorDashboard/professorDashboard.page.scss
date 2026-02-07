@@ -1,0 +1,14 @@
+.professor-dashboard {
+  min-height: 100vh;
+  background: var(--background);
+  color: var(--text);
+
+  &__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    font-size: 16px;
+    color: var(--text-tertiary);
+  }
+}

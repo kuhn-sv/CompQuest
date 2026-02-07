@@ -5,6 +5,7 @@ import {trainingService} from '../../../services/supabase/training.service';
 import {helperModules} from '../../helpers/registry';
 import type {UserTopicBadge} from '../../../shared/interfaces';
 import {BADGE_CONFIG, BADGE_LEGEND_TIERS} from '../../../shared/interfaces';
+import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
 
 interface ExercisesModalProps {
   show: boolean;
@@ -45,7 +46,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
   const defaultMicroMissions: Exercise[] = [
     {
       id: 'von-neumann',
-      title: 'Von-Neumann-Architektur',
+      title: TASK_DISPLAY_NAMES['von-neumann'],
       description: 'Quiz zur Von-Neumann-Architektur',
       path: '/task/von-neumann',
       progressPercent: undefined,
@@ -53,7 +54,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
     },
     {
       id: 'read-assembly',
-      title: 'Assembler-Programm lesen',
+      title: TASK_DISPLAY_NAMES['read-assembly'],
       description: 'Lies den Assembler-Code und beantworte die Fragen',
       path: '/task/read-assembly',
       progressPercent: undefined,
@@ -61,7 +62,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
     },
     {
       id: 'write-assembly',
-      title: 'Assembler-Programm schreiben',
+      title: TASK_DISPLAY_NAMES['write-assembly'],
       description: 'Sortiere die Befehle in die richtige Reihenfolge',
       path: '/task/write-assembly',
       progressPercent: undefined,
@@ -69,7 +70,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
     },
     {
       id: 'java-to-assembly',
-      title: 'Java → Assembler',
+      title: TASK_DISPLAY_NAMES['java-to-assembly'],
       description: 'Übersetze Java Code in Assembler',
       path: '/task/java-to-assembly',
       progressPercent: undefined,

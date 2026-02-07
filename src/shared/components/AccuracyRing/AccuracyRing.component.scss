@@ -1,0 +1,48 @@
+.accuracy-ring {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  &__track {
+    stroke: rgba(255, 255, 255, 0.08);
+  }
+
+  &__fill {
+    transition: stroke-dashoffset 0.6s ease;
+  }
+
+  &__label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    letter-spacing: -0.2px;
+  }
+
+  // ── colour variants ──
+  &--high .accuracy-ring__fill {
+    stroke: var(--success);          // #64E593
+  }
+  &--high .accuracy-ring__label {
+    color: var(--success);
+  }
+
+  &--medium .accuracy-ring__fill {
+    stroke: var(--warning);          // #FACC15
+  }
+  &--medium .accuracy-ring__label {
+    color: var(--warning);
+  }
+
+  &--low .accuracy-ring__fill {
+    stroke: var(--error);            // #FF4D6D
+  }
+  &--low .accuracy-ring__label {
+    color: var(--error);
+  }
+}

@@ -10,6 +10,7 @@ const Model3D = React.lazy(
 import useDeviceType from '../../shared/hooks/useDeviceType';
 import {BoardWithHotspots} from '../../shared/components';
 import {TaskId} from '../../shared/enums/taskId.enum';
+import {TASK_DISPLAY_NAMES} from '../../shared/constants/taskDisplayNames';
 
 const VIEW_MODE_STORAGE_KEY = 'compquest-view-mode';
 
@@ -80,28 +81,28 @@ const DashboardPage: React.FC = () => {
   const missions = [
     {
       id: TaskId.NumberSystem,
-      title: 'Zahlensystem-Konverter',
+      title: TASK_DISPLAY_NAMES[TaskId.NumberSystem],
       description: 'Konvertiere zwischen binär, oktal & hexadezimal um.',
       path: '/task/number-system',
       progressPercent: 100,
     },
     {
       id: TaskId.PositiveArithmetic,
-      title: 'Positive Arithmetik',
+      title: TASK_DISPLAY_NAMES[TaskId.PositiveArithmetic],
       description: 'Addiere in binär, oktal & hexadezimal.',
       path: '/task/positive-arithmetic',
       progressPercent: 72,
     },
     {
       id: TaskId.Complements,
-      title: 'Einer- & Zweierkomplement',
+      title: TASK_DISPLAY_NAMES[TaskId.Complements],
       description: 'Stelle negative Zahlen im Binärsystem dar.',
       path: '/task/complements',
       progressPercent: 0,
     },
     {
       id: TaskId.TwosComplementArithmetic,
-      title: 'Zweierkomplement-Arithmetik',
+      title: TASK_DISPLAY_NAMES[TaskId.TwosComplementArithmetic],
       description:
         'Wende das Zweierkomplement in Rechnungen an und verstehe Vorzeichenoperationen.',
       path: '/task/twos-complement-arithmetic',
@@ -109,7 +110,7 @@ const DashboardPage: React.FC = () => {
     },
     {
       id: TaskId.Quiz,
-      title: 'Quiz',
+      title: TASK_DISPLAY_NAMES[TaskId.Quiz],
       description:
         'Tim hat ein paar Fragen zu dem Thema. Kannst du sie beantworten?',
       path: '/task/quiz',

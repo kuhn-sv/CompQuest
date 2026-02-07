@@ -11,3 +11,4 @@ export { default as TopNavbar } from './TopNavbar/TopNavbar.component';
 export { default as ConfirmModal } from './ConfirmModal/ConfirmModal.component';
 export { default as DndProvider } from './DndProvider';
 export { default as OrientationOverlay } from './OrientationOverlay/OrientationOverlay';
+export { default as AccuracyRing } from './AccuracyRing/AccuracyRing.component';

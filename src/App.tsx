@@ -19,6 +19,7 @@ import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOn
 import PracticeTaskTwoPage from './features/tasks/practiceTaskTwo/PracticeTaskTwo.page';
 import HelperModulePage from './features/helpers/HelperModule.page';
 import OnboardingPage from './features/onboarding/onboarding.page';
+import {ProfessorDashboardPage} from './features/professorDashboard';
 import {TaskId} from './shared/enums/taskId.enum';
 import {useOrientation} from './shared/hooks/useOrientation';
 import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
@@ -66,7 +67,7 @@ const AppShell: React.FC<{shouldShowOrientationOverlay: boolean}> = ({
 
 const AppWithNavbar: React.FC = () => {
   const location = useLocation();
-  const hideNavbarOn = ['/dashboard', '/onboarding'];
+  const hideNavbarOn = ['/dashboard', '/onboarding', '/professor-dashboard'];
 
   return (
     <>
@@ -115,6 +116,16 @@ const AppWithNavbar: React.FC = () => {
           element={
             <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Professor Dashboard – admin only (guard inside page) */}
+        <Route
+          path="/professor-dashboard"
+          element={
+            <ProtectedRoute>
+              <ProfessorDashboardPage />
             </ProtectedRoute>
           }
         />

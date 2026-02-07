@@ -6,6 +6,7 @@ import ComplementsComponent from './complements/Complements.component';
 import Quiz from './quiz/Quiz.component';
 import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
+import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
 
 interface PracticeTaskOnePageProps {
   initialSubTask?: TaskId;
@@ -27,7 +28,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
   const subTaskConfigs: SubTaskConfig[] = [
     {
       id: TaskId.NumberSystem,
-      title: 'Zahlensystem-Konverter',
+      title: TASK_DISPLAY_NAMES[TaskId.NumberSystem],
       description:
         'Verbinde Zahlen mit ihren Äquivalenten in verschiedenen Zahlensystemen.',
       chapters: [{title: '3.1 Zahlensysteme'}],
@@ -37,7 +38,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     },
     {
       id: TaskId.PositiveArithmetic,
-      title: 'Positive Arithmetik',
+      title: TASK_DISPLAY_NAMES[TaskId.PositiveArithmetic],
       description: 'Additionen und Subtraktionen mit positiven Zahlen.',
       chapters: [{title: '3.1 Zahlensysteme'}],
       component:
@@ -46,7 +47,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     },
     {
       id: TaskId.Complements,
-      title: 'Einer- & Zweierkomplement',
+      title: TASK_DISPLAY_NAMES[TaskId.Complements],
       description:
         'Verbinde Binärzahlen mit ihren Dezimalwerten und übe Einer-/Zweierkomplement.',
       chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
@@ -56,7 +57,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     },
     {
       id: TaskId.TwosComplementArithmetic,
-      title: 'Zweierkomplement-Arithmetik',
+      title: TASK_DISPLAY_NAMES[TaskId.TwosComplementArithmetic],
       description:
         'Verbinde Operationen im Zweierkomplement und erkenne Überläufe.',
       chapters: [{title: '3.2.1 Darstellung natürlicher Zahlen'}],
@@ -66,7 +67,7 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
     },
     {
       id: TaskId.Quiz,
-      title: 'Quiz',
+      title: TASK_DISPLAY_NAMES[TaskId.Quiz],
       description: 'Beweise dein Wissen. ',
       component: Quiz as React.ComponentType<SubTaskComponentProps>,
       timeLimit: 2 * 60 * 1000,
