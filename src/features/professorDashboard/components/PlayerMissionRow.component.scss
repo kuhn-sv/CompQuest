@@ -1,0 +1,56 @@
+.player-mission-row {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+
+  td {
+    padding: 20px 16px;
+    vertical-align: middle;
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  &__name {
+    font-weight: 600;
+    padding-left: 32px !important;
+  }
+
+  &__result {
+    text-align: center;
+  }
+
+  &__badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+
+    &--completed {
+      background: rgba(34, 197, 94, 0.12);
+      color: var(--success);
+    }
+
+    &--open {
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text-tertiary);
+    }
+  }
+
+  &__accuracy {
+    text-align: center;
+
+    .accuracy-ring {
+      margin: 0 auto;
+    }
+  }
+
+  &__time {
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &__no-data {
+    color: var(--text-tertiary);
+    font-weight: 500;
+  }
+}

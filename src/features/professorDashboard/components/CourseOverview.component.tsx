@@ -1,7 +1,27 @@
 import React from 'react';
 import MissionTable from './MissionTable.component';
-import type {CategoryMissionGroup} from '../interfaces/professorDashboard.interfaces';
+import MissionRow from './MissionRow.component';
+import type {
+  CategoryMissionGroup,
+  MissionStats,
+  TableColumnDef,
+} from '../interfaces/professorDashboard.interfaces';
 import './CourseOverview.component.scss';
+
+const COURSE_COLUMNS: TableColumnDef[] = [
+  {key: 'name', label: 'Mission', className: 'mission-table__col-name'},
+  {
+    key: 'participants',
+    label: 'Teilnehmer',
+    className: 'mission-table__col-participants',
+  },
+  {
+    key: 'accuracy',
+    label: 'Präzision',
+    className: 'mission-table__col-accuracy',
+  },
+  {key: 'time', label: 'Zeit', className: 'mission-table__col-time'},
+];
 
 interface CourseOverviewProps {
   categoryGroups: CategoryMissionGroup[];
@@ -18,6 +38,14 @@ const CourseOverview: React.FC<CourseOverviewProps> = ({
   loading,
   error,
 }) => {
+  const renderCourseRow = (mission: MissionStats) => (
+    <MissionRow
+      key={mission.taskId}
+      mission={mission}
+      totalStudents={totalStudents}
+    />
+  );
+
   return (
     <section className="course-overview">
       <div className="course-overview__header">
@@ -37,8 +65,9 @@ const CourseOverview: React.FC<CourseOverviewProps> = ({
 
       {!loading && !error && (
         <MissionTable
+          columns={COURSE_COLUMNS}
           categoryGroups={categoryGroups}
-          totalStudents={totalStudents}
+          renderRow={renderCourseRow}
         />
       )}
     </section>

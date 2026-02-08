@@ -10,6 +10,28 @@
   border-collapse: collapse;
   table-layout: fixed;
 
+  &__title-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 32px 0;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: 0.3px;
+  }
+
+  &__title-icon {
+    font-size: 16px;
+  }
+
+  &__title-text {
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
   thead tr {
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
   }
@@ -39,6 +61,14 @@
   }
 
   &__col-time {
+    width: 25%;
+  }
+
+  &__col-result {
+    width: 20%;
+  }
+
+  &__col-best-time {
     width: 25%;
   }
 }

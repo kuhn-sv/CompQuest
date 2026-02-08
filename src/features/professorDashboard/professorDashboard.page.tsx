@@ -3,6 +3,7 @@ import {Navigate} from 'react-router-dom';
 import {useAuth} from '../auth';
 import ProfessorHeader from './components/ProfessorHeader.component';
 import CourseOverview from './components/CourseOverview.component';
+import PlayerProfiles from './components/PlayerProfiles.component';
 import {useCourseOverview} from './hooks/useCourseOverview';
 import type {ProfessorDashboardView} from './interfaces/professorDashboard.interfaces';
 import './professorDashboard.page.scss';
@@ -31,11 +32,7 @@ const ProfessorDashboardPage: React.FC = () => {
         />
       )}
 
-      {activeView === 'player-profiles' && (
-        <div className="professor-dashboard__placeholder">
-          Spielerprofile – wird in Kürze implementiert
-        </div>
-      )}
+      {activeView === 'player-profiles' && <PlayerProfiles />}
     </div>
   );
 };

@@ -1,0 +1,61 @@
+.player-profiles {
+  padding: 32px 40px 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 28px;
+  }
+
+  &__matrikel {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    letter-spacing: 0.5px;
+  }
+
+  &__error {
+    text-align: center;
+    padding: 48px 0;
+    font-size: 15px;
+    color: var(--error);
+  }
+
+  &__loading {
+    text-align: center;
+    padding: 48px 0;
+    font-size: 15px;
+    color: var(--text-secondary);
+  }
+
+  &__empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 40px;
+    text-align: center;
+  }
+
+  &__empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+
+  &__empty-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin: 0 0 8px;
+  }
+
+  &__empty-hint {
+    font-size: 14px;
+    color: var(--text-tertiary);
+    margin: 0;
+  }
+}
