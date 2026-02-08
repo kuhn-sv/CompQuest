@@ -1,4 +1,4 @@
-import React, {useCallback, useMemo, useState} from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
 import {DigitsRow, StaticDigitsRow} from '../../../shared/components';
@@ -79,17 +79,19 @@ const Uebertragshelfer: React.FC<SubTaskComponentProps> = ({
 
   // ── Evaluate ───────────────────────────────────────────────────────────
   // When `evaluated` flips to true, compute validation
-  const prevEvaluated = React.useRef(false);
-  if (evaluated && !prevEvaluated.current && task) {
-    const v = validate(task, carries, resultDigits, overflowMarked);
-    setValidation(v);
-  }
-  prevEvaluated.current = evaluated;
+  const prevEvaluated = useRef(false);
+  useEffect(() => {
+    if (evaluated && !prevEvaluated.current && task) {
+      const v = validate(task, carries, resultDigits, overflowMarked);
+      setValidation(v);
+    }
+    prevEvaluated.current = evaluated;
 
-  // When `evaluated` flips to false (new task), clear validation
-  if (!evaluated && validation) {
-    setValidation(null);
-  }
+    // When `evaluated` flips to false (new task), clear validation
+    if (!evaluated) {
+      setValidation(null);
+    }
+  }, [evaluated, task, carries, resultDigits, overflowMarked, validate]);
 
   // ── Carry toggle handler ───────────────────────────────────────────────
   const toggleCarry = useCallback(
@@ -124,7 +126,6 @@ const Uebertragshelfer: React.FC<SubTaskComponentProps> = ({
   );
 
   // ── Derived ────────────────────────────────────────────────────────────
-  const digitCount = getDigitCount(mode);
   const base: 8 | 16 = mode === 'octal' ? 8 : 16;
 
   // ── Early return if no task yet ────────────────────────────────────────
@@ -182,14 +183,7 @@ const Uebertragshelfer: React.FC<SubTaskComponentProps> = ({
         {/* ── Carry row ───────────────────────────────────────── */}
         <div className="uebertragshelfer__row uebertragshelfer__carries-row">
           <span className="uebertragshelfer__row-label">Übertrag</span>
-          <div
-            className="uebertragshelfer__carries-grid"
-            style={{
-              display: 'grid',
-              gridTemplateColumns: `repeat(${digitCount}, 60px)`,
-              gap: '12px',
-              justifyContent: 'center',
-            }}>
+          <div className={`uebertragshelfer__carries-grid uebertragshelfer__carries-grid--${mode}`}>
             {carries.map((c, i) => (
               <CarryCheckbox
                 key={i}

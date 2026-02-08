@@ -1,4 +1,4 @@
-import {useCallback, useMemo, useRef} from 'react';
+import { useCallback, useMemo } from 'react';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -34,10 +34,10 @@ export interface AdditionValidation {
 // Constants
 // ────────────────────────────────────────────────────────────────────────────
 
-const MODE_CONFIG: Record<AdditionMode, {base: number; digitCount: number}> = {
-  binary: {base: 2, digitCount: 8},
-  octal: {base: 8, digitCount: 3},
-  hex: {base: 16, digitCount: 2},
+const MODE_CONFIG: Record<AdditionMode, { base: number; digitCount: number }> = {
+  binary: { base: 2, digitCount: 8 },
+  octal: { base: 8, digitCount: 3 },
+  hex: { base: 16, digitCount: 2 },
 };
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -74,7 +74,7 @@ function addDigitArrays(
   a: number[],
   b: number[],
   base: number,
-): {carries: boolean[]; result: number[]; overflow: boolean} {
+): { carries: boolean[]; result: number[]; overflow: boolean } {
   const len = a.length;
   const result = new Array<number>(len);
   // carries[i] represents the carry INTO column i (from the right).
@@ -94,7 +94,7 @@ function addDigitArrays(
   const carries = carriesRaw.slice(0, len).map(c => c > 0);
   const overflow = carriesRaw[0] > 0;
 
-  return {carries, result, overflow};
+  return { carries, result, overflow };
 }
 
 // ────────────────────────────────────────────────────────────────────────────
@@ -120,11 +120,8 @@ export interface UseAdditionTaskReturn {
  * for the Übertragshelfer module.
  */
 export function useAdditionTask(): UseAdditionTaskReturn {
-  // Stable ref so `generate` identity never changes.
-  const genRef = useRef<((mode: AdditionMode) => AdditionTask) | null>(null);
-
   const generate = useCallback((mode: AdditionMode): AdditionTask => {
-    const {base, digitCount} = MODE_CONFIG[mode];
+    const { base, digitCount } = MODE_CONFIG[mode];
     const max = base ** digitCount; // e.g. 256 for binary-8
 
     const valA = randomInt(max);
@@ -133,7 +130,7 @@ export function useAdditionTask(): UseAdditionTaskReturn {
     const operandA = toDigits(valA, base, digitCount);
     const operandB = toDigits(valB, base, digitCount);
 
-    const {carries, result, overflow} = addDigitArrays(operandA, operandB, base);
+    const { carries, result, overflow } = addDigitArrays(operandA, operandB, base);
 
     return {
       operandA,
@@ -143,8 +140,6 @@ export function useAdditionTask(): UseAdditionTaskReturn {
       expectedOverflow: overflow,
     };
   }, []);
-
-  genRef.current = generate;
 
   const validate = useCallback(
     (
@@ -168,7 +163,7 @@ export function useAdditionTask(): UseAdditionTaskReturn {
         digitResults.every(r => r === 'correct') &&
         overflowCorrect;
 
-      return {carryResults, digitResults, overflowCorrect, allCorrect};
+      return { carryResults, digitResults, overflowCorrect, allCorrect };
     },
     [],
   );
@@ -179,7 +174,7 @@ export function useAdditionTask(): UseAdditionTaskReturn {
   );
 
   return useMemo(
-    () => ({generate, validate, getDigitCount}),
+    () => ({ generate, validate, getDigitCount }),
     [generate, validate, getDigitCount],
   );
 }

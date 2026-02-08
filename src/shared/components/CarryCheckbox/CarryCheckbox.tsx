@@ -1,12 +1,15 @@
 import React from 'react';
 import './CarryCheckbox.scss';
 
+/** Visual feedback state after evaluation. */
+export type CarryState = 'neutral' | 'correct' | 'wrong';
+
 export interface CarryCheckboxProps {
   checked: boolean;
   onChange: (checked: boolean) => void;
   disabled?: boolean;
   /** Visual feedback after evaluation. */
-  state?: 'neutral' | 'correct' | 'wrong';
+  state?: CarryState;
 }
 
 const CarryCheckbox: React.FC<CarryCheckboxProps> = ({

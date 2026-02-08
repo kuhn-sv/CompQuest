@@ -1,12 +1,15 @@
 import React from 'react';
 import './OverflowToggle.scss';
 
+/** Visual feedback state after evaluation. */
+export type OverflowState = 'neutral' | 'correct' | 'wrong';
+
 export interface OverflowToggleProps {
   active: boolean;
   onToggle: () => void;
   disabled?: boolean;
   /** Visual feedback after evaluation. */
-  state?: 'neutral' | 'correct' | 'wrong';
+  state?: OverflowState;
 }
 
 const OverflowToggle: React.FC<OverflowToggleProps> = ({

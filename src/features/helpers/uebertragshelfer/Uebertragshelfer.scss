@@ -53,7 +53,24 @@
     white-space: nowrap;
   }
 
+  &__carries-grid {
+    display: grid;
+    gap: 12px;
+    justify-content: center;
 
+    // Mode-specific column counts
+    &--binary {
+      grid-template-columns: repeat(8, 60px);
+    }
+
+    &--octal {
+      grid-template-columns: repeat(3, 60px);
+    }
+
+    &--hex {
+      grid-template-columns: repeat(2, 60px);
+    }
+  }
 
   // ── Separator ───────────────────────────────────────────────────────────
   &__separator {
