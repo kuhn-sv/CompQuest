@@ -1,11 +1,11 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
 import {DigitsRow} from '../../../shared/components';
 import './Potenzrechner.scss';
 import ValueExpression from './components/PotenzValueExpression.component';
 import TabRow from '../../../shared/components/tabRow/TabRow.component';
-import {useFooterControls, useHudState} from '../../../shared/hooks';
+import {useHelperTask} from '../../../shared/hooks';
 
 type Mode = 'binary' | 'octal' | 'hex';
 
@@ -27,7 +27,6 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
     Array(DIGITS_HEX).fill(0),
   );
   const [target, setTarget] = useState<number>(0);
-  const [evaluated, setEvaluated] = useState(false);
 
   // Calculate 2^n labels for binary mode (LSB right)
   const powers = useMemo(
@@ -65,29 +64,14 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
 
   // Initialize task UI in HUD and footer controls
   const newTask = useCallback((m: Mode) => {
-    setEvaluated(false);
     setTarget(randomTarget(m));
     if (m === 'binary') setBits(Array(BITS_BINARY).fill(0));
     if (m === 'octal') setOctDigits(Array(DIGITS_OCTAL).fill(0));
     if (m === 'hex') setHexDigits(Array(DIGITS_HEX).fill(0));
   }, []);
 
-  // Footer controls (stabilised via hook — always active)
-  const handleReset = useCallback(() => newTask(mode), [newTask, mode]);
-  const handleEvaluate = useCallback(() => setEvaluated(true), []);
-  const handleNext = useCallback(() => newTask(mode), [newTask, mode]);
-  useFooterControls(
-    onControlsChange,
-    {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext},
-    {
-      showReset: true,
-      showEvaluate: true,
-      showNext: true,
-      disableReset: false,
-      disableNext: false,
-    },
-    true,
-  );
+  // Wrap newTask for the hook (uses current mode)
+  const generateTask = useCallback(() => newTask(mode), [newTask, mode]);
 
   // HUD state (reactive to mode + target)
   const hudState = useMemo(
@@ -106,24 +90,14 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
     }),
     [mode, target],
   );
-  useHudState(onHudChange, hudState);
 
-  // Cleanup summary on unmount
-  useEffect(() => {
-    return () => {
-      onSummaryChange?.(null);
-    };
-  }, [onSummaryChange]);
-
-  // initialize first task
-  const initializedRef = useRef(false);
-  useEffect(() => {
-    if (!initializedRef.current) {
-      initializedRef.current = true;
-      newTask('binary');
-      onHudChange?.({progress: null, requestTimer: 'reset'});
-    }
-  }, [newTask, onHudChange]);
+  const {evaluated} = useHelperTask({
+    onControlsChange,
+    onHudChange,
+    onSummaryChange,
+    generateTask,
+    hudState,
+  });
 
   // Bits werden über BitToggleRow onChange gesetzt
 

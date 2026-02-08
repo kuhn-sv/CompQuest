@@ -1,0 +1,116 @@
+@use '../../../styles/_variables' as *;
+
+.uebertragshelfer {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: stretch;
+  height: 100%;
+  font-size: 20px;
+  align-items: center;
+
+  > .tabs {
+    margin-top: 0.5rem;
+  }
+
+  &__hint {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin: 0;
+  }
+
+  &__board {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 20px;
+    border: 1px solid var(--surface-border);
+    border-radius: 12px;
+    background: var(--surface);
+  }
+
+  // ── Row layout ──────────────────────────────────────────────────────────
+  &__row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__row-label {
+    min-width: 80px;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+
+
+  // ── Separator ───────────────────────────────────────────────────────────
+  &__separator {
+    height: 2px;
+    background: var(--surface-border);
+    border-radius: 1px;
+    margin: 0.25rem 0;
+    width: 100%;
+  }
+
+  // ── Result row ──────────────────────────────────────────────────────────
+  &__result-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  &__overflow-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    min-width: 80px;
+  }
+
+  &__overflow-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__arrow {
+    font-size: 1.5rem;
+    color: var(--text-secondary);
+  }
+
+  &__result-input {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+  }
+
+  // ── Feedback ────────────────────────────────────────────────────────────
+  &__feedback {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 600;
+    padding: 0.5rem 0;
+
+    &--correct {
+      color: var(--success);
+    }
+
+    &--wrong {
+      color: var(--error);
+    }
+  }
+}

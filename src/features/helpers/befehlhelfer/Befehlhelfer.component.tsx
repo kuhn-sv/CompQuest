@@ -1,9 +1,9 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import './Befehlhelfer.scss';
 import OperationMatcher from './components/OperationMatcher';
 import type {Operation} from './types';
-import {useFooterControls, useHudState} from '../../../shared/hooks';
+import {useHelperTask} from '../../../shared/hooks';
 
 // All 12 operations from the microprocessor instruction set
 const ALL_OPERATIONS: Operation[] = [
@@ -80,8 +80,6 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
   onSummaryChange,
 }) => {
   const [currentOperations, setCurrentOperations] = useState<Operation[]>([]);
-  const [evaluated, setEvaluated] = useState(false);
-  const initializedRef = useRef(false);
 
   // Shuffle array helper
   const shuffle = <T,>(array: T[]): T[] => {
@@ -94,9 +92,7 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
   };
 
   // Generate new task: select 4 random operations and shuffle descriptions
-  const newTask = useCallback(() => {
-    setEvaluated(false);
-
+  const generateTask = useCallback(() => {
     // Select 4 random operations
     const shuffled = shuffle(ALL_OPERATIONS);
     const selected = shuffled.slice(0, 4);
@@ -120,22 +116,6 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
     setCurrentOperations(withShuffledDescriptions);
   }, []);
 
-  const handleReset = useCallback(() => newTask(), [newTask]);
-  const handleEvaluate = useCallback(() => setEvaluated(true), []);
-  const handleNext = useCallback(() => newTask(), [newTask]);
-  useFooterControls(
-    onControlsChange,
-    {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext},
-    {
-      showReset: true,
-      showEvaluate: true,
-      showNext: true,
-      disableReset: false,
-      disableNext: false,
-    },
-    true,
-  );
-
   const hudState = useMemo(
     () => ({
       subtitle: 'Ordne Assembler-Begriffe ihren Beschreibungen zu',
@@ -143,25 +123,14 @@ const Befehlhelfer: React.FC<SubTaskComponentProps> = ({
     }),
     [],
   );
-  useHudState(onHudChange, hudState);
 
-  // Cleanup summary on unmount
-  useEffect(() => {
-    return () => {
-      onSummaryChange?.(null);
-    };
-  }, [onSummaryChange]);
-
-  // Initialize first task
-  useEffect(() => {
-    if (!initializedRef.current) {
-      initializedRef.current = true;
-      newTask();
-      onHudChange?.({progress: null, requestTimer: 'reset'});
-    }
-    // Only run once on mount to initialize task
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const {evaluated} = useHelperTask({
+    onControlsChange,
+    onHudChange,
+    onSummaryChange,
+    generateTask,
+    hudState,
+  });
 
   return (
     <div className="befehlhelfer">

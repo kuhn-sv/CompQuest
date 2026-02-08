@@ -28,7 +28,6 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 }) => {
   const [missionsWithProgress, setMissionsWithProgress] =
     useState<Exercise[]>(missions);
-  const [helpersList, setHelpersList] = useState<Exercise[]>(helpers);
   const {badges} = useUserBadges();
   // accordion state: which panels are open
   const [openPanels, setOpenPanels] = useState<Record<string, boolean>>({
@@ -120,7 +119,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
     if (!show) return; // avoid work when modal hidden
     (async () => {
-      const [m, h, mm] = await Promise.all([
+      const [m, mm] = await Promise.all([
         loadProgress(missions, true),
         loadProgress(helpers, false),
         loadProgress(microMissions, true),
@@ -136,23 +135,11 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
           disabled: true,
         },
       ];
-      const placeholderHelpers: Exercise[] = [
-        {
-          id: 'placeholder-uebertragshelfer',
-          title: 'Hilfsmodul: Übertragshelfer',
-          description: 'coming soon',
-          path: '#',
-          progressPercent: undefined,
-          disabled: true,
-        },
-      ];
 
       const missionsWithPlaceholders = [...m, ...placeholderMissions];
-      const helpersWithPlaceholders = [...h, ...placeholderHelpers];
       const microWithPlaceholders = [...mm];
       if (!cancelled) {
         setMissionsWithProgress(missionsWithPlaceholders);
-        setHelpersList(helpersWithPlaceholders);
         setMicroMissionsWithProgress(microWithPlaceholders);
       }
     })();
@@ -261,7 +248,18 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
               <div className="dashboard__section">
                 <div className="dashboard__section-title">Hilfsmodule</div>
-                <ExercisesList exercises={helpersList} />
+                <ExercisesList
+                  exercises={Object.values(helperModules)
+                    .filter(module => module.topic === 'zahlendarstellung')
+                    .map(module => ({
+                      id: module.slug,
+                      title: `Hilfsmodul: ${module.title}`,
+                      description: module.description || '',
+                      path: `/hilfsmodul/${module.slug}`,
+                      progressPercent: undefined,
+                      disabled: false,
+                    }))}
+                />
               </div>
             </div>
           </div>
@@ -324,14 +322,16 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
               <div className="dashboard__section">
                 <div className="dashboard__section-title">Hilfsmodule</div>
                 <ExercisesList
-                  exercises={Object.values(helperModules).map(module => ({
-                    id: module.slug,
-                    title: `Hilfsmodul: ${module.title}`,
-                    description: module.description || '',
-                    path: `/hilfsmodul/${module.slug}`,
-                    progressPercent: undefined,
-                    disabled: false,
-                  }))}
+                  exercises={Object.values(helperModules)
+                    .filter(module => module.topic === 'mikroprozessortechnik')
+                    .map(module => ({
+                      id: module.slug,
+                      title: `Hilfsmodul: ${module.title}`,
+                      description: module.description || '',
+                      path: `/hilfsmodul/${module.slug}`,
+                      progressPercent: undefined,
+                      disabled: false,
+                    }))}
                 />
               </div>
             </div>

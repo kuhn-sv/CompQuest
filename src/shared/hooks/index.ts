@@ -8,6 +8,8 @@ export { useDeviceType } from './useDeviceType';
 export { useFooterControls } from './useFooterControls';
 export type { FooterControlFlags, FooterControlHandlers } from './useFooterControls';
 export { useHudState } from './useHudState';
+export { useHelperTask } from './useHelperTask';
+export type { UseHelperTaskOptions, UseHelperTaskResult } from './useHelperTask';
 export { useGameStartScreen } from './useGameStartScreen';
 export type { UseGameStartScreenOptions, UseGameStartScreenResult } from './useGameStartScreen';
 export { useBadgeNotification } from './useBadgeNotification';

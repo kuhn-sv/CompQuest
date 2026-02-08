@@ -144,6 +144,13 @@ const DashboardPage: React.FC = () => {
         'Umrechnung zwischen Binär ⇆ Oktal ⇆ Hexadezimal (Schritt für Schritt).',
       path: '/hilfsmodul/umrechnungshelfer',
     },
+    {
+      id: TaskId.HelperUebertragshelfer,
+      title: 'Hilfsmodul: Übertragshelfer',
+      description:
+        'Addiere Zahlen und markiere Überträge in Binär/Oktal/Hexadezimal.',
+      path: '/hilfsmodul/uebertragshelfer',
+    },
   ];
 
   const handleCpuClick = useCallback(() => {

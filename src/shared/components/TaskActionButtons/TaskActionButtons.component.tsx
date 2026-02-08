@@ -62,7 +62,6 @@ const TaskActionButtons: React.FC<TaskActionButtonsProps> = ({
             Weiter
           </button>
         )}
-        {/* (moved) Tim fragen button rendered above as first element */}
       </div>
 
       <AskTimModal

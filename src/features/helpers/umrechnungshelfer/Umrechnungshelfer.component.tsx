@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import React, {useCallback, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import './Umrechnungshelfer.scss';
 import TabRow from '../../../shared/components/tabRow/TabRow.component';
@@ -8,7 +8,7 @@ import './components/StepPanel/StepPanel.scss';
 import './components/PlaceValueInputGrid/PlaceValueInputGrid.scss';
 import Step1Box from './components/Step1Box/Step1Box';
 import Step2Box from './components/Step2Box/Step2Box';
-import {useFooterControls, useHudState} from '../../../shared/hooks';
+import {useHelperTask} from '../../../shared/hooks';
 import ResultLine from './components/ResultLine/ResultLine';
 import {useBaseConvert} from './hooks/useBaseConvert';
 import {useStepperExpanded} from './hooks/useStepperExpanded';
@@ -22,6 +22,7 @@ const BITS = 8;
 const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
   onHudChange,
+  onSummaryChange,
 }) => {
   const {
     toBits,
@@ -37,7 +38,6 @@ const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({
   const [entries, setEntries] = useState<Array<0 | 1 | null>>(
     Array(BITS).fill(null),
   );
-  const [evaluated, setEvaluated] = useState(false);
 
   const expectedDec = useMemo(
     () => bitsToDecimal(targetBits),
@@ -71,33 +71,13 @@ const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({
     reset: resetExpanded,
   } = useStepperExpanded();
 
-  const newTask = useCallback(() => {
+  const generateTask = useCallback(() => {
     const n = Math.floor(Math.random() * 256); // 0..255
     setTargetBits(toBits(n, BITS));
     setEntries(Array(BITS).fill(null));
     // reset octal step state via hook below (if available later) and collapse panels
     resetExpanded();
-    setEvaluated(false);
   }, [toBits, resetExpanded]);
-
-  // init and provide controls to container
-  const initRef = useRef(false);
-  useEffect(() => {
-    if (!initRef.current) {
-      initRef.current = true;
-      newTask();
-    }
-  }, [newTask]);
-
-  // Footer controls (stabilised via hook — always active)
-  const handleReset = useCallback(() => newTask(), [newTask]);
-  const handleEvaluate = useCallback(() => setEvaluated(true), []);
-  const handleNext = useCallback(() => newTask(), [newTask]);
-  useFooterControls(onControlsChange, {onReset: handleReset, onEvaluate: handleEvaluate, onNext: handleNext}, {
-    showReset: true,
-    showEvaluate: true,
-    showNext: true,
-  }, true);
 
   // HUD state (reactive to tab)
   const hudState = useMemo(() => {
@@ -109,7 +89,14 @@ const Umrechnungshelfer: React.FC<SubTaskComponentProps> = ({
           : 'Modus: Oktal ↔ Hexadezimal';
     return {subtitle, progress: null};
   }, [tab]);
-  useHudState(onHudChange, hudState);
+
+  const {evaluated} = useHelperTask({
+    onControlsChange,
+    onHudChange,
+    onSummaryChange,
+    generateTask,
+    hudState,
+  });
 
   const setEntry = (idx: number, val: 0 | 1 | null) =>
     setEntries(prev => prev.map((v, i) => (i === idx ? val : v)));

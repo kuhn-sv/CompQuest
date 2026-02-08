@@ -1,0 +1,36 @@
+.static-digits-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  &__label {
+    min-width: 80px;
+    text-align: right;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+  }
+
+  &__prefix {
+    margin-right: 4px;
+    color: var(--text-secondary);
+  }
+
+  &__cell {
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
+    border: 2px solid var(--surface-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    user-select: none;
+  }
+}

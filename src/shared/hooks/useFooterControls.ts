@@ -1,4 +1,4 @@
-import {useCallback, useEffect, useMemo, useRef} from 'react';
+import {useEffect, useMemo, useRef} from 'react';
 import type {TaskFooterControls} from '../interfaces/tasking.interfaces';
 
 /**
@@ -27,11 +27,10 @@ export interface FooterControlHandlers {
  * Manages footer-control synchronisation between a task component and its
  * `TaskContainer` parent.
  *
- * Internally uses ref-stabilised handler wrappers so that the `controls`
- * object's identity only changes when a flag value changes — not when a
- * handler is re-created. Parent notifications are deduplicated so
- * `onControlsChange` is only called when necessary, and a single cleanup
- * on unmount resets the controls to `null`.
+ * Uses a single ref to keep handler references fresh while the `controls`
+ * object's identity only changes when a flag value changes. The parent is
+ * notified via `onControlsChange` whenever `controls` changes, and
+ * receives `null` on unmount.
  *
  * @param onControlsChange Callback provided by `TaskContainer` via render-props.
  * @param handlers         The three action handlers (`onReset`, `onEvaluate`, `onNext`).
@@ -44,32 +43,19 @@ export function useFooterControls(
   flags: FooterControlFlags,
   active: boolean,
 ): void {
-  // --- Ref-stabilise handlers so useMemo identity only depends on flags ---
-  const resetRef = useRef(handlers.onReset);
-  const evaluateRef = useRef(handlers.onEvaluate);
-  const nextRef = useRef(handlers.onNext);
-
+  // --- Keep handler references fresh without changing object identity ---
+  const handlersRef = useRef(handlers);
   useEffect(() => {
-    resetRef.current = handlers.onReset;
-  }, [handlers.onReset]);
-  useEffect(() => {
-    evaluateRef.current = handlers.onEvaluate;
-  }, [handlers.onEvaluate]);
-  useEffect(() => {
-    nextRef.current = handlers.onNext;
-  }, [handlers.onNext]);
-
-  const onResetStable = useCallback(() => resetRef.current(), []);
-  const onEvaluateStable = useCallback(() => evaluateRef.current(), []);
-  const onNextStable = useCallback(() => nextRef.current(), []);
+    handlersRef.current = handlers;
+  });
 
   // --- Build the controls object (identity only changes when flags change) ---
   const controls = useMemo<TaskFooterControls | null>(() => {
     if (!active) return null;
     return {
-      onReset: onResetStable,
-      onEvaluate: onEvaluateStable,
-      onNext: onNextStable,
+      onReset: () => handlersRef.current.onReset(),
+      onEvaluate: () => handlersRef.current.onEvaluate(),
+      onNext: () => handlersRef.current.onNext(),
       showReset: flags.showReset,
       showEvaluate: flags.showEvaluate,
       showNext: flags.showNext,
@@ -83,29 +69,13 @@ export function useFooterControls(
     flags.showNext,
     flags.disableReset,
     flags.disableNext,
-    onResetStable,
-    onEvaluateStable,
-    onNextStable,
   ]);
 
-  // --- Notify parent only when the controls object really changes ---
-  const prevRef = useRef<TaskFooterControls | null>(null);
-  const cbRef = useRef(onControlsChange);
+  // --- Notify parent when controls change; reset to null on unmount ---
   useEffect(() => {
-    cbRef.current = onControlsChange;
-  }, [onControlsChange]);
-
-  useEffect(() => {
-    if (prevRef.current !== controls) {
-      cbRef.current?.(controls);
-      prevRef.current = controls;
-    }
-  }, [controls]);
-
-  // --- Cleanup on unmount (ref-based, no dependency on callback identity) ---
-  useEffect(() => {
+    onControlsChange?.(controls);
     return () => {
-      cbRef.current?.(null);
+      onControlsChange?.(null);
     };
-  }, []);
+  }, [controls, onControlsChange]);
 }

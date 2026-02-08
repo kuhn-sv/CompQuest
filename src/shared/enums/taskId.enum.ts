@@ -13,4 +13,5 @@ export enum TaskId {
   JavaToAssembly = 'java-to-assembly',
   HelperPotenzrechner = 'helper-potenzrechner',
   HelperUmrechnungshelfer = 'helper-umrechnungshelfer',
+  HelperUebertragshelfer = 'helper-uebertragshelfer',
 }
