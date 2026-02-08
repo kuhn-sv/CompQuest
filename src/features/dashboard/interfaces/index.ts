@@ -1,5 +1,6 @@
 // Dashboard interfaces
 export type { MouseState, HoverState, SceneRefs, Model3DProps } from './model3d.interfaces';
+export type { DashboardHeaderProps, SettingsModalProps } from './settings.interface';
 export type {
 	ComponentLevel,
 	Quest,

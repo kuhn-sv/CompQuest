@@ -8,55 +8,6 @@
   background: var(--background);
   overflow: hidden;
 
-  // Header with user info
-  &__header {
-    position: absolute;
-    top: 0;
-    right: 0;
-    z-index: 10;
-    padding: 1rem;
-  }
-
-  &__user-info {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    background: var(--surface);
-    padding: 0.5rem 1rem;
-    border-radius: 25px;
-    backdrop-filter: blur(10px);
-    border: 1px solid var(--surface-border);
-
-    img {
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      object-fit: cover;
-    }
-  }
-
-  &__welcome {
-    color: white;
-    font-size: 0.9rem;
-    font-weight: 500;
-  }
-
-  &__logout-btn {
-    background: var(--surface);
-    color: white;
-    border: 1px solid var(--surface-border);
-    padding: 0.25rem 0.75rem;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-
-    &:hover {
-      background: var(--surface);
-      transform: translateY(-1px);
-    }
-  }
-
   // 3D Viewer Container
   &__3d-container {
     position: absolute;

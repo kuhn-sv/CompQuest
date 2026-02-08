@@ -1,7 +1,10 @@
-import React, {useState, useEffect, Suspense} from 'react';
+import React, {useState, useEffect, useCallback, Suspense} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
 import ExercisesModal from './components/ExercisesModal.component';
+import DashboardHeader from './components/DashboardHeader.component';
+import SettingsModal from './components/SettingsModal.component';
 import {useAuth} from '../auth';
+import {useSettingsModal} from './hooks/useSettingsModal';
 import './dashboard.page.scss';
 import type {DashboardNavigationState} from '../../shared/interfaces';
 const Model3D = React.lazy(
@@ -19,7 +22,15 @@ const DashboardPage: React.FC = () => {
   const navigate = useNavigate();
   const [showExercises, setShowExercises] = useState(false);
 
-  const {user, signOut, userProfile} = useAuth();
+  const {user, userProfile} = useAuth();
+  const {
+    showSettings,
+    openSettings,
+    closeSettings,
+    handleSignOut,
+    handleNavigateToAdmin,
+    isAdmin,
+  } = useSettingsModal();
 
   useEffect(() => {
     if (userProfile && !userProfile.progress?.hasCompletedOnboarding) {
@@ -59,7 +70,7 @@ const DashboardPage: React.FC = () => {
   }, [isTablet]);
 
   // Handle critical performance - automatically switch to 2D
-  const handleCriticalPerformance = () => {
+  const handleCriticalPerformance = useCallback(() => {
     setIs3DView(false);
     setShowPerformanceWarning(true);
     // Save 2D mode to localStorage when automatically switched due to performance
@@ -69,7 +80,7 @@ const DashboardPage: React.FC = () => {
     setTimeout(() => {
       setShowPerformanceWarning(false);
     }, 10000);
-  };
+  }, []);
 
   // Toggle view mode and save to localStorage
   const handleToggleView = () => {
@@ -135,35 +146,24 @@ const DashboardPage: React.FC = () => {
     },
   ];
 
-  const handleCpuClick = () => {
+  const handleCpuClick = useCallback(() => {
     setShowExercises(true);
-  };
-
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
+  }, []);
 
   return (
     <div className="dashboard">
-      {/* User Info & Logout */}
-      <div className="dashboard__header">
-        <div className="dashboard__user-info">
-          <img src="favicon.svg"></img>
-          <span className="dashboard__welcome">
-            Willkommen, {user?.displayName || user?.email}
-          </span>
-          <button
-            className="dashboard__logout-btn"
-            onClick={handleSignOut}
-            title="Abmelden">
-            Abmelden
-          </button>
-        </div>
-      </div>
+      <DashboardHeader
+        displayName={user?.displayName || user?.email || ''}
+        onSettingsClick={openSettings}
+      />
+
+      <SettingsModal
+        show={showSettings}
+        onClose={closeSettings}
+        onSignOut={handleSignOut}
+        isAdmin={isAdmin}
+        onNavigateToAdmin={handleNavigateToAdmin}
+      />
 
       <div className="dashboard__3d-container">
         {is3DView ? (
