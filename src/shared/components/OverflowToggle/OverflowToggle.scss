@@ -12,15 +12,13 @@
   transition: all 0.2s ease;
   color: var(--text-secondary);
 
-  &:hover:not(.disabled) {
-    border-color: var(--primary);
-    color: var(--primary);
-  }
-
   &.active {
-    border-color: var(--primary);
-    background: var(--primary10);
-    color: var(--primary);
+    border-color: var(--error);
+    color: var(--error);
+
+    &:focus {
+      outline: none;
+    }
   }
 
   &.disabled,
