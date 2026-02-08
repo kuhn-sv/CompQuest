@@ -172,6 +172,11 @@
     margin-bottom: 1rem;
     overflow: hidden;
 
+    &--locked {
+      opacity: 0.55;
+      border-style: dashed;
+    }
+
     .dashboard__accordion-header {
       display: flex;
       justify-content: space-between;
@@ -185,6 +190,11 @@
       color: var(--text);
       cursor: pointer;
       text-align: left;
+
+      &--locked {
+        cursor: not-allowed;
+        opacity: 0.85;
+      }
     }
 
     .dashboard__accordion-title-row {
@@ -266,6 +276,27 @@
         max-height: 2000px; // generous max to allow content
         padding: 1rem;
       }
+    }
+
+    .dashboard__lock-icon {
+      margin-right: 0.4rem;
+      font-size: 0.95rem;
+    }
+
+    .dashboard__locked-hint {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.65rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      white-space: nowrap;
+      line-height: 1.4;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--surface-border);
     }
   }
 }

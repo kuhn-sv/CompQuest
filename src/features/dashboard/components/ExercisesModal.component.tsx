@@ -3,9 +3,13 @@ import './ExercisesModal.component.scss';
 import ExercisesList, {type Exercise} from './ExercisesList.component';
 import {trainingService} from '../../../services/supabase/training.service';
 import {helperModules} from '../../helpers/registry';
-import type {UserTopicBadge} from '../../../shared/interfaces';
-import {BADGE_CONFIG, BADGE_LEGEND_TIERS} from '../../../shared/interfaces';
+import {
+  BADGE_CONFIG,
+  BADGE_LEGEND_TIERS,
+  isBadgeLevelSufficient,
+} from '../../../shared/interfaces';
 import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
+import {useUserBadges} from '../../../shared/hooks/useUserBadges';
 
 interface ExercisesModalProps {
   show: boolean;
@@ -25,7 +29,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
   const [missionsWithProgress, setMissionsWithProgress] =
     useState<Exercise[]>(missions);
   const [helpersList, setHelpersList] = useState<Exercise[]>(helpers);
-  const [badges, setBadges] = useState<Record<string, UserTopicBadge>>({});
+  const {badges} = useUserBadges();
   // accordion state: which panels are open
   const [openPanels, setOpenPanels] = useState<Record<string, boolean>>({
     '1-zahlendarstellung': false,
@@ -81,6 +85,12 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
   const [microMissionsWithProgress, setMicroMissionsWithProgress] =
     useState<Exercise[]>(defaultMicroMissions);
 
+  // Determine whether Mikroprozessortechnik is locked
+  const isMikroLocked = !isBadgeLevelSufficient(
+    badges['zahlendarstellung']?.badgeLevel ?? 'none',
+    'bronze',
+  );
+
   useEffect(() => {
     let cancelled = false;
     const loadProgress = async (
@@ -110,17 +120,11 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
     if (!show) return; // avoid work when modal hidden
     (async () => {
-      const [m, h, mm, badgeData] = await Promise.all([
+      const [m, h, mm] = await Promise.all([
         loadProgress(missions, true),
         loadProgress(helpers, false),
         loadProgress(microMissions, true),
-        trainingService.getUserBadges().catch(() => [] as UserTopicBadge[]),
       ]);
-      // Index badges by category for quick lookup
-      const badgeMap: Record<string, UserTopicBadge> = {};
-      for (const b of badgeData) {
-        badgeMap[b.category] = b;
-      }
       // Inject two placeholder items (hard-coded) for upcoming content
       const placeholderMissions: Exercise[] = [
         {
@@ -150,7 +154,6 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
         setMissionsWithProgress(missionsWithPlaceholders);
         setHelpersList(helpersWithPlaceholders);
         setMicroMissionsWithProgress(microWithPlaceholders);
-        setBadges(badgeMap);
       }
     })();
     return () => {
@@ -161,6 +164,8 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
   if (!show) return null;
 
   const togglePanel = (key: string) => {
+    // Prevent opening the Mikroprozessortechnik panel when locked
+    if (key === '2-mikroprozessortechnik' && isMikroLocked) return;
     setOpenPanels(prev => ({...prev, [key]: !prev[key]}));
   };
 
@@ -261,15 +266,29 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
             </div>
           </div>
 
-          {/* Accordion 2: Mikroprozessortechnik - placeholder content for now */}
-          <div className="dashboard__accordion-item">
+          {/* Accordion 2: Mikroprozessortechnik */}
+          <div
+            className={`dashboard__accordion-item${isMikroLocked ? ' dashboard__accordion-item--locked' : ''}`}>
             <button
-              className="dashboard__accordion-header"
+              className={`dashboard__accordion-header${isMikroLocked ? ' dashboard__accordion-header--locked' : ''}`}
               onClick={() => togglePanel('2-mikroprozessortechnik')}
-              aria-expanded={!!openPanels['2-mikroprozessortechnik']}>
+              aria-expanded={!!openPanels['2-mikroprozessortechnik']}
+              aria-disabled={isMikroLocked}
+              disabled={isMikroLocked}>
               <span className="dashboard__accordion-title-row">
-                <span>2. Mikroprozessortechnik</span>
-                {renderTopicBadges('mikroprozessortechnik')}
+                <span>
+                  {isMikroLocked && (
+                    <span className="dashboard__lock-icon">🔒</span>
+                  )}
+                  2. Mikroprozessortechnik
+                </span>
+                {isMikroLocked ? (
+                  <span className="dashboard__locked-hint">
+                    Erreiche mindestens Bronze in Zahlendarstellung
+                  </span>
+                ) : (
+                  renderTopicBadges('mikroprozessortechnik')
+                )}
               </span>
               <span className="dashboard__accordion-toggle">
                 {openPanels['2-mikroprozessortechnik'] ? '▾' : '▸'}
@@ -288,7 +307,16 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
                     </span>
                   )}
                 </div>
-                <ExercisesList exercises={microMissionsWithProgress} />
+                <ExercisesList
+                  exercises={
+                    isMikroLocked
+                      ? microMissionsWithProgress.map(ex => ({
+                          ...ex,
+                          disabled: true,
+                        }))
+                      : microMissionsWithProgress
+                  }
+                />
               </div>
 
               <div className="dashboard__section-separator" />

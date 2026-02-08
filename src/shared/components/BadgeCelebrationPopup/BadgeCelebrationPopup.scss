@@ -98,6 +98,25 @@
 }
 
 // ---------------------------------------------------------------------------
+// Unlock hint (shown when a new topic is unlocked)
+// ---------------------------------------------------------------------------
+.badge-popup__unlock-hint {
+  margin: -0.75rem 0 1.5rem;
+  padding: 0.6rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(100, 229, 147, 0.1);
+  border: 1px solid rgba(100, 229, 147, 0.25);
+  font-size: 0.85rem;
+  color: var(--success);
+  line-height: 1.5;
+  text-align: center;
+
+  strong {
+    font-weight: 700;
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Button
 // ---------------------------------------------------------------------------
 .badge-popup__btn {

@@ -8,8 +8,14 @@ import {
   useLocation,
 } from 'react-router-dom';
 import TopNavbar from './shared/components/TopNavbar/TopNavbar.component';
-import {AuthProvider, ProtectedRoute, useAuth} from './features/auth';
+import {
+  AuthProvider,
+  ProtectedRoute,
+  TopicGuard,
+  useAuth,
+} from './features/auth';
 import {BadgeNotificationProvider} from './shared/context/BadgeNotificationContext';
+import {UserBadgesProvider} from './shared/context/UserBadgesContext';
 import BadgeCelebrationPopup from './shared/components/BadgeCelebrationPopup/BadgeCelebrationPopup.component';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
@@ -56,11 +62,13 @@ const AppShell: React.FC<{shouldShowOrientationOverlay: boolean}> = ({
 
   return (
     <BadgeNotificationProvider isAuthenticated={!!user}>
-      <Router>
-        {shouldShowOrientationOverlay && <OrientationOverlay />}
-        <BadgeCelebrationPopup />
-        <AppWithNavbar />
-      </Router>
+      <UserBadgesProvider isAuthenticated={!!user}>
+        <Router>
+          {shouldShowOrientationOverlay && <OrientationOverlay />}
+          <BadgeCelebrationPopup />
+          <AppWithNavbar />
+        </Router>
+      </UserBadgesProvider>
     </BadgeNotificationProvider>
   );
 };
@@ -210,7 +218,11 @@ const AppWithNavbar: React.FC = () => {
           path="/task/von-neumann"
           element={
             <ProtectedRoute>
-              <PracticeTaskTwoPage initialSubTask={TaskId.VonNeumann} />
+              <TopicGuard
+                requiredCategory="zahlendarstellung"
+                requiredLevel="bronze">
+                <PracticeTaskTwoPage initialSubTask={TaskId.VonNeumann} />
+              </TopicGuard>
             </ProtectedRoute>
           }
         />
@@ -219,7 +231,11 @@ const AppWithNavbar: React.FC = () => {
           path="/task/read-assembly"
           element={
             <ProtectedRoute>
-              <PracticeTaskTwoPage initialSubTask={TaskId.ReadAssembly} />
+              <TopicGuard
+                requiredCategory="zahlendarstellung"
+                requiredLevel="bronze">
+                <PracticeTaskTwoPage initialSubTask={TaskId.ReadAssembly} />
+              </TopicGuard>
             </ProtectedRoute>
           }
         />
@@ -228,7 +244,11 @@ const AppWithNavbar: React.FC = () => {
           path="/task/write-assembly"
           element={
             <ProtectedRoute>
-              <PracticeTaskTwoPage initialSubTask={TaskId.WriteAssembly} />
+              <TopicGuard
+                requiredCategory="zahlendarstellung"
+                requiredLevel="bronze">
+                <PracticeTaskTwoPage initialSubTask={TaskId.WriteAssembly} />
+              </TopicGuard>
             </ProtectedRoute>
           }
         />
@@ -237,7 +257,11 @@ const AppWithNavbar: React.FC = () => {
           path="/task/java-to-assembly"
           element={
             <ProtectedRoute>
-              <PracticeTaskTwoPage initialSubTask={TaskId.JavaToAssembly} />
+              <TopicGuard
+                requiredCategory="zahlendarstellung"
+                requiredLevel="bronze">
+                <PracticeTaskTwoPage initialSubTask={TaskId.JavaToAssembly} />
+              </TopicGuard>
             </ProtectedRoute>
           }
         />

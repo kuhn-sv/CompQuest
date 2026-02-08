@@ -11,3 +11,4 @@ export { useHudState } from './useHudState';
 export { useGameStartScreen } from './useGameStartScreen';
 export type { UseGameStartScreenOptions, UseGameStartScreenResult } from './useGameStartScreen';
 export { useBadgeNotification } from './useBadgeNotification';
+export { useUserBadges } from './useUserBadges';

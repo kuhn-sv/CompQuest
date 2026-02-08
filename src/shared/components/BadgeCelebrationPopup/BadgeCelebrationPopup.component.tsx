@@ -39,6 +39,13 @@ const BadgeCelebrationPopup: React.FC = () => {
           <strong>{config.label}-Badge</strong> verdient.
         </p>
 
+        {category === 'zahlendarstellung' && newLevel === 'bronze' && (
+          <p className="badge-popup__unlock-hint">
+            🔓 Du hast den Bereich <strong>Mikroprozessortechnik</strong>{' '}
+            freigeschaltet!
+          </p>
+        )}
+
         <button
           className="badge-popup__btn"
           onClick={dismissNotification}

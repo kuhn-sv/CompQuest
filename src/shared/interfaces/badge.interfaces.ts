@@ -47,3 +47,19 @@ export const getBadgeLevelForAccuracy = (accuracy: number): BadgeLevel => {
   }
   return 'none';
 };
+
+/**
+ * Ordered rank of badge levels (lowest → highest).
+ * Used for comparing badge levels programmatically.
+ */
+const BADGE_LEVEL_ORDER: BadgeLevel[] = ['none', 'bronze', 'silver', 'gold', 'platinum'];
+
+/**
+ * Check whether `current` badge level meets or exceeds `required` badge level.
+ */
+export const isBadgeLevelSufficient = (
+  current: BadgeLevel,
+  required: BadgeLevel,
+): boolean => {
+  return BADGE_LEVEL_ORDER.indexOf(current) >= BADGE_LEVEL_ORDER.indexOf(required);
+};

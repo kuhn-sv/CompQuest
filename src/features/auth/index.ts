@@ -9,6 +9,7 @@ export { AuthModal, LoginForm, RegisterForm, ForgotPasswordModal } from './compo
 
 // Route Guards
 export { default as ProtectedRoute } from './guards/ProtectedRoute.tsx';
+export { default as TopicGuard } from './guards/TopicGuard.tsx';
 
 // Re-export types for convenience
 export type { 

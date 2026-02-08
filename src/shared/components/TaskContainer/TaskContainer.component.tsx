@@ -15,6 +15,7 @@ import {
   TaskContainerInjectedProps,
 } from '../../interfaces/taskContainerProps.interface';
 import {useBadgeNotification} from '../../hooks/useBadgeNotification';
+import {useUserBadges} from '../../hooks/useUserBadges';
 import {
   hudShallowEqual,
   summaryShallowEqual,
@@ -34,6 +35,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   children,
 }) => {
   const {enqueueBadgeCheck} = useBadgeNotification();
+  const {refreshBadges} = useUserBadges();
 
   const [footerControls, setFooterControls] =
     useState<TaskFooterControls | null>(null);
@@ -199,12 +201,15 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
             accuracy: accuracyPct,
             points: normalized.totalPoints,
           })
-          .then(() => enqueueBadgeCheck())
+          .then(() => {
+            enqueueBadgeCheck();
+            refreshBadges();
+          })
           .catch(err => console.error('Failed to record attempt:', err));
       }
     },
     // hudState removed from deps – read from hudStateRef instead
-    [taskMeta, enqueueBadgeCheck],
+    [taskMeta, enqueueBadgeCheck, refreshBadges],
   );
 
   const handleTaskContextChange = useCallback((ctx: unknown | null) => {
@@ -316,7 +321,10 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                   accuracy: accuracyPct,
                   points: pending.totalPoints,
                 })
-                .then(() => enqueueBadgeCheck())
+                .then(() => {
+                  enqueueBadgeCheck();
+                  refreshBadges();
+                })
                 .catch(err => console.error('Failed to record attempt:', err));
             }
           };
