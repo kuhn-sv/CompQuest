@@ -79,7 +79,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               <button
                 className="settings-modal__admin-btn"
                 onClick={onNavigateToAdmin}>
-                Zum Admin-Bereich wechseln
+                Zum Lehrpersonen-Dashboard wechseln
               </button>
             </div>
           </>

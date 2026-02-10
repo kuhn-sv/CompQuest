@@ -140,8 +140,10 @@ $$;
 revoke execute on function get_student_exercise_stats(uuid) from public;
 grant  execute on function get_student_exercise_stats(uuid) to authenticated;
 
--- 5. get_student_badges(uuid)
---    Returns topic badges for a given student.
+-- =============================================================
+-- 5) get_student_badges(uuid)
+--    Returns topic badges for a given student (Dynamic Calculation).
+--    Calculated on-the-fly from task_categories and exercise_stats
 -- ----------------------------------------------------------------------------
 create or replace function get_student_badges(p_user_id uuid)
 returns table (
@@ -161,14 +163,36 @@ begin
   end if;
 
   return query
+  with category_totals as (
+    select tc.category, count(*)::int as total
+    from public.task_categories tc
+    group by tc.category
+  ),
+  user_stats as (
     select
-      utb.category,
-      utb.avg_accuracy,
-      utb.badge_level,
-      utb.completed_tasks,
-      utb.total_tasks
-    from user_topic_badges utb
-    where utb.user_id = p_user_id;
+      tc.category,
+      count(*)::int as completed,
+      sum(es.best_accuracy) as sum_accuracy
+    from public.exercise_stats es
+    join public.task_categories tc on tc.task_id = es.task_id
+    where es.user_id = p_user_id
+    group by tc.category
+  )
+  select
+    ct.category,
+    coalesce(round(us.sum_accuracy / ct.total, 2), 0) as avg_accuracy,
+    case
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 100 then 'platinum'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 90 then 'gold'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 80 then 'silver'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 50 then 'bronze'
+        else 'none'
+    end as badge_level,
+    coalesce(us.completed, 0) as completed_tasks,
+    ct.total as total_tasks
+  from category_totals ct
+  left join user_stats us on us.category = ct.category
+  order by ct.category;
 end;
 $$;
 

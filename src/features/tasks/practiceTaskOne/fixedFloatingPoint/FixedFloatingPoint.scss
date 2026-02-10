@@ -1,0 +1,122 @@
+@import '../../../../styles/mixins';
+
+.fixed-floating-point-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+
+
+  .ff-header {
+    margin-bottom: 2rem;
+    text-align: center;
+    h1 {
+      font-size: 1.5rem;
+      color: var(--text-primary);
+    }
+  }
+
+  .ff-content {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bits-frame {
+    position: relative;
+    padding: 2rem;
+    border-radius: 16px;
+    background: var(--surface-card);
+    border: 1px solid var(--border-dim);
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+
+    &.success {
+      border-color: var(--success);
+      background: rgba(var(--success-rgb), 0.05);
+    }
+
+    &.error {
+      border-color: var(--error);
+      background: rgba(var(--error-rgb), 0.05);
+    }
+  }
+
+  .bits-wrapper {
+    position: relative;
+  }
+
+  .bits-row {
+     // Custom spacing for float layout if needed
+     &.float-layout {
+         // BitToggleRow uses grid. We can adjust column gaps if we target the grid directly.
+         // But the grid is inside BitToggleRow -> .bit-grid.
+         // We passed the className to the wrapper div of toggle row, but strictly BitToggleRow applies className to the inner grid div?
+         // Let's check BitToggleRow implementation:
+         // <div className={`bit-grid ${className ?? ''}`.trim()} ...>
+         // So .float-layout is on the grid.
+         
+         // 8 columns.
+         // S (1) | E (4) | M (3)
+         // Gap is uniform '12px'.
+         // We want larger gaps after col 1 (index 0) and col 5 (index 4).
+         
+         // We can't easily change *specific* column gaps with simple grid-gap.
+         // We might need to use margin on the children.
+         
+         .bit-col:nth-child(1),
+         .bit-col:nth-child(5) {
+             margin-right: 2.5rem;
+             position: relative;
+
+             &::after {
+                 content: '';
+                 position: absolute;
+                 right: -1.75rem; /* Center in the 2.5rem margin */
+                 height: 100%;
+                 width: 6px;
+                 background-color: var(--surface);
+                 border-radius: 2px;
+                 transform: translateX(50%);
+                 align-self: center;
+
+             }
+         }
+     }
+     
+     &.fixed-layout {
+         // Decimal point between index 3 and 4 (2^0 and 2^-1)
+         .bit-col:nth-child(4) {
+             margin-right: 1.5rem;
+             position: relative;
+             
+             &::after {
+                 content: '.';
+                 position: absolute;
+                 right: -1.5rem;
+                 top: 20%;
+                 font-size: 2rem;
+                 color: var(--primary);
+                 font-weight: bold;
+                 line-height: 0;
+                 margin-bottom: 20px;
+                 align-self: anchor-center;
+             }
+         }
+     }
+  }
+
+  .info-line {
+    font-size: 1.1rem;
+    font-weight: 500;
+    min-height: 1.5rem;
+    
+    .expected {
+      &.correct { color: var(--success); }
+      &.wrong { color: var(--error); }
+    }
+  }
+}

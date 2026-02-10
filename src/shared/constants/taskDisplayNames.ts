@@ -15,4 +15,5 @@ export const TASK_DISPLAY_NAMES: Record<string, string> = {
   'read-assembly': 'Assembler-Programm lesen',
   'write-assembly': 'Assembler-Programm schreiben',
   'java-to-assembly': 'Java → Assembler',
+  'fixed-floating-point': 'Fest- & Gleitkommazahlen',
 };

@@ -313,8 +313,9 @@ $$;
 grant execute on function public.get_leaderboard(text, int, int) to authenticated;
 
 -- =============================================================
--- 7) Get topic badges for the current user
+-- 7) Get topic badges for the current user (Dynamic Calculation)
 --    Returns one row per category with avg accuracy & badge level
+--    Calculated on-the-fly from task_categories and exercise_stats
 -- =============================================================
 create or replace function public.get_user_badges()
 returns table (
@@ -328,15 +329,54 @@ language sql
 security definer
 set search_path = public
 as $$
+  with category_totals as (
+    select category, count(*)::int as total
+    from public.task_categories
+    group by category
+  ),
+  user_stats as (
+    select
+      tc.category,
+      count(*)::int as completed,
+      sum(es.best_accuracy) as sum_accuracy
+    from public.exercise_stats es
+    join public.task_categories tc on tc.task_id = es.task_id
+    where es.user_id = auth.uid()
+    group by tc.category
+  )
   select
-    utb.category,
-    utb.avg_accuracy,
-    utb.badge_level,
-    utb.completed_tasks,
-    utb.total_tasks
-  from public.user_topic_badges utb
-  where utb.user_id = auth.uid()
-  order by utb.category;
+    ct.category,
+    coalesce(round(us.sum_accuracy / ct.total, 2), 0) as avg_accuracy,
+    case
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 100 then 'platinum'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 90 then 'gold'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 80 then 'silver'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 50 then 'bronze'
+        else 'none'
+    end as badge_level,
+    coalesce(us.completed, 0) as completed_tasks,
+    ct.total as total_tasks
+  from category_totals ct
+  left join user_stats us on us.category = ct.category
+  order by ct.category;
 $$;
 
-grant execute on function public.get_user_badges() to authenticated;
+
+-- =============================================================
+-- 8) Get exercise stats for the current user (Single Task)
+--    Bypasses RLS to ensure consistent data retrieval
+-- =============================================================
+create or replace function public.get_my_exercise_stats(p_task_id text)
+returns setof public.exercise_stats
+language sql
+security definer
+set search_path = public
+as $$
+  select *
+  from public.exercise_stats
+  where user_id = auth.uid()
+    and task_id = p_task_id
+  limit 1;
+$$;
+
+grant execute on function public.get_my_exercise_stats(text) to authenticated;

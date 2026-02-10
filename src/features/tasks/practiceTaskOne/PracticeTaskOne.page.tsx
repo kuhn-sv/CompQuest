@@ -3,6 +3,7 @@ import {SubTaskConfig, SubTaskComponentProps} from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
 import PositiveArithmeticComponent from './arithmetic/arithmetic';
 import ComplementsComponent from './complements/Complements.component';
+import FixedFloatingPointComponent from './fixedFloatingPoint/FixedFloatingPoint.component';
 import Quiz from './quiz/Quiz.component';
 import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
@@ -64,6 +65,15 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
       component:
         TwosComplementArithmeticSubtask as React.ComponentType<SubTaskComponentProps>,
       timeLimit: 5 * 60 * 1000,
+    },
+    {
+      id: TaskId.FixedFloatingPoint,
+      title: TASK_DISPLAY_NAMES[TaskId.FixedFloatingPoint],
+      description: 'Wandle Dezimalzahlen in Fest- und Gleitkommadarstellung um.',
+      chapters: [{title: '3.2.2 Gleitkommazahlen'}],
+      component:
+        FixedFloatingPointComponent as React.ComponentType<SubTaskComponentProps>,
+      timeLimit: 10 * 60 * 1000,
     },
     {
       id: TaskId.Quiz,

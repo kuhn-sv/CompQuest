@@ -1,5 +1,5 @@
 import supabase from './client';
-import type {BadgeLevel, UserTopicBadge} from '../../shared/interfaces';
+import type { BadgeLevel, UserTopicBadge } from '../../shared/interfaces';
 
 export interface AttemptMetrics {
   timeMs: number;
@@ -129,13 +129,17 @@ export const trainingService = {
 
   // Fetch aggregated stats for current user for one task
   getStatsForTask: async (taskId: string): Promise<ExerciseStatsRow | null> => {
-    const { data, error } = await supabase
-      .from('exercise_stats')
-      .select('*')
-      .eq('task_id', taskId)
-      .maybeSingle();
+    // Determine if we should clear it if no task found?
+    // Using RPC to bypass RLS issues on client-side select
+    const { data, error } = await supabase.rpc('get_my_exercise_stats', {
+      p_task_id: taskId
+    });
+
     if (error) throw error;
-    return data as ExerciseStatsRow | null;
+
+    // RPC returns setof, so it's an array. We take the first one or null.
+    const rows = data as ExerciseStatsRow[];
+    return rows && rows.length > 0 ? rows[0] : null;
   },
 
   // Fetch Tim messages for a task (latest first)

@@ -206,6 +206,15 @@ const AppWithNavbar: React.FC = () => {
         />
 
         <Route
+          path="/task/fixed-floating-point"
+          element={
+            <ProtectedRoute>
+              <PracticeTaskOnePage initialSubTask={TaskId.FixedFloatingPoint} />
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
           path="/task/quiz"
           element={
             <ProtectedRoute>

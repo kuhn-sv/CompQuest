@@ -119,28 +119,15 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
 
     if (!show) return; // avoid work when modal hidden
     (async () => {
-      const [m, mm] = await Promise.all([
+      const [m, , mm] = await Promise.all([
         loadProgress(missions, true),
         loadProgress(helpers, false),
         loadProgress(microMissions, true),
       ]);
-      // Inject two placeholder items (hard-coded) for upcoming content
-      const placeholderMissions: Exercise[] = [
-        {
-          id: 'placeholder-fest-gleitkomma',
-          title: 'Fest- Gleitkomma',
-          description: 'coming soon',
-          path: '#',
-          progressPercent: undefined,
-          disabled: true,
-        },
-      ];
-
-      const missionsWithPlaceholders = [...m, ...placeholderMissions];
-      const microWithPlaceholders = [...mm];
+      
       if (!cancelled) {
-        setMissionsWithProgress(missionsWithPlaceholders);
-        setMicroMissionsWithProgress(microWithPlaceholders);
+        setMissionsWithProgress(m);
+        setMicroMissionsWithProgress(mm);
       }
     })();
     return () => {

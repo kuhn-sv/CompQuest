@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
 import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow.tsx';
+import TargetValueDisplay from '../../../../shared/components/TargetValueDisplay/TargetValueDisplay.component.tsx';
 import {GameStartScreen} from '../../../../shared/components';
 // Footer buttons rendered by parent
 import type {SubTaskComponentProps} from '../interfaces';
@@ -231,14 +232,12 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
       {hasStarted && (
         <div className="complements-content">
-          <div className="target-box" aria-label="Ziel Binärzahl">
-            Ausgang:{' '}
-            <strong className="mono">{bitsToString(current.sourceBits)}</strong>
-            <div className="sub">
-              Modus:{' '}
-              {current.mode === 'ones' ? 'Einerkomplement' : 'Zweierkomplement'}
-            </div>
-          </div>
+          <TargetValueDisplay
+            value={bitsToString(current.sourceBits)}
+            subLabel="Modus"
+            subValue={current.mode === 'ones' ? 'Einerkomplement' : 'Zweierkomplement'}
+            className="target-box"
+          />
           <div
             className={`bits-frame ${evaluated ? (isCorrect ? 'success' : 'error') : ''} ${evaluated ? 'evaluated' : ''}`}>
             <BitToggleRow

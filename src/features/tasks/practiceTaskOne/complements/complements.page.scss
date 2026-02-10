@@ -18,15 +18,7 @@
     justify-content: center; // vertical centering within content block
   }
 
-  .target-box {
-    padding: $spacing-md $spacing-lg;
-    border: 2px solid var(--surface-border);
-    border-radius: $border-radius-md;
-    background: var(--surface);
-    font-size: 18px;
-    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; letter-spacing: 0.5px; }
-    .sub { font-size: 14px; color: var(--text-secondary); margin-top: $spacing-xs; }
-  }
+
 
   .info-line {
     display: flex;

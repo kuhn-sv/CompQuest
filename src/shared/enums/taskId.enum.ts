@@ -14,4 +14,5 @@ export enum TaskId {
   HelperPotenzrechner = 'helper-potenzrechner',
   HelperUmrechnungshelfer = 'helper-umrechnungshelfer',
   HelperUebertragshelfer = 'helper-uebertragshelfer',
+  FixedFloatingPoint = 'fixed-floating-point',
 }

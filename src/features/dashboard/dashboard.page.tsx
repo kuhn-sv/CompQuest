@@ -127,6 +127,13 @@ const DashboardPage: React.FC = () => {
       path: '/task/quiz',
       progressPercent: 0,
     },
+    {
+      id: TaskId.FixedFloatingPoint,
+      title: TASK_DISPLAY_NAMES[TaskId.FixedFloatingPoint],
+      description: 'Wandle Dezimalzahlen in Fest- und Gleitkommadarstellung um.',
+      path: '/task/fixed-floating-point',
+      progressPercent: 0,
+    },
   ];
 
   const helpers = [

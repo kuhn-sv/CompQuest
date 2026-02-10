@@ -1,12 +1,8 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import {useAuth} from '../../../features/auth';
 import './TopNavbar.component.scss';
 
 const TopNavbar: React.FC = () => {
-  const {userProfile} = useAuth();
-  const isAdmin = userProfile?.role === 'admin';
-
   return (
     <header className="cq-topnavbar">
       <div className="cq-topnavbar__inner">
@@ -20,14 +16,6 @@ const TopNavbar: React.FC = () => {
             <span className="cq-topnavbar__brand-text">CompQuest</span>
           </Link>
         </div>
-
-        {isAdmin && (
-          <nav className="cq-topnavbar__nav">
-            <Link to="/professor-dashboard" className="cq-topnavbar__link">
-              Lehrpersonen-Dashboard
-            </Link>
-          </nav>
-        )}
       </div>
     </header>
   );
