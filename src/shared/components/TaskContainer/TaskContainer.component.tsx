@@ -112,7 +112,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
   }, [hudState]);
 
   const handleSummaryChange = useCallback(
-    (summary: Partial<TaskSummaryState> | null) => {
+    async (summary: Partial<TaskSummaryState> | null) => {
       // If null, just clear
       if (!summary) {
         setSummaryState(null);
@@ -185,7 +185,6 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
         return;
       }
 
-      setSummaryState(normalized);
       prevSummaryRef.current = normalized;
       if (normalized && taskMeta?.id && taskMeta?.title) {
         const accuracyPct =
@@ -194,19 +193,20 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 (normalized.totalCorrect / normalized.totalPossible) * 100,
               )
             : 0;
-        // Fire-and-forget; UI shouldn't block on persistence
-        trainingService
-          .recordAttempt(taskMeta.id, taskMeta.title, {
+        // Await persistence so leaderboard reflects the new score
+        try {
+          await trainingService.recordAttempt(taskMeta.id, taskMeta.title, {
             timeMs: Math.round(normalized.elapsedMs),
             accuracy: accuracyPct,
             points: normalized.totalPoints,
-          })
-          .then(() => {
-            enqueueBadgeCheck();
-            refreshBadges();
-          })
-          .catch(err => console.error('Failed to record attempt:', err));
+          });
+          enqueueBadgeCheck();
+          refreshBadges();
+        } catch (err) {
+          console.error('Failed to record attempt:', err);
+        }
       }
+      setSummaryState(normalized);
     },
     // hudState removed from deps – read from hudStateRef instead
     [taskMeta, enqueueBadgeCheck, refreshBadges],
@@ -307,7 +307,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
           // Provide fallback controls when child didn't supply them but we have a
           // pending summary: show a Next button that reveals the summary.
           // Helper: record the attempt + trigger badge check for a pending summary
-          const recordPendingAttempt = (pending: TaskSummaryState) => {
+          const recordPendingAttempt = async (pending: TaskSummaryState): Promise<void> => {
             if (taskMeta?.id && taskMeta?.title) {
               const accuracyPct =
                 pending.totalPossible > 0
@@ -315,29 +315,29 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                       (pending.totalCorrect / pending.totalPossible) * 100,
                     )
                   : 0;
-              trainingService
-                .recordAttempt(taskMeta.id, taskMeta.title, {
+              try {
+                await trainingService.recordAttempt(taskMeta.id, taskMeta.title, {
                   timeMs: Math.round(pending.elapsedMs),
                   accuracy: accuracyPct,
                   points: pending.totalPoints,
-                })
-                .then(() => {
-                  enqueueBadgeCheck();
-                  refreshBadges();
-                })
-                .catch(err => console.error('Failed to record attempt:', err));
+                });
+                enqueueBadgeCheck();
+                refreshBadges();
+              } catch (err) {
+                console.error('Failed to record attempt:', err);
+              }
             }
           };
 
-          const fallbackOnNext = () => {
+          const fallbackOnNext = async () => {
             // If there's a pending summary, reveal it; otherwise call provided handler
             if (pendingSummaryRef.current) {
               // stop timer and reveal summary overlay
               stop();
               const pending = pendingSummaryRef.current;
-              setSummaryState(pending);
               pendingSummaryRef.current = null;
-              recordPendingAttempt(pending);
+              await recordPendingAttempt(pending);
+              setSummaryState(pending);
             } else {
               start();
               footerControls!.onNext?.();
@@ -354,14 +354,14 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                 }}
                 onNext={
                   footerControls?.onNext
-                    ? () => {
+                    ? async () => {
                         // If child provided onNext, prefer it, but also reveal pending summary if present
                         if (pendingSummaryRef.current) {
                           stop();
                           const pending = pendingSummaryRef.current;
-                          setSummaryState(pending);
                           pendingSummaryRef.current = null;
-                          recordPendingAttempt(pending);
+                          await recordPendingAttempt(pending);
+                          setSummaryState(pending);
                         } else {
                           start();
                           footerControls!.onNext?.();
