@@ -4,6 +4,7 @@ import {useFixedFloatingPoint} from './useFixedFloatingPoint';
 import {GameStartScreen} from '../../../../shared/components';
 import TargetValueDisplay from '../../../../shared/components/TargetValueDisplay/TargetValueDisplay.component';
 import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow';
+import {computeEvalStates} from '../../../../shared/utils/evalStates';
 import './FixedFloatingPoint.scss';
 
 const FixedFloatingPointComponent: React.FC<SubTaskComponentProps> = (props) => {
@@ -42,6 +43,8 @@ const FixedFloatingPointComponent: React.FC<SubTaskComponentProps> = (props) => 
 
   const isFloat = currentRound.mode === 'float';
   const formatLabel = isFloat ? 'Gleitkomma 1-4-3 / Bias 7' : 'Festkomma 4.4';
+
+  const bitStates = computeEvalStates(bits, currentRound.expectedBits, evaluated);
   
   // Custom grouping logic for visual separators
   // We can pass a className or style to specific bits if BitToggleRow supported it per-bit,
@@ -79,6 +82,7 @@ const FixedFloatingPointComponent: React.FC<SubTaskComponentProps> = (props) => 
                         ? ['S', 'E3', 'E2', 'E1', 'E0', 'M2', 'M1', 'M0'] 
                         : ['2^3', '2^2', '2^1', '2^0', '2^-1', '2^-2', '2^-3', '2^-4']
                     }
+                    bitStates={bitStates}
                  />
              </div>
           </div>

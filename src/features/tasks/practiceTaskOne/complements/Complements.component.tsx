@@ -2,6 +2,7 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
 import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow.tsx';
+import {computeEvalStates} from '../../../../shared/utils/evalStates';
 import TargetValueDisplay from '../../../../shared/components/TargetValueDisplay/TargetValueDisplay.component.tsx';
 import {GameStartScreen} from '../../../../shared/components';
 // Footer buttons rendered by parent
@@ -62,6 +63,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
   const isCorrect =
     evaluated && bitsToString(bits) === bitsToString(expectedBits);
+
+  const bitStates = computeEvalStates(bits, expectedBits, evaluated);
 
   const startTaskHandler = React.useCallback(() => {
     startTask();
@@ -245,6 +248,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
               onChange={setBits}
               className="bits-row"
               disabled={evaluated}
+              bitStates={bitStates}
             />
             <div className="bits-frame__overlay" aria-hidden="true" />
           </div>

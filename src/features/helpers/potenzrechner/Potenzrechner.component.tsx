@@ -1,6 +1,5 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import type { DigitState } from '../../../shared/components/digitsRow/DigitsRow';
-import type { BitState } from '../../../shared/components/bitToggleRow/BitToggleRow';
+import {computeEvalStates} from '../../../shared/utils/evalStates';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
 import {DigitsRow} from '../../../shared/components';
@@ -120,14 +119,9 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
     return arr.reverse();
   }, [target]);
 
-  // Per-digit evaluation states (only after evaluate)
-  const octDigitStates: DigitState[] | undefined = evaluated
-    ? octDigits.map((d, i) => d === expectedOctDigits[i] ? 'correct' : 'wrong')
-    : undefined;
-
-  const hexDigitStates: DigitState[] | undefined = evaluated
-    ? hexDigits.map((d, i) => d === expectedHexDigits[i] ? 'correct' : 'wrong')
-    : undefined;
+  // Per-digit/bit evaluation states (only after evaluate)
+  const octDigitStates = computeEvalStates(octDigits, expectedOctDigits, evaluated);
+  const hexDigitStates = computeEvalStates(hexDigits, expectedHexDigits, evaluated);
 
   // Compute expected bits for binary (MSB first)
   const expectedBits = useMemo(() => {
@@ -137,9 +131,7 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
     return arr.reverse();
   }, [target]);
 
-  const bitStates: BitState[] | undefined = evaluated
-    ? bits.map((b, i) => b === expectedBits[i] ? 'correct' : 'wrong')
-    : undefined;
+  const bitStates = computeEvalStates(bits, expectedBits, evaluated);
 
   return (
     <div className="potenzrechner">

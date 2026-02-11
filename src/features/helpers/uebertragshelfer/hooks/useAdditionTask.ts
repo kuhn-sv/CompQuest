@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from 'react';
+import { computeEvalStates } from '../../../../shared/utils/evalStates';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -148,13 +149,9 @@ export function useAdditionTask(): UseAdditionTaskReturn {
       userResult: number[],
       userOverflow: boolean,
     ): AdditionValidation => {
-      const carryResults = task.expectedCarries.map((expected, i) =>
-        userCarries[i] === expected ? 'correct' as const : 'wrong' as const,
-      );
+      const carryResults = computeEvalStates(userCarries, task.expectedCarries)!;
 
-      const digitResults = task.expectedResult.map((expected, i) =>
-        userResult[i] === expected ? 'correct' as const : 'wrong' as const,
-      );
+      const digitResults = computeEvalStates(userResult, task.expectedResult)!;
 
       const overflowCorrect = userOverflow === task.expectedOverflow;
 
