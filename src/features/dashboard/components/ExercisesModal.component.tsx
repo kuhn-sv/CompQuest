@@ -2,107 +2,67 @@ import React, {useEffect, useState} from 'react';
 import './ExercisesModal.component.scss';
 import ExercisesList, {type Exercise} from './ExercisesList.component';
 import {trainingService} from '../../../services/supabase/training.service';
-import {helperModules} from '../../helpers/registry';
 import {
   BADGE_CONFIG,
   BADGE_LEGEND_TIERS,
   isBadgeLevelSufficient,
 } from '../../../shared/interfaces';
-import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
 import {useUserBadges} from '../../../shared/hooks/useUserBadges';
+import {EXERCISE_CATEGORIES} from './constants/categories';
+import type {ExerciseCategory} from '../interfaces/exercise.interface'; // Correct import path
 
 interface ExercisesModalProps {
   show: boolean;
   onClose: () => void;
-  missions: Exercise[];
-  helpers: Exercise[];
-  topicTitle?: string; // e.g., "1. Zahlendarstellung"
+  topicTitle?: string;
 }
 
 const ExercisesModal: React.FC<ExercisesModalProps> = ({
   show,
   onClose,
-  missions,
-  helpers,
   topicTitle = 'Übungsaufgaben',
 }) => {
-  const [missionsWithProgress, setMissionsWithProgress] =
-    useState<Exercise[]>(missions);
+
+  const [categoriesWithProgress, setCategoriesWithProgress] =
+    useState<ExerciseCategory[]>(EXERCISE_CATEGORIES);
+
   const {badges} = useUserBadges();
-  // accordion state: which panels are open
-  const [openPanels, setOpenPanels] = useState<Record<string, boolean>>({
-    '1-zahlendarstellung': false,
-    '2-mikroprozessortechnik': false,
-  });
+
+  const [openPanels, setOpenPanels] = useState<Record<string, boolean>>(
+    Object.fromEntries(EXERCISE_CATEGORIES.map(cat => [cat.id, false])),
+  );
 
   // When the modal opens, ensure all accordion panels are closed by default
   useEffect(() => {
     if (show) {
-      setOpenPanels({
-        '1-zahlendarstellung': false,
-        '2-mikroprozessortechnik': false,
-      });
+      setOpenPanels(
+        Object.fromEntries(EXERCISE_CATEGORIES.map(cat => [cat.id, false])),
+      );
     }
   }, [show]);
 
-  // Micro missions (local list) - include VonNeumannQuiz, ReadAssembly, WriteAssembly and JavaToAssembly
-  const defaultMicroMissions: Exercise[] = [
-    {
-      id: 'von-neumann',
-      title: TASK_DISPLAY_NAMES['von-neumann'],
-      description: 'Quiz zur Von-Neumann-Architektur',
-      path: '/task/von-neumann',
-      progressPercent: undefined,
-      disabled: false,
-    },
-    {
-      id: 'read-assembly',
-      title: TASK_DISPLAY_NAMES['read-assembly'],
-      description: 'Lies den Assembler-Code und beantworte die Fragen',
-      path: '/task/read-assembly',
-      progressPercent: undefined,
-      disabled: false,
-    },
-    {
-      id: 'write-assembly',
-      title: TASK_DISPLAY_NAMES['write-assembly'],
-      description: 'Sortiere die Befehle in die richtige Reihenfolge',
-      path: '/task/write-assembly',
-      progressPercent: undefined,
-      disabled: false,
-    },
-    {
-      id: 'java-to-assembly',
-      title: TASK_DISPLAY_NAMES['java-to-assembly'],
-      description: 'Übersetze Java Code in Assembler',
-      path: '/task/java-to-assembly',
-      progressPercent: undefined,
-      disabled: false,
-    },
-  ];
-  const [microMissions] = useState<Exercise[]>(defaultMicroMissions);
-  const [microMissionsWithProgress, setMicroMissionsWithProgress] =
-    useState<Exercise[]>(defaultMicroMissions);
-
-  // Determine whether Mikroprozessortechnik is locked
-  const isMikroLocked = !isBadgeLevelSufficient(
-    badges['zahlendarstellung']?.badgeLevel ?? 'none',
-    'bronze',
-  );
-
   useEffect(() => {
     let cancelled = false;
-    const loadProgress = async (
+
+    // Helper to load progress for a list of exercises
+    const loadProgressForList = async (
       items: Exercise[],
-      showProgress: boolean,
     ): Promise<Exercise[]> => {
-      if (!showProgress) {
-        // Helper-Module: progressPercent immer undefined
-        return items.map(ex => ({...ex, progressPercent: undefined}));
-      }
       const results = await Promise.all(
         items.map(async ex => {
+          // If progressPercent is already set/hardcoded, keep it? 
+          // Current logic: if it's undefined, try to fetch it.
+          // Original logic: for helper modules, progress is undefined. For missions, fetch.
+          // We can determine if it's a mission or helper by some flag or just try to fetch for all that don't have it?
+          // The current helper implementation returns undefined.
+          // BUT: helpers in EXERCISE_CATEGORIES don't have progressPercent set.
+          // Let's assume ONLY missions need progress.
+          // How to distinguish? helperModules vs missions field in category.
+          // We'll process each category's lists separately.
           try {
+             // Only fetch if it looks like a mission (e.g. typically helper modules don't have progress tracking in DB yet?)
+             // Or just try for everything. Existing code: "Helper-Module: progressPercent immer undefined".
+             // We will handle this when processing the category below.
             const row = await trainingService.getStatsForTask(ex.id);
             const accuracy =
               row && row.best_accuracy != null
@@ -110,41 +70,67 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
                 : 0;
             return {...ex, progressPercent: accuracy} as Exercise;
           } catch {
+            // For helpers or if fetch fails, return 0 (or undefined if we want to hide progress)
+            // But we want to preserve the "undefined" for helpers if that was the intent.
+            // The original code had a boolean "showProgress" flag.
             return {...ex, progressPercent: 0} as Exercise;
           }
         }),
       );
       return results;
     };
+    
+    // Just map over categories and update missions
+    const updateCategories = async () => {
+        const updated = await Promise.all(EXERCISE_CATEGORIES.map(async (cat) => {
+            // Load progress for missions
+            const missionsWithProg = await loadProgressForList(cat.missions);
 
-    if (!show) return; // avoid work when modal hidden
-    (async () => {
-      const [m, , mm] = await Promise.all([
-        loadProgress(missions, true),
-        loadProgress(helpers, false),
-        loadProgress(microMissions, true),
-      ]);
-      
-      if (!cancelled) {
-        setMissionsWithProgress(m);
-        setMicroMissionsWithProgress(mm);
-      }
-    })();
+            
+            return {
+                ...cat,
+                missions: missionsWithProg,
+                helperModules: cat.helperModules
+            };
+        }));
+        
+        if (!cancelled) {
+            setCategoriesWithProgress(updated);
+        }
+    };
+
+    if (show) {
+        updateCategories();
+    }
+
     return () => {
       cancelled = true;
     };
-  }, [show, missions, helpers, microMissions]);
+  }, [show]);
 
   if (!show) return null;
 
-  const togglePanel = (key: string) => {
-    // Prevent opening the Mikroprozessortechnik panel when locked
-    if (key === '2-mikroprozessortechnik' && isMikroLocked) return;
-    setOpenPanels(prev => ({...prev, [key]: !prev[key]}));
+  const togglePanel = (categoryId: string) => {
+    // Check lock
+    const category = categoriesWithProgress.find(c => c.id === categoryId);
+    if (!category) return;
+    
+    if (category.lock) {
+        const { requiredBadgeKey, requiredLevel } = category.lock;
+        const currentLevel = badges[requiredBadgeKey]?.badgeLevel ?? 'none';
+        
+        if (!isBadgeLevelSufficient(currentLevel, requiredLevel)) {
+           return;
+        }
+    }
+    
+    setOpenPanels(prev => ({...prev, [categoryId]: !prev[categoryId]}));
   };
 
-  const renderTopicBadges = (category: string) => {
-    const badge = badges[category];
+  const renderTopicBadges = (category: ExerciseCategory) => {
+    // If locked, don't render badge here (logic moved to button content)
+    // Actually the design had specific lock UI.
+    const badge = badges[category.badgeKey];
     if (!badge) return null;
 
     const isCompleted =
@@ -171,6 +157,13 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
         )}
       </span>
     );
+  };
+
+  const isCategoryLocked = (category: ExerciseCategory) => {
+      if (!category.lock) return false;
+      const { requiredBadgeKey, requiredLevel } = category.lock;
+      const currentLevel = badges[requiredBadgeKey]?.badgeLevel ?? 'none';
+      return !isBadgeLevelSufficient(currentLevel, requiredLevel);
   };
 
   return (
@@ -201,128 +194,78 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
         </div>
 
         <div className="dashboard__accordion">
-          {/* Accordion 1: Zahlendarstellung - contains missions + helpers (current behavior) */}
-          <div className="dashboard__accordion-item">
-            <button
-              className="dashboard__accordion-header"
-              onClick={() => togglePanel('1-zahlendarstellung')}
-              aria-expanded={!!openPanels['1-zahlendarstellung']}>
-              <span className="dashboard__accordion-title-row">
-                <span>1. Zahlendarstellung</span>
-                {renderTopicBadges('zahlendarstellung')}
-              </span>
-              <span className="dashboard__accordion-toggle">
-                {openPanels['1-zahlendarstellung'] ? '▾' : '▸'}
-              </span>
-            </button>
-            <div
-              className={`dashboard__accordion-body ${openPanels['1-zahlendarstellung'] ? 'is-open' : ''}`}
-              aria-hidden={!openPanels['1-zahlendarstellung']}>
-              <div className="dashboard__section">
-                <div className="dashboard__section-title-row">
-                  <span className="dashboard__section-title">Missionen</span>
-                  {badges['zahlendarstellung'] && (
-                    <span className="dashboard__section-avg">
-                      Ø Genauigkeit:{' '}
-                      {Math.round(badges['zahlendarstellung'].avgAccuracy)}%
+          {categoriesWithProgress.map(category => {
+              const locked = isCategoryLocked(category);
+              const isOpen = openPanels[category.id];
+              const badge = badges[category.badgeKey];
+              const avgAccuracy = badge ? Math.round(badge.avgAccuracy) : 0;
+              
+              return (
+                <div
+                    key={category.id}
+                    className={`dashboard__accordion-item${locked ? ' dashboard__accordion-item--locked' : ''}`}>
+                    <button
+                    className={`dashboard__accordion-header${locked ? ' dashboard__accordion-header--locked' : ''}`}
+                    onClick={() => togglePanel(category.id)}
+                    aria-expanded={!!isOpen}
+                    aria-disabled={locked}
+                    disabled={locked}>
+                    <span className="dashboard__accordion-title-row">
+                        <span>
+                        {locked && (
+                            <span className="dashboard__lock-icon">🔒</span>
+                        )}
+                        {category.title}
+                        </span>
+                        {locked ? (
+                        <span className="dashboard__locked-hint">
+                            {category.lock?.hint}
+                        </span>
+                        ) : (
+                        renderTopicBadges(category)
+                        )}
                     </span>
-                  )}
-                </div>
-                <ExercisesList exercises={missionsWithProgress} />
-              </div>
-
-              <div className="dashboard__section-separator" />
-
-              <div className="dashboard__section">
-                <div className="dashboard__section-title">Hilfsmodule</div>
-                <ExercisesList
-                  exercises={Object.values(helperModules)
-                    .filter(module => module.topic === 'zahlendarstellung')
-                    .map(module => ({
-                      id: module.slug,
-                      title: `${module.title}`,
-                      description: module.description || '',
-                      path: `/hilfsmodul/${module.slug}`,
-                      progressPercent: undefined,
-                      disabled: false,
-                    }))}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Accordion 2: Mikroprozessortechnik */}
-          <div
-            className={`dashboard__accordion-item${isMikroLocked ? ' dashboard__accordion-item--locked' : ''}`}>
-            <button
-              className={`dashboard__accordion-header${isMikroLocked ? ' dashboard__accordion-header--locked' : ''}`}
-              onClick={() => togglePanel('2-mikroprozessortechnik')}
-              aria-expanded={!!openPanels['2-mikroprozessortechnik']}
-              aria-disabled={isMikroLocked}
-              disabled={isMikroLocked}>
-              <span className="dashboard__accordion-title-row">
-                <span>
-                  {isMikroLocked && (
-                    <span className="dashboard__lock-icon">🔒</span>
-                  )}
-                  2. Mikroprozessortechnik
-                </span>
-                {isMikroLocked ? (
-                  <span className="dashboard__locked-hint">
-                    Erreiche mindestens Bronze in Zahlendarstellung
-                  </span>
-                ) : (
-                  renderTopicBadges('mikroprozessortechnik')
-                )}
-              </span>
-              <span className="dashboard__accordion-toggle">
-                {openPanels['2-mikroprozessortechnik'] ? '▾' : '▸'}
-              </span>
-            </button>
-            <div
-              className={`dashboard__accordion-body ${openPanels['2-mikroprozessortechnik'] ? 'is-open' : ''}`}
-              aria-hidden={!openPanels['2-mikroprozessortechnik']}>
-              <div className="dashboard__section">
-                <div className="dashboard__section-title-row">
-                  <span className="dashboard__section-title">Missionen</span>
-                  {badges['mikroprozessortechnik'] && (
-                    <span className="dashboard__section-avg">
-                      Ø Genauigkeit:{' '}
-                      {Math.round(badges['mikroprozessortechnik'].avgAccuracy)}%
+                    <span className="dashboard__accordion-toggle">
+                        {isOpen ? '▾' : '▸'}
                     </span>
-                  )}
+                    </button>
+                    <div
+                    className={`dashboard__accordion-body ${isOpen ? 'is-open' : ''}`}
+                    aria-hidden={!isOpen}>
+                    <div className="dashboard__section">
+                        <div className="dashboard__section-title-row">
+                        <span className="dashboard__section-title">Missionen</span>
+                        {badges[category.badgeKey] && (
+                            <span className="dashboard__section-avg">
+                            Ø Genauigkeit:{' '}
+                            {avgAccuracy}%
+                            </span>
+                        )}
+                        </div>
+                        <ExercisesList
+                        exercises={
+                            locked
+                            ? category.missions.map(ex => ({
+                                ...ex,
+                                disabled: true,
+                                }))
+                            : category.missions
+                        }
+                        />
+                    </div>
+
+                    <div className="dashboard__section-separator" />
+
+                    <div className="dashboard__section">
+                        <div className="dashboard__section-title">Hilfsmodule</div>
+                        <ExercisesList
+                        exercises={category.helperModules}
+                        />
+                    </div>
+                    </div>
                 </div>
-                <ExercisesList
-                  exercises={
-                    isMikroLocked
-                      ? microMissionsWithProgress.map(ex => ({
-                          ...ex,
-                          disabled: true,
-                        }))
-                      : microMissionsWithProgress
-                  }
-                />
-              </div>
-
-              <div className="dashboard__section-separator" />
-
-              <div className="dashboard__section">
-                <div className="dashboard__section-title">Hilfsmodule</div>
-                <ExercisesList
-                  exercises={Object.values(helperModules)
-                    .filter(module => module.topic === 'mikroprozessortechnik')
-                    .map(module => ({
-                      id: module.slug,
-                      title: `${module.title}`,
-                      description: module.description || '',
-                      path: `/hilfsmodul/${module.slug}`,
-                      progressPercent: undefined,
-                      disabled: false,
-                    }))}
-                />
-              </div>
-            </div>
-          </div>
+              );
+          })}
         </div>
       </div>
     </div>
