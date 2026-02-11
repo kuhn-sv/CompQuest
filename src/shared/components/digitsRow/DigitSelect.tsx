@@ -1,13 +1,17 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
+export type DigitState = 'neutral' | 'correct' | 'wrong';
+
 interface DigitSelectProps {
   value: number;
   onChange: (value: number) => void;
   base: 8 | 16;
   disabled?: boolean;
+  /** Visual feedback after evaluation. */
+  state?: DigitState;
 }
 
-const DigitSelect: React.FC<DigitSelectProps> = ({ value, onChange, base, disabled }) => {
+const DigitSelect: React.FC<DigitSelectProps> = ({ value, onChange, base, disabled, state = 'neutral' }) => {
   const options = useMemo(() => {
     const n = base === 8 ? 8 : 16;
     return Array.from({ length: n }, (_, v) => ({
@@ -62,8 +66,10 @@ const DigitSelect: React.FC<DigitSelectProps> = ({ value, onChange, base, disabl
     }
   };
 
+  const stateCls = state !== 'neutral' ? `digit-select--${state}` : '';
+
   return (
-    <div className="digit-select" ref={wrapperRef}>
+    <div className={`digit-select ${stateCls}`.trim()} ref={wrapperRef}>
       <button
         type="button"
         className="digit-select__button"

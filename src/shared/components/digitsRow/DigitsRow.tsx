@@ -1,6 +1,9 @@
 import React from 'react';
 import DigitSelect from './DigitSelect';
+import type { DigitState } from './DigitSelect';
 import './DigitsRow.scss';
+
+export type { DigitState };
 
 export interface DigitsRowProps {
   digits: number[];
@@ -10,6 +13,7 @@ export interface DigitsRowProps {
   disabled?: boolean;
   showPowers?: boolean;
   powerLabels?: Array<number | string>;
+  digitStates?: DigitState[];
 }
 
 const DigitsRow: React.FC<DigitsRowProps> = ({
@@ -20,6 +24,7 @@ const DigitsRow: React.FC<DigitsRowProps> = ({
   disabled = false,
   showPowers = false,
   powerLabels,
+  digitStates,
 }) => {
   const cols = digits.length;
   const canShowPowers = showPowers && Array.isArray(powerLabels) && powerLabels.length === cols;
@@ -40,7 +45,7 @@ const DigitsRow: React.FC<DigitsRowProps> = ({
       <div className={`digit-grid ${className ?? ''}`.trim()} style={gridStyle}>
         {digits.map((d, i) => (
           <div key={`col:${i}`} className="digit-col">
-            <DigitSelect value={d} onChange={(v) => handleChangeAt(i, v)} base={base} disabled={disabled} />
+            <DigitSelect value={d} onChange={(v) => handleChangeAt(i, v)} base={base} disabled={disabled} state={digitStates?.[i]} />
             {canShowPowers && <div className="power" aria-hidden="true">{powerLabels![i]}</div>}
           </div>
         ))}

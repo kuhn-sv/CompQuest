@@ -1,4 +1,6 @@
 import React, {useCallback, useMemo, useState} from 'react';
+import type { DigitState } from '../../../shared/components/digitsRow/DigitsRow';
+import type { BitState } from '../../../shared/components/bitToggleRow/BitToggleRow';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
 import {DigitsRow} from '../../../shared/components';
@@ -103,6 +105,42 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
 
   const isCorrect = currentValue === target;
 
+  // Compute expected digit arrays for octal/hex
+  const expectedOctDigits = useMemo(() => {
+    const arr: number[] = [];
+    let v = target;
+    for (let i = 0; i < DIGITS_OCTAL; i++) { arr.push(v % 8); v = Math.floor(v / 8); }
+    return arr.reverse();
+  }, [target]);
+
+  const expectedHexDigits = useMemo(() => {
+    const arr: number[] = [];
+    let v = target;
+    for (let i = 0; i < DIGITS_HEX; i++) { arr.push(v % 16); v = Math.floor(v / 16); }
+    return arr.reverse();
+  }, [target]);
+
+  // Per-digit evaluation states (only after evaluate)
+  const octDigitStates: DigitState[] | undefined = evaluated
+    ? octDigits.map((d, i) => d === expectedOctDigits[i] ? 'correct' : 'wrong')
+    : undefined;
+
+  const hexDigitStates: DigitState[] | undefined = evaluated
+    ? hexDigits.map((d, i) => d === expectedHexDigits[i] ? 'correct' : 'wrong')
+    : undefined;
+
+  // Compute expected bits for binary (MSB first)
+  const expectedBits = useMemo(() => {
+    const arr: number[] = [];
+    let v = target;
+    for (let i = 0; i < BITS_BINARY; i++) { arr.push(v % 2); v = Math.floor(v / 2); }
+    return arr.reverse();
+  }, [target]);
+
+  const bitStates: BitState[] | undefined = evaluated
+    ? bits.map((b, i) => b === expectedBits[i] ? 'correct' : 'wrong')
+    : undefined;
+
   return (
     <div className="potenzrechner">
       <TabRow
@@ -144,6 +182,7 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
               className="bits-row"
               showPowers
               powerLabels={powers}
+              bitStates={bitStates}
             />
           )}
 
@@ -156,6 +195,7 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
                 className="digits-row"
                 showPowers
                 powerLabels={octPowers}
+                digitStates={octDigitStates}
               />
             </div>
           )}
@@ -169,6 +209,7 @@ const Potenzrechner: React.FC<SubTaskComponentProps> = ({
                 className="digits-row"
                 showPowers
                 powerLabels={hexPowers}
+                digitStates={hexDigitStates}
               />
             </div>
           )}

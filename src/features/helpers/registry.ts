@@ -20,7 +20,7 @@ import Uebertragshelfer from './uebertragshelfer/Uebertragshelfer.component';
 export const helperModules: Record<string, HelperModuleConfig> = {
   befehlhelfer: {
     slug: 'befehlhelfer',
-    title: 'Befehlhelfer',
+    title: 'Hilfsmodul: Befehlhelfer',
     description: 'Ordne Assembler-Begriffe ihren Beschreibungen zu',
     component: Befehlhelfer,
     topic: 'mikroprozessortechnik',

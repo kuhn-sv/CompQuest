@@ -240,7 +240,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
                     .filter(module => module.topic === 'zahlendarstellung')
                     .map(module => ({
                       id: module.slug,
-                      title: `Hilfsmodul: ${module.title}`,
+                      title: `${module.title}`,
                       description: module.description || '',
                       path: `/hilfsmodul/${module.slug}`,
                       progressPercent: undefined,
@@ -313,7 +313,7 @@ const ExercisesModal: React.FC<ExercisesModalProps> = ({
                     .filter(module => module.topic === 'mikroprozessortechnik')
                     .map(module => ({
                       id: module.slug,
-                      title: `Hilfsmodul: ${module.title}`,
+                      title: `${module.title}`,
                       description: module.description || '',
                       path: `/hilfsmodul/${module.slug}`,
                       progressPercent: undefined,

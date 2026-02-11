@@ -26,6 +26,19 @@
     align-items: center;
     justify-content: space-between;
     padding: 0 10px;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+
+  // Evaluation states
+  .digit-select--correct .digit-select__button {
+    border-color: var(--success) !important;
+    background: rgba(var(--success-rgb, 72, 199, 142), 0.1);
+    color: var(--success);
+  }
+  .digit-select--wrong .digit-select__button {
+    border-color: var(--error) !important;
+    background: rgba(var(--error-rgb, 255, 99, 99), 0.1);
+    color: var(--error);
   }
   .digit-select__chevron {
     margin-left: 8px;

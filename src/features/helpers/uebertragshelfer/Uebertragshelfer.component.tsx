@@ -219,6 +219,7 @@ const Uebertragshelfer: React.FC<SubTaskComponentProps> = ({
                 bits={resultDigits}
                 onChange={handleResultBitsChange}
                 disabled={evaluated}
+                bitStates={validation?.digitResults}
               />
             ) : (
               <DigitsRow
@@ -226,6 +227,7 @@ const Uebertragshelfer: React.FC<SubTaskComponentProps> = ({
                 onChange={handleResultDigitsChange}
                 base={base}
                 disabled={evaluated}
+                digitStates={validation?.digitResults}
               />
             )}
           </div>

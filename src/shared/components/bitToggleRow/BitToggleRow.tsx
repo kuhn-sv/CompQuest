@@ -1,6 +1,9 @@
 import React from 'react';
 import BitToggleButton from '../bitToggleButton/BitToggleButton';
+import type { BitState } from '../bitToggleButton/BitToggleButton';
 import './BitToggleRow.scss';
+
+export type { BitState };
 
 interface BitToggleRowProps {
   bits: number[];               // array of 0/1, MSB-first
@@ -9,9 +12,11 @@ interface BitToggleRowProps {
   disabled?: boolean;
   showPowers?: boolean;         // when true, render powers row below
   powerLabels?: Array<number | string>; // labels to show per bit, must match bits.length when showPowers
+  /** Per-bit evaluation state after submission. */
+  bitStates?: BitState[];
 }
 
-const BitToggleRow: React.FC<BitToggleRowProps> = ({ bits, onChange, className, disabled = false, showPowers = false, powerLabels }) => {
+const BitToggleRow: React.FC<BitToggleRowProps> = ({ bits, onChange, className, disabled = false, showPowers = false, powerLabels, bitStates }) => {
   const toggleBit = (idx: number) => {
     if (disabled) return;
     onChange(bits.map((b, i) => (i === idx ? (b === 0 ? 1 : 0) : b)));
@@ -26,7 +31,7 @@ const BitToggleRow: React.FC<BitToggleRowProps> = ({ bits, onChange, className, 
       <div className={`bit-grid ${className ?? ''}`.trim()} style={gridStyle}>
         {bits.map((b, i) => (
           <div key={`col:${i}`} className="bit-col">
-            <BitToggleButton value={b} onToggle={() => toggleBit(i)} disabled={disabled} />
+            <BitToggleButton value={b} onToggle={() => toggleBit(i)} disabled={disabled} state={bitStates?.[i]} />
             {canShowPowers && (
               <div className="power" aria-hidden="true">{powerLabels![i]}</div>
             )}

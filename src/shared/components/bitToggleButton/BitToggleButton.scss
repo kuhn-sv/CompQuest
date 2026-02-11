@@ -23,4 +23,16 @@
     opacity: 0.6;
     cursor: not-allowed;
   }
+
+  // Evaluation states
+  &--correct {
+    border-color: var(--success) !important;
+    background: rgba(var(--success-rgb, 72, 199, 142), 0.1);
+    color: var(--success);
+  }
+  &--wrong {
+    border-color: var(--error) !important;
+    background: rgba(var(--error-rgb, 255, 99, 99), 0.1);
+    color: var(--error);
+  }
 }
