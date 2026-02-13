@@ -2,7 +2,7 @@ import React, {useState} from 'react';
 import './TaskActionButtons.component.scss';
 import AskTimModal from './AskTimModal.component';
 import TimIcon from './TimIcon';
-import type {TaskFooterControls} from '../../interfaces/tasking.interfaces';
+import { TaskFooterControls } from '@/shared/interfaces/tasking.interfaces';
 
 interface TaskActionButtonsProps extends TaskFooterControls {
   taskMeta?: {
