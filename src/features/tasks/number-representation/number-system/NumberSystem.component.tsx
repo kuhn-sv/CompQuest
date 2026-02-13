@@ -8,10 +8,10 @@ import type {
 } from './interfaces/numberSystem.interface';
 import type {StageScore} from './interfaces/evaluation.interface';
 import type {AssignmentMap} from './numberSystem.types';
-import {EquationRow as SharedEquationRow} from '@shared/components/input/equation-row/EquationRow';
 import NumberWithBase from '@shared/components/input/number/NumberWithBase.component';
 import {
   DndProvider,
+  EquationRow,
 } from '@shared/components';
 import {DragOverlay} from '@dnd-kit/core';
 import type {SubTaskComponentProps} from '../interfaces';
@@ -400,7 +400,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
                     );
                   const isActive = activeTaskId === t.id;
                   return (
-                    <SharedEquationRow
+                    <EquationRow
                       key={`ns-task:${t.id}`}
                       hasAssignment={!!assigned}
                       sourceContent={

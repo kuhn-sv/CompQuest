@@ -1,7 +1,6 @@
 import React from 'react';
-import BitToggleButton from '../bit-toggle-button/BitToggleButton';
-import type { BitState } from '../bit-toggle-button/BitToggleButton';
 import './BitToggleRow.scss';
+import BitToggleButton, { BitState } from '../bit-toggle-button/BitToggleButton.component';
 
 export type { BitState };
 

@@ -11,7 +11,6 @@ import {
   useGameStartScreen,
   CONNECTION_LINE_PRESETS,
 } from '@shared/hooks';
-import {EquationRow as SharedEquationRow} from '@shared/components/input/equation-row/EquationRow';
 import NumberWithBase from '@shared/components/input/number/NumberWithBase.component';
 import {generateAdditionSet, AdditionTask} from './addition.helper';
 import {Difficulty} from '@shared/enums/difficulty.enum';
@@ -24,6 +23,7 @@ import { ResultsSection } from '../shared/number-task/ResultsSection';
 import DndProvider from '@shared/utils/dnd/DndProvider';
 import { ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay';
 import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
+import { EquationRow } from '@/shared/components';
 
 const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
@@ -414,7 +414,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
                           ? '₁₆'
                           : '';
                   return (
-                    <SharedEquationRow
+                    <EquationRow
                       key={`pa-task:${t.id}`}
                       hasAssignment={!!assigned}
                       sourceContent={

@@ -14,7 +14,7 @@ interface TabRowProps<T extends string = string> {
   className?: string;
 }
 
-function TabRow<T extends string = string>({ value, items, onSelect, ariaLabel = 'Darstellungsmodus', className }: TabRowProps<T>) {
+const TabRow = <T extends string = string>({ value, items, onSelect, ariaLabel = 'Darstellungsmodus', className }: TabRowProps<T>) => {
   return (
     <div className={`tabs ${className ?? ''}`.trim()} role="tablist" aria-label={ariaLabel}>
       {items.map((item) => (

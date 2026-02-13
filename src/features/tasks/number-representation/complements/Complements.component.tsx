@@ -1,7 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
-import BitToggleRow from '@shared/components/input/bit-toggle-row/BitToggleRow.tsx';
 import {computeEvalStates} from '@shared/utils/evalStates';
 import TargetValueDisplay from '../../../../features/tasks/shared/components/target-value-display/TargetValueDisplay.component';
 import {GameStartScreen} from '../../../../features/tasks/shared/components';
@@ -16,6 +15,7 @@ import {
   bitsToString,
 } from './complements.helper.ts';
 import {Difficulty} from '@shared/enums/difficulty.enum';
+import { BitToggleRow } from '@/shared/components/index.ts';
 
 type Round = ComplementRound;
 
