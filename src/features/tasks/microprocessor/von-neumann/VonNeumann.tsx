@@ -36,26 +36,18 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     totalTasks: rounds.length,
   });
 
-  // Quiz state
-  const [quizScore, setQuizScore] = useState<TaskStageScore | null>(null);
+  const [currentRoundScore, setCurrentRoundScore] = useState<TaskStageScore | null>(null);
+
+  const handleScoreChange = useCallback((score: TaskStageScore | null) => {
+    setCurrentRoundScore(score);
+  }, []);
+
   const [shuffledItems, setShuffledItems] = useState<
     {id: string; label: string; isCore: boolean}[]
   >([]);
 
-  // Functions state
-  const [functionsScore, setFunctionsScore] = useState<TaskStageScore | null>(
-    null,
-  );
-
-  // Reconstruct state
-  const [reconstructScore, setReconstructScore] =
-    useState<TaskStageScore | null>(null);
   const [shuffledReconstructComponents, setShuffledReconstructComponents] =
     useState<string[]>([]);
-
-  // Bus assignment state
-  const [busAssignmentScore, setBusAssignmentScore] =
-    useState<TaskStageScore | null>(null);
 
   // Single reset key for all sub-components (remounts them on change)
   const [resetKey, setResetKey] = useState<number>(0);
@@ -75,6 +67,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   // Initialize round state when round changes
   useEffect(() => {
     setEvaluated(false);
+    setCurrentRoundScore(null); // Reset score for new round
     setResetKey(prev => prev + 1);
 
     // Shuffle quiz items if this is a quiz round
@@ -141,11 +134,13 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
   const startTask = useCallback(() => {
     baseStart();
     setEvaluated(false);
+    setCurrentRoundScore(null);
     setResetKey(prev => prev + 1);
   }, [baseStart]);
 
   const resetTask = useCallback(() => {
     setEvaluated(false);
+    setCurrentRoundScore(null);
     setResetKey(prev => prev + 1);
   }, []);
 
@@ -156,22 +151,10 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     let total = 1;
     let points = 0;
 
-    if (current.type === 'quiz' && quizScore) {
-      correct = quizScore.correct;
-      total = quizScore.total;
-      points = quizScore.points;
-    } else if (current.type === 'functions' && functionsScore) {
-      correct = functionsScore.correct;
-      total = functionsScore.total;
-      points = functionsScore.points;
-    } else if (current.type === 'reconstruct' && reconstructScore) {
-      correct = reconstructScore.correct;
-      total = reconstructScore.total;
-      points = reconstructScore.points;
-    } else if (current.type === 'busAssignment' && busAssignmentScore) {
-      correct = busAssignmentScore.correct;
-      total = busAssignmentScore.total;
-      points = busAssignmentScore.points;
+    if (currentRoundScore) {
+      correct = currentRoundScore.correct;
+      total = currentRoundScore.total;
+      points = currentRoundScore.points;
     }
 
     const difficulty = Difficulty.Easy;
@@ -194,11 +177,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       });
     }
   }, [
-    current,
-    quizScore,
-    functionsScore,
-    reconstructScore,
-    busAssignmentScore,
+    currentRoundScore,
     getElapsed,
     onSummaryChange,
     roundIndex,
@@ -283,7 +262,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
         <VonNeumannQuiz
           key={resetKey}
           items={shuffledItems}
-          onChange={score => setQuizScore(score)}
+          onChange={handleScoreChange}
           evaluated={evaluated}
         />
       ) : current.type === 'functions' && current.functionPairs ? (
@@ -291,21 +270,21 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
           key={resetKey}
           left={current.functionPairs.left}
           right={current.functionPairs.right}
-          onChange={score => setFunctionsScore(score)}
+          onChange={handleScoreChange}
           evaluated={evaluated}
         />
       ) : current.type === 'reconstruct' && current.components ? (
         <VonNeumannReconstruct
           key={resetKey}
           components={shuffledReconstructComponents}
-          onChange={score => setReconstructScore(score)}
+          onChange={handleScoreChange}
           evaluated={evaluated}
         />
       ) : current.type === 'busAssignment' && current.buses ? (
         <VonNeumannBusAssignment
           key={resetKey}
           buses={current.buses}
-          onChange={score => setBusAssignmentScore(score)}
+          onChange={handleScoreChange}
           evaluated={evaluated}
         />
       ) : null}
