@@ -22,7 +22,7 @@ interface TopicGuardProps {
  * Usage:
  * ```tsx
  * <TopicGuard requiredCategory="zahlendarstellung" requiredLevel="bronze">
- *   <PracticeTaskTwoPage />
+ *   <MicroProcessorPage />
  * </TopicGuard>
  * ```
  */

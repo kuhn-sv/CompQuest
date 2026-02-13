@@ -13,11 +13,11 @@ import {
   JavaToAssembly,
 } from './components';
 
-interface PracticeTaskTwoPageProps {
+interface MicroProcessorPageProps {
   initialSubTask?: TaskId;
 }
 
-const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
+const MicroProcessor: React.FC<MicroProcessorPageProps> = ({
   initialSubTask = TaskId.VonNeumann,
 }) => {
   const [currentSubTask] = useState<TaskId>(initialSubTask);
@@ -110,4 +110,4 @@ const PracticeTaskTwo: React.FC<PracticeTaskTwoPageProps> = ({
   );
 };
 
-export default PracticeTaskTwo;
+export default MicroProcessor;

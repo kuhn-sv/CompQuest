@@ -27,7 +27,7 @@ import {TaskId} from './shared/enums/taskId.enum';
 import {useOrientation} from './shared/hooks/useOrientation';
 import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
 import { ProfessorDashboardPage } from './features/professor-dashboard';
-import PracticeTaskTwoPage from './features/tasks/microprocessor/PracticeTaskTwo.page';
+import MicroProcessorPage from './features/tasks/microprocessor/MicroProcessor.page';
 import PracticeTaskOnePage from './features/tasks/number-representation/PracticeTaskOne.page';
 
 const App: React.FC = () => {
@@ -161,7 +161,7 @@ const AppWithNavbar: React.FC = () => {
           path="/practice-task-two"
           element={
             <ProtectedRoute>
-              <PracticeTaskTwoPage />
+              <MicroProcessorPage />
             </ProtectedRoute>
           }
         />
@@ -230,7 +230,7 @@ const AppWithNavbar: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <PracticeTaskTwoPage initialSubTask={TaskId.VonNeumann} />
+                <MicroProcessorPage initialSubTask={TaskId.VonNeumann} />
               </TopicGuard>
             </ProtectedRoute>
           }
@@ -243,7 +243,7 @@ const AppWithNavbar: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <PracticeTaskTwoPage initialSubTask={TaskId.ReadAssembly} />
+                <MicroProcessorPage initialSubTask={TaskId.ReadAssembly} />
               </TopicGuard>
             </ProtectedRoute>
           }
@@ -256,7 +256,7 @@ const AppWithNavbar: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <PracticeTaskTwoPage initialSubTask={TaskId.WriteAssembly} />
+                <MicroProcessorPage initialSubTask={TaskId.WriteAssembly} />
               </TopicGuard>
             </ProtectedRoute>
           }
@@ -269,7 +269,7 @@ const AppWithNavbar: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <PracticeTaskTwoPage initialSubTask={TaskId.JavaToAssembly} />
+                <MicroProcessorPage initialSubTask={TaskId.JavaToAssembly} />
               </TopicGuard>
             </ProtectedRoute>
           }

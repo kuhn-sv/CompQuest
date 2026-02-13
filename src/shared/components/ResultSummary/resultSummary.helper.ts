@@ -14,7 +14,7 @@ function chaptersToString(chapters?: IChapter[]) {
   return chapters.map((c) => c.title).join(', ');
 }
 
-// Determine if task is a PracticeTaskTwo assembler-related task
+// Determine if task is a MicroProcessorPage assembler-related task
 function isAssemblerTask(taskId?: string): boolean {
   return ['read-assembly', 'write-assembly', 'java-to-assembly'].includes(taskId || '');
 }
