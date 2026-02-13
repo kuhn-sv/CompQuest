@@ -32,7 +32,7 @@ import { PerformanceMonitor } from './performance.monitor';
 import { QualityLevel } from '../../interfaces/performance.types';
 import { getQualitySettings } from './quality.settings';
 import { getModelPathForQuality } from './lod.config';
-import { determineInitialQuality, getDeviceDescription } from './device.detector';
+import { determineInitialQuality } from './device.detector';
 
 // Extend Model3DProps to include critical performance callback
 interface ExtendedModel3DProps extends Model3DProps {
@@ -55,7 +55,8 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
   const rayRef = useRef<THREE.Raycaster>(new THREE.Raycaster());
   
   const [isLoading, setIsLoading] = useState(true);
-  const [currentQuality, setCurrentQuality] = useState<QualityLevel>(QualityLevel.LOW);
+  // Initialize with determined quality to avoid flicker
+  const [currentQuality, setCurrentQuality] = useState<QualityLevel>(determineInitialQuality);
   
   // Performance monitoring
   const performanceMonitorRef = useRef<PerformanceMonitor | null>(null);
@@ -146,6 +147,7 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
             }
             
             setCurrentQuality(newQuality);
+            localStorage.setItem('model3d_quality', newQuality);
             setIsLoading(false);
           },
           (error) => {
@@ -156,6 +158,7 @@ const Model3D: React.FC<ExtendedModel3DProps> = ({
       } else {
         // Just update settings, no model swap needed
         setCurrentQuality(newQuality);
+        localStorage.setItem('model3d_quality', newQuality);
         
         if (sceneRef.current && rendererRef.current && currentMount) {
           applyQualitySettings(

@@ -1,6 +1,6 @@
 // Badge-related types and constants for the topic badge system
 
-export type BadgeLevel = 'none' | 'bronze' | 'silver' | 'gold' | 'platinum';
+export type BadgeLevel = 'none' | 'bronze' | 'silver' | 'gold' | 'diamond';
 
 export interface BadgeConfig {
   level: BadgeLevel;
@@ -23,11 +23,11 @@ export interface UserTopicBadge {
  * Used for legend rendering, level derivation, and progress coloring.
  */
 export const BADGE_TIERS: BadgeConfig[] = [
-  {level: 'platinum', label: 'Platin', icon: '💎', minAccuracy: 100, description: '100%'},
-  {level: 'gold', label: 'Gold', icon: '🥇', minAccuracy: 90, description: '90–99%'},
-  {level: 'silver', label: 'Silber', icon: '🥈', minAccuracy: 80, description: '80–89%'},
-  {level: 'bronze', label: 'Bronze', icon: '🥉', minAccuracy: 50, description: '50–79%'},
-  {level: 'none', label: '', icon: '', minAccuracy: 0, description: '< 50%'},
+  { level: 'diamond', label: 'Diamant', icon: '💎', minAccuracy: 100, description: '100%' },
+  { level: 'gold', label: 'Gold', icon: '🥇', minAccuracy: 90, description: '90–99%' },
+  { level: 'silver', label: 'Silber', icon: '🥈', minAccuracy: 80, description: '80–89%' },
+  { level: 'bronze', label: 'Bronze', icon: '🥉', minAccuracy: 50, description: '50–79%' },
+  { level: 'none', label: '', icon: '', minAccuracy: 0, description: '< 50%' },
 ];
 
 /** Quick lookup: BadgeLevel → BadgeConfig */
@@ -52,7 +52,7 @@ export const getBadgeLevelForAccuracy = (accuracy: number): BadgeLevel => {
  * Ordered rank of badge levels (lowest → highest).
  * Used for comparing badge levels programmatically.
  */
-const BADGE_LEVEL_ORDER: BadgeLevel[] = ['none', 'bronze', 'silver', 'gold', 'platinum'];
+const BADGE_LEVEL_ORDER: BadgeLevel[] = ['none', 'bronze', 'silver', 'gold', 'diamond'];
 
 /**
  * Check whether `current` badge level meets or exceeds `required` badge level.

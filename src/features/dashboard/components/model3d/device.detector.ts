@@ -19,24 +19,24 @@ interface DeviceCapabilities {
  */
 export function detectDeviceCapabilities(): DeviceCapabilities {
   const userAgent = navigator.userAgent.toLowerCase();
-  
+
   // Device Memory API (Chrome/Edge)
   const memory = (navigator as any).deviceMemory as number | undefined;
-  
+
   // Hardware Concurrency (CPU cores)
   const cores = navigator.hardwareConcurrency;
-  
+
   // Mobile/Tablet detection
   const isMobile = /android|webos|iphone|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
   const isTablet = /ipad|android(?!.*mobile)|tablet|kindle|silk/i.test(userAgent);
-  
+
   // Connection speed (Network Information API - experimental)
   const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
   const connectionSpeed = connection?.effectiveType;
-  
+
   // Device pixel ratio
   const devicePixelRatio = window.devicePixelRatio || 1;
-  
+
   return {
     memory,
     cores,
@@ -52,8 +52,18 @@ export function detectDeviceCapabilities(): DeviceCapabilities {
  * Strategy: Start LOW (safe), let performance monitoring upgrade if capable
  */
 export function determineInitialQuality(): QualityLevel {
-  // Always start with LOW for progressive enhancement
-  // Performance monitor will upgrade if device is capable
+  // Try to recover last used quality from localStorage
+  try {
+    const savedQuality = localStorage.getItem('model3d_quality');
+    if (savedQuality && Object.values(QualityLevel).includes(savedQuality as QualityLevel)) {
+      return savedQuality as QualityLevel;
+    }
+  } catch (e) {
+    console.warn('Failed to read quality settings from localStorage', e);
+  }
+
+  // Default to LOW for better first impression
+  // Performance monitor will upgrade if needed
   return QualityLevel.LOW;
 }
 
@@ -63,27 +73,27 @@ export function determineInitialQuality(): QualityLevel {
  */
 export function isLowEndDevice(): boolean {
   const capabilities = detectDeviceCapabilities();
-  
+
   // Low memory
   if (capabilities.memory && capabilities.memory < 4) {
     return true;
   }
-  
+
   // Few CPU cores
   if (capabilities.cores && capabilities.cores < 4) {
     return true;
   }
-  
+
   // Slow connection
   if (capabilities.connectionSpeed === 'slow-2g' || capabilities.connectionSpeed === '2g') {
     return true;
   }
-  
+
   // Mobile device (often lower performance)
   if (capabilities.isMobile) {
     return true;
   }
-  
+
   return false;
 }
 
@@ -93,15 +103,15 @@ export function isLowEndDevice(): boolean {
 export function getDeviceDescription(): string {
   const capabilities = detectDeviceCapabilities();
   const parts: string[] = [];
-  
+
   if (capabilities.memory) {
     parts.push(`${capabilities.memory}GB RAM`);
   }
-  
+
   if (capabilities.cores) {
     parts.push(`${capabilities.cores} cores`);
   }
-  
+
   if (capabilities.isMobile) {
     parts.push('Mobile');
   } else if (capabilities.isTablet) {
@@ -109,11 +119,11 @@ export function getDeviceDescription(): string {
   } else {
     parts.push('Desktop');
   }
-  
+
   if (capabilities.connectionSpeed) {
     parts.push(capabilities.connectionSpeed.toUpperCase());
   }
-  
+
   return parts.join(', ') || 'Unknown device';
 }
 

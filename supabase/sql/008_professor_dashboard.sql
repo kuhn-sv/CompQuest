@@ -182,7 +182,7 @@ begin
     ct.category,
     coalesce(round(us.sum_accuracy / ct.total, 2), 0) as avg_accuracy,
     case
-        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 100 then 'platinum'
+        when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 100 then 'diamond'
         when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 90 then 'gold'
         when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 80 then 'silver'
         when coalesce(round(us.sum_accuracy / ct.total, 2), 0) >= 50 then 'bronze'

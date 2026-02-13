@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
-import { QualityLevel, QualitySettings } from '../../interfaces/performance.types';
+import { QualityLevel } from '../../interfaces/performance.types';
 import { getQualitySettings } from './quality.settings';
 import { getModelPathForQuality, requiresModelSwap } from './lod.config';
 // Enable caching of fetched assets to speed up subsequent loads
@@ -23,7 +23,7 @@ export const createCamera = (width: number, height: number): THREE.PerspectiveCa
 };
 
 export const createRenderer = (width: number, height: number): THREE.WebGLRenderer => {
-  const renderer = new THREE.WebGLRenderer({ 
+  const renderer = new THREE.WebGLRenderer({
     antialias: true,
     alpha: true,
     powerPreference: 'low-power', // Battery/performance saving mode
@@ -64,7 +64,7 @@ export const setupLighting = (scene: THREE.Scene): void => {
 // CPU component detection
 export const isCPUComponent = (partName: string): boolean => {
   const cpuKeywords = ['cpulid'];
-  return cpuKeywords.some(keyword => 
+  return cpuKeywords.some(keyword =>
     partName.toLowerCase().includes(keyword.toLowerCase())
   );
 };
@@ -72,9 +72,9 @@ export const isCPUComponent = (partName: string): boolean => {
 // Placeholder creation
 export const createPlaceholder = (): THREE.Group => {
   const group = new THREE.Group();
-  
+
   const geometry = new THREE.BoxGeometry(2, 1, 0.2);
-  const material = new THREE.MeshLambertMaterial({ 
+  const material = new THREE.MeshLambertMaterial({
     color: 0x2d5a27,
     side: THREE.DoubleSide,
   });
@@ -155,15 +155,15 @@ export const scaleAndCenterModel = (object: THREE.Object3D): THREE.Group => {
   const box = new THREE.Box3().setFromObject(object);
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3());
-  
+
   const modelGroup = new THREE.Group();
   object.position.sub(center);
   modelGroup.add(object);
-  
+
   const maxDim = Math.max(size.x, size.y, size.z);
   const scale = 10 / maxDim;
   modelGroup.scale.setScalar(scale);
-  
+
   return modelGroup;
 };
 
@@ -217,11 +217,11 @@ export const getIntersectedObject = (
 ): THREE.Mesh | null => {
   raycaster.setFromCamera(mouse, camera);
   const intersects = raycaster.intersectObjects(scene.children, true);
-  
+
   if (intersects.length > 0) {
     return intersects[0].object as THREE.Mesh;
   }
-  
+
   return null;
 };
 
@@ -232,7 +232,7 @@ export const createHighlightMaterial = (): THREE.MeshBasicMaterial => {
 
 // CPU pulse animation
 export const createCPUPulseMaterial = (): THREE.MeshBasicMaterial => {
-  return new THREE.MeshBasicMaterial({ 
+  return new THREE.MeshBasicMaterial({
     color: 0x4169E1, // Royal Blue
     transparent: true,
     opacity: 1.0
@@ -267,7 +267,7 @@ export const isDragGesture = (
   threshold: number = 5
 ): boolean => {
   const dragDistance = Math.sqrt(
-    Math.pow(currentPos.x - startPos.x, 2) + 
+    Math.pow(currentPos.x - startPos.x, 2) +
     Math.pow(currentPos.y - startPos.y, 2)
   );
   return dragDistance > threshold;
@@ -284,7 +284,7 @@ export const calculateRotation = (
 ): { rotationX: number; rotationY: number } => {
   const deltaX = mouseX - startMouseX;
   const deltaY = mouseY - startMouseY;
-  
+
   return {
     rotationX: baseRotationX - deltaY * Math.PI * 0.25,
     rotationY: baseRotationY + deltaX * Math.PI * 0.5
@@ -312,21 +312,21 @@ export const createAnimationLoop = (
   getTargetRotation: () => { x: number; y: number }
 ): (() => void) => {
   let animationId: number;
-  
+
   const animate = () => {
     animationId = requestAnimationFrame(animate);
-    
+
     const currentModel = getCurrentModel();
     if (currentModel) {
       const targetRotation = getTargetRotation();
       updateModelRotation(currentModel, targetRotation.x, targetRotation.y);
     }
-    
+
     renderer.render(scene, camera);
   };
-  
+
   animate();
-  
+
   return () => {
     if (animationId) {
       cancelAnimationFrame(animationId);
@@ -366,10 +366,10 @@ export const applyRendererQuality = (
   height: number
 ): void => {
   const settings = getQualitySettings(quality);
-  
+
   renderer.setPixelRatio(settings.pixelRatio);
   renderer.setSize(width, height);
-  
+
   // Note: Antialiasing cannot be changed after renderer creation,
   // but we track it for potential renderer recreation
 };
@@ -382,7 +382,7 @@ export const adjustLighting = (
   quality: QualityLevel
 ): void => {
   const settings = getQualitySettings(quality);
-  
+
   // Remove all existing lights
   const lightsToRemove: THREE.Light[] = [];
   scene.traverse((child) => {
@@ -391,14 +391,14 @@ export const adjustLighting = (
     }
   });
   lightsToRemove.forEach(light => scene.remove(light));
-  
+
   // Add ambient light (always present)
   const ambientLight = new THREE.AmbientLight(0x404040, 2.0);
   scene.add(ambientLight);
-  
+
   // Add directional lights based on quality
   const lightIntensity = 1.0;
-  
+
   if (settings.lightCount >= 1) {
     // Front light (most important)
     const frontLight = new THREE.DirectionalLight(0xffffff, lightIntensity);
@@ -406,20 +406,20 @@ export const adjustLighting = (
     frontLight.castShadow = false;
     scene.add(frontLight);
   }
-  
+
   if (settings.lightCount >= 3) {
     // Add top and one side light
     const topLight = new THREE.DirectionalLight(0xffffff, lightIntensity);
     topLight.position.set(0, 10, 0);
     topLight.castShadow = false;
     scene.add(topLight);
-    
+
     const sideLight = new THREE.DirectionalLight(0xffffff, lightIntensity);
     sideLight.position.set(10, 0, 0);
     sideLight.castShadow = false;
     scene.add(sideLight);
   }
-  
+
   if (settings.lightCount >= 6) {
     // Add remaining lights (back, left, bottom)
     const lights = [
@@ -427,7 +427,7 @@ export const adjustLighting = (
       { position: [-10, 0, 0], name: 'left' },
       { position: [0, -10, 0], name: 'bottom' }
     ];
-    
+
     lights.forEach(({ position }) => {
       const light = new THREE.DirectionalLight(0xffffff, lightIntensity);
       light.position.set(position[0], position[1], position[2]);
@@ -450,7 +450,7 @@ export const simplifyMaterials = (
   quality: QualityLevel
 ): void => {
   const settings = getQualitySettings(quality);
-  
+
   if (!settings.useMaterialSimplification) {
     // Restore original materials if we have them
     model.traverse((child) => {
@@ -463,7 +463,7 @@ export const simplifyMaterials = (
     });
     return;
   }
-  
+
   // Apply simplified materials
   model.traverse((child) => {
     if (child instanceof THREE.Mesh) {
@@ -471,19 +471,19 @@ export const simplifyMaterials = (
       if (!originalMaterialsMap.has(child)) {
         originalMaterialsMap.set(child, child.material);
       }
-      
+
       // Skip CPU component (it has its own pulsing material)
       if (isCPUComponent(child.name)) {
         return;
       }
-      
-      const originalMaterial = Array.isArray(child.material) 
-        ? child.material[0] 
+
+      const originalMaterial = Array.isArray(child.material)
+        ? child.material[0]
         : child.material;
-      
-      if (originalMaterial instanceof THREE.MeshStandardMaterial || 
-          originalMaterial instanceof THREE.MeshPhongMaterial) {
-        
+
+      if (originalMaterial instanceof THREE.MeshStandardMaterial ||
+        originalMaterial instanceof THREE.MeshPhongMaterial) {
+
         // Create a simple material with basic lighting
         const simplifiedMaterial = new THREE.MeshBasicMaterial({
           color: originalMaterial.color,
@@ -492,7 +492,7 @@ export const simplifyMaterials = (
           opacity: originalMaterial.opacity,
           side: originalMaterial.side
         });
-        
+
         child.material = simplifiedMaterial;
       }
     }
@@ -524,10 +524,10 @@ export const applyQualitySettings = (
 ): void => {
   // Apply renderer settings
   applyRendererQuality(renderer, quality, width, height);
-  
+
   // Adjust lighting
   adjustLighting(scene, quality);
-  
+
   // Simplify materials if model is loaded
   if (model) {
     simplifyMaterials(model, quality);
@@ -544,17 +544,17 @@ export const unloadCurrentModel = (
   model: THREE.Object3D | null
 ): void => {
   if (!model) return;
-  
+
   // Remove from scene
   scene.remove(model);
-  
+
   // Traverse and dispose of geometries and materials
   model.traverse((child) => {
     if (child instanceof THREE.Mesh) {
       if (child.geometry) {
         child.geometry.dispose();
       }
-      
+
       if (child.material) {
         if (Array.isArray(child.material)) {
           child.material.forEach(material => material.dispose());
@@ -578,14 +578,14 @@ export const swapModel = (
   onError?: (error: unknown) => void
 ): void => {
   const modelPath = getModelPathForQuality(newQuality);
-  
+
   // Store current rotation if model exists
   const currentRotation = currentModel ? {
     x: currentModel.rotation.x,
     y: currentModel.rotation.y,
     z: currentModel.rotation.z
   } : null;
-  
+
   // Load new model
   loadGLTFModel(
     modelPath,
@@ -596,12 +596,12 @@ export const swapModel = (
       if (currentModel) {
         unloadCurrentModel(scene, currentModel);
       }
-      
+
       // Apply previous rotation to new model
       if (currentRotation) {
         newModel.rotation.set(currentRotation.x, currentRotation.y, currentRotation.z);
       }
-      
+
       onLoaded(newModel);
     },
     undefined,

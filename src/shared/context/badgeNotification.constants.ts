@@ -1,4 +1,4 @@
-import type {BadgeLevel} from '../interfaces';
+import type { BadgeLevel } from '../interfaces';
 
 /** Category key → user-facing display name */
 export const CATEGORY_DISPLAY_NAMES: Record<string, string> = {
@@ -15,5 +15,5 @@ export const BADGE_RANK: Record<BadgeLevel, number> = {
   bronze: 1,
   silver: 2,
   gold: 3,
-  platinum: 4,
+  diamond: 4,
 };
