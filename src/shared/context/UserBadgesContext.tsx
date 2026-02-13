@@ -27,8 +27,13 @@ export const UserBadgesProvider: React.FC<Props> = ({
   const [badges, setBadges] = useState<Record<string, UserTopicBadge>>({});
   const [loading, setLoading] = useState(false);
 
+  const hasFetchedOnce = React.useRef(false);
+
   const fetchBadges = useCallback(async () => {
-    setLoading(true);
+    // Only show global loading spinner on first load
+    if (!hasFetchedOnce.current) {
+      setLoading(true);
+    }
     try {
       const badgeData = await trainingService.getUserBadges();
       const map: Record<string, UserTopicBadge> = {};
@@ -36,6 +41,7 @@ export const UserBadgesProvider: React.FC<Props> = ({
         map[b.category] = b;
       }
       setBadges(map);
+      hasFetchedOnce.current = true;
     } catch {
       // Silently ignore – user can still use the app
     } finally {
@@ -48,6 +54,7 @@ export const UserBadgesProvider: React.FC<Props> = ({
     if (!isAuthenticated) {
       setBadges({});
       setLoading(false);
+      hasFetchedOnce.current = false;
       return;
     }
     fetchBadges();

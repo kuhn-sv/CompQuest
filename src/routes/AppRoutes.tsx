@@ -9,8 +9,9 @@ import HelperModulePage from '../features/helpers/HelperModule.page';
 import OnboardingPage from '../features/onboarding/onboarding.page';
 import { TaskId } from '../shared/enums/taskId.enum';
 import { ProfessorDashboardPage } from '../features/professor-dashboard';
-import MicroProcessorPage from '../features/tasks/microprocessor/MicroProcessor.page';
-import NumberRepresentation from '../features/tasks/number-representation/NumberRepresentation.page';
+import GenericTaskPage from '../features/tasks/shared/pages/GenericTask.page';
+import { microprocessorConfig } from '../features/tasks/microprocessor/config/microprocessor.config';
+import { numberRepresentationConfig } from '@/features/tasks/number-representation/config/numberRepresentation.config';
 
 const AppRoutes: React.FC = () => {
   const location = useLocation();
@@ -91,7 +92,7 @@ const AppRoutes: React.FC = () => {
           path="/practice-task-one"
           element={
             <ProtectedRoute>
-              <NumberRepresentation />
+              <GenericTaskPage subTaskConfigs={numberRepresentationConfig} />
             </ProtectedRoute>
           }
         />
@@ -100,7 +101,7 @@ const AppRoutes: React.FC = () => {
           path="/practice-task-two"
           element={
             <ProtectedRoute>
-              <MicroProcessorPage />
+              <GenericTaskPage subTaskConfigs={microprocessorConfig} />
             </ProtectedRoute>
           }
         />
@@ -110,7 +111,10 @@ const AppRoutes: React.FC = () => {
           path="/task/number-system"
           element={
             <ProtectedRoute>
-              <NumberRepresentation initialSubTask={TaskId.NumberSystem} />
+              <GenericTaskPage
+                subTaskConfigs={numberRepresentationConfig}
+                initialSubTask={TaskId.NumberSystem}
+              />
             </ProtectedRoute>
           }
         />
@@ -119,7 +123,10 @@ const AppRoutes: React.FC = () => {
           path="/task/positive-arithmetic"
           element={
             <ProtectedRoute>
-              <NumberRepresentation initialSubTask={TaskId.PositiveArithmetic} />
+              <GenericTaskPage
+                subTaskConfigs={numberRepresentationConfig}
+                initialSubTask={TaskId.PositiveArithmetic}
+              />
             </ProtectedRoute>
           }
         />
@@ -128,7 +135,8 @@ const AppRoutes: React.FC = () => {
           path="/task/twos-complement-arithmetic"
           element={
             <ProtectedRoute>
-              <NumberRepresentation
+              <GenericTaskPage
+                subTaskConfigs={numberRepresentationConfig}
                 initialSubTask={TaskId.TwosComplementArithmetic}
               />
             </ProtectedRoute>
@@ -139,7 +147,10 @@ const AppRoutes: React.FC = () => {
           path="/task/complements"
           element={
             <ProtectedRoute>
-              <NumberRepresentation initialSubTask={TaskId.Complements} />
+              <GenericTaskPage
+                subTaskConfigs={numberRepresentationConfig}
+                initialSubTask={TaskId.Complements}
+              />
             </ProtectedRoute>
           }
         />
@@ -148,7 +159,10 @@ const AppRoutes: React.FC = () => {
           path="/task/fixed-floating-point"
           element={
             <ProtectedRoute>
-              <NumberRepresentation initialSubTask={TaskId.FixedFloatingPoint} />
+              <GenericTaskPage
+                subTaskConfigs={numberRepresentationConfig}
+                initialSubTask={TaskId.FixedFloatingPoint}
+              />
             </ProtectedRoute>
           }
         />
@@ -157,7 +171,10 @@ const AppRoutes: React.FC = () => {
           path="/task/quiz"
           element={
             <ProtectedRoute>
-              <NumberRepresentation initialSubTask={TaskId.Quiz} />
+              <GenericTaskPage
+                subTaskConfigs={numberRepresentationConfig}
+                initialSubTask={TaskId.Quiz}
+              />
             </ProtectedRoute>
           }
         />
@@ -169,7 +186,10 @@ const AppRoutes: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <MicroProcessorPage initialSubTask={TaskId.VonNeumann} />
+                <GenericTaskPage
+                  subTaskConfigs={microprocessorConfig}
+                  initialSubTask={TaskId.VonNeumann}
+                />
               </TopicGuard>
             </ProtectedRoute>
           }
@@ -182,7 +202,10 @@ const AppRoutes: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <MicroProcessorPage initialSubTask={TaskId.ReadAssembly} />
+                <GenericTaskPage
+                  subTaskConfigs={microprocessorConfig}
+                  initialSubTask={TaskId.ReadAssembly}
+                />
               </TopicGuard>
             </ProtectedRoute>
           }
@@ -195,7 +218,10 @@ const AppRoutes: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <MicroProcessorPage initialSubTask={TaskId.WriteAssembly} />
+                <GenericTaskPage
+                  subTaskConfigs={microprocessorConfig}
+                  initialSubTask={TaskId.WriteAssembly}
+                />
               </TopicGuard>
             </ProtectedRoute>
           }
@@ -208,7 +234,10 @@ const AppRoutes: React.FC = () => {
               <TopicGuard
                 requiredCategory="zahlendarstellung"
                 requiredLevel="bronze">
-                <MicroProcessorPage initialSubTask={TaskId.JavaToAssembly} />
+                <GenericTaskPage
+                  subTaskConfigs={microprocessorConfig}
+                  initialSubTask={TaskId.JavaToAssembly}
+                />
               </TopicGuard>
             </ProtectedRoute>
           }

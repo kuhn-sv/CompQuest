@@ -336,7 +336,11 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
               stop();
               const pending = pendingSummaryRef.current;
               pendingSummaryRef.current = null;
-              await recordPendingAttempt(pending);
+              try {
+                await recordPendingAttempt(pending);
+              } catch (e) {
+                console.error("Failed to record attempt, displaying summary anyway", e);
+              }
               setSummaryState(pending);
             } else {
               start();
@@ -360,7 +364,11 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
                           stop();
                           const pending = pendingSummaryRef.current;
                           pendingSummaryRef.current = null;
-                          await recordPendingAttempt(pending);
+                          try {
+                            await recordPendingAttempt(pending);
+                          } catch (e) {
+                             console.error("Failed to record attempt, displaying summary anyway", e);
+                          }
                           setSummaryState(pending);
                         } else {
                           start();
