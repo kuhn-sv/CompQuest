@@ -195,6 +195,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
     displayName: string,
     matrikelnummer: string,
     gamertag: string,
+    leaderboardOptIn: boolean,
   ): Promise<void> => {
     try {
       setLoading(true);
@@ -206,6 +207,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({children}) => {
         displayName,
         matrikelnummer,
         gamertag,
+        leaderboardOptIn,
       );
       // Inform UI to show verification modal
       setEmailVerificationRequired(email);

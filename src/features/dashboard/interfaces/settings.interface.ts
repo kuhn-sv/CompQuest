@@ -9,4 +9,6 @@ export interface SettingsModalProps {
   onSignOut: () => void;
   isAdmin: boolean;
   onNavigateToAdmin: () => void;
+  leaderboardOptIn: boolean;
+  onLeaderboardOptInChange: (value: boolean) => void;
 }

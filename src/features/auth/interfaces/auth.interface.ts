@@ -10,6 +10,7 @@ export interface UserProfile {
   displayName: string;
   matrikelnummer: string;
   gamertag: string;
+  leaderboardOptIn: boolean;
   // 'student' | 'admin'
   role?: 'student' | 'admin';
   createdAt: string;
@@ -61,7 +62,7 @@ export interface AuthContextType {
   error: string | null;
   emailVerificationRequired: string | null;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, displayName: string, matrikelnummer: string, gamertag: string) => Promise<void>;
+  signUp: (email: string, password: string, displayName: string, matrikelnummer: string, gamertag: string, leaderboardOptIn: boolean) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   resendEmailVerification: (email: string) => Promise<void>;
@@ -79,4 +80,5 @@ export interface RegisterData extends LoginCredentials {
   matrikelnummer: string;
   gamertag: string;
   confirmPassword: string;
+  leaderboardOptIn: boolean;
 }

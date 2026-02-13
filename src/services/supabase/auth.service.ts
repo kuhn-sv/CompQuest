@@ -25,7 +25,7 @@ const defaultProgress: UserProgress = {
 const nowIso = () => new Date().toISOString();
 
 // Ensure a profile row exists for the given auth user id
-const ensureUserProfile = async (uid: string, email: string, displayName?: string | null, matrikelnummer?: string, gamertag?: string) => {
+const ensureUserProfile = async (uid: string, email: string, displayName?: string | null, matrikelnummer?: string, gamertag?: string, leaderboardOptIn?: boolean) => {
   const { data, error } = await supabase
     .from('profiles')
     .select('id')
@@ -43,6 +43,7 @@ const ensureUserProfile = async (uid: string, email: string, displayName?: strin
       displayName: displayName || '',
       matrikelnummer: matrikelnummer || '',
       gamertag: gamertag || '',
+      leaderboardOptIn: leaderboardOptIn ?? true,
       createdAt: nowIso(),
       lastLoginAt: nowIso(),
       preferences: defaultPreferences,
@@ -55,6 +56,7 @@ const ensureUserProfile = async (uid: string, email: string, displayName?: strin
       display_name: profile.displayName,
       matrikelnummer: profile.matrikelnummer,
       gamertag: profile.gamertag,
+      leaderboard_opt_in: profile.leaderboardOptIn,
       preferences: profile.preferences,
       progress: profile.progress,
       created_at: profile.createdAt,
@@ -74,14 +76,14 @@ const ensureUserProfile = async (uid: string, email: string, displayName?: strin
 
 export const authService = {
   // Sign up new user (no session until email confirmed if confirm required)
-  signUp: async (email: string, password: string, displayName: string, matrikelnummer: string, gamertag: string): Promise<void> => {
+  signUp: async (email: string, password: string, displayName: string, matrikelnummer: string, gamertag: string, leaderboardOptIn: boolean = true): Promise<void> => {
     const redirectTo = (import.meta.env.VITE_AUTH_LOGIN_REDIRECT as string) || `${window.location.origin}/auth/login`;
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: redirectTo,
-        data: { displayName, matrikelnummer, gamertag },
+        data: { displayName, matrikelnummer, gamertag, leaderboardOptIn },
       },
     });
     if (error) {
@@ -103,7 +105,7 @@ export const authService = {
     const user = data.user;
     if (user) {
       // If project requires confirmed email, unconfirmed users won't get a session
-      await ensureUserProfile(user.id, user.email || '', user.user_metadata?.displayName, user.user_metadata?.matrikelnummer, user.user_metadata?.gamertag);
+      await ensureUserProfile(user.id, user.email || '', user.user_metadata?.displayName, user.user_metadata?.matrikelnummer, user.user_metadata?.gamertag, user.user_metadata?.leaderboardOptIn);
     }
   },
 
@@ -148,6 +150,7 @@ export const authService = {
     if (data.gamertag !== undefined) payload.gamertag = data.gamertag;
     if (data.email !== undefined) payload.email = data.email;
     if (data.lastLoginAt !== undefined) payload.last_login_at = data.lastLoginAt;
+    if (data.leaderboardOptIn !== undefined) payload.leaderboard_opt_in = data.leaderboardOptIn;
     if (data.preferences !== undefined) payload.preferences = data.preferences;
     if (data.progress !== undefined) payload.progress = data.progress;
 
@@ -170,17 +173,18 @@ export const userProfileService = {
     }
     return data
       ? {
-          uid: data.id,
-          email: data.email,
-          displayName: data.display_name,
-          matrikelnummer: data.matrikelnummer,
-          gamertag: data.gamertag ?? '',
-          role: (data.role as 'student' | 'admin' | undefined) ?? 'student',
-          createdAt: data.created_at,
-          lastLoginAt: data.last_login_at,
-          preferences: data.preferences ?? defaultPreferences,
-          progress: data.progress ?? defaultProgress,
-        }
+        uid: data.id,
+        email: data.email,
+        displayName: data.display_name,
+        matrikelnummer: data.matrikelnummer,
+        gamertag: data.gamertag ?? '',
+        leaderboardOptIn: data.leaderboard_opt_in ?? true,
+        role: (data.role as 'student' | 'admin' | undefined) ?? 'student',
+        createdAt: data.created_at,
+        lastLoginAt: data.last_login_at,
+        preferences: data.preferences ?? defaultPreferences,
+        progress: data.progress ?? defaultProgress,
+      }
       : null;
   },
 

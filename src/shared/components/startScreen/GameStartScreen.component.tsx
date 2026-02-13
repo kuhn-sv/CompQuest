@@ -4,6 +4,7 @@ import './GameStartScreen.component.scss';
 import {trainingService} from '../../../services/supabase/training.service';
 import {Leaderboard} from '../Leaderboard/Leaderboard';
 import {formatDuration} from '../../utils/formatTime.utils';
+import {useAuth} from '../../../features/auth';
 import type {
   BestAttempt,
   GameStartScreenProps,
@@ -26,6 +27,8 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
   startLabel = 'Mission starten',
   className,
 }) => {
+  const {userProfile} = useAuth();
+  const userOptedOut = userProfile ? !userProfile.leaderboardOptIn : false;
   const [loadedBest, setLoadedBest] = useState<BestAttempt | null | undefined>(
     undefined,
   );
@@ -153,7 +156,7 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
             </div>
           </div>
         </div>
-        {taskId && <Leaderboard taskId={taskId} className="gss-leaderboard" />}
+        {taskId && <Leaderboard taskId={taskId} className="gss-leaderboard" userOptedOut={userOptedOut} />}
       </div>
     </div>
   );

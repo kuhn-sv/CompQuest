@@ -292,6 +292,7 @@ as $$
     inner join public.profiles p on p.id = es.user_id
     where es.task_id = p_task_id
       and es.best_accuracy is not null
+      and p.leaderboard_opt_in = true
   ),
   total as (
     select count(*) as cnt from ranked

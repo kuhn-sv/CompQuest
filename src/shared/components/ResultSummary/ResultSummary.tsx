@@ -3,6 +3,7 @@ import './ResultSummary.scss';
 import {generateFeedback} from './resultSummary.helper';
 import {Link} from 'react-router-dom';
 import {Leaderboard} from '../Leaderboard/Leaderboard';
+import {useAuth} from '../../../features/auth';
 import type {SummaryResultLike} from './resultSummary.interfaces';
 
 export type {SummaryResultLike} from './resultSummary.interfaces';
@@ -32,6 +33,8 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
   chapters,
   timeLimit,
 }) => {
+  const {userProfile} = useAuth();
+  const userOptedOut = userProfile ? !userProfile.leaderboardOptIn : false;
   const accuracy = Math.round(
     (result.totalCorrect / Math.max(1, result.totalPossible)) * 100,
   );
@@ -103,7 +106,7 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
       </div>
 
       {taskId && (
-        <Leaderboard taskId={taskId} className="summary-leaderboard" />
+        <Leaderboard taskId={taskId} className="summary-leaderboard" userOptedOut={userOptedOut} />
       )}
     </div>
   );

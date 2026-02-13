@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, {useEffect, useRef} from 'react';
 import type {SettingsModalProps} from '../interfaces/settings.interface';
 import './SettingsModal.component.scss';
 
@@ -8,8 +8,9 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
   onSignOut,
   isAdmin,
   onNavigateToAdmin,
+  leaderboardOptIn,
+  onLeaderboardOptInChange,
 }) => {
-  const [leaderboardEnabled, setLeaderboardEnabled] = useState(true);
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -60,10 +61,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
               Am Leaderboard teilnehmen
             </span>
             <button
-              className={`settings-modal__toggle ${leaderboardEnabled ? 'settings-modal__toggle--active' : ''}`}
-              onClick={() => setLeaderboardEnabled(prev => !prev)}
+              className={`settings-modal__toggle ${leaderboardOptIn ? 'settings-modal__toggle--active' : ''}`}
+              onClick={() => onLeaderboardOptInChange(!leaderboardOptIn)}
               role="switch"
-              aria-checked={leaderboardEnabled}
+              aria-checked={leaderboardOptIn}
               aria-label="Am Leaderboard teilnehmen">
               <span className="settings-modal__toggle-thumb" />
             </button>

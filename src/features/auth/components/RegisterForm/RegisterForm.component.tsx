@@ -18,6 +18,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
     displayName: '',
     matrikelnummer: '',
     gamertag: '',
+    leaderboardOptIn: true,
   });
   const [formErrors, setFormErrors] = useState<Partial<RegisterData>>({});
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
@@ -148,6 +149,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
         formData.displayName,
         formData.matrikelnummer,
         formData.gamertag,
+        formData.leaderboardOptIn,
       );
       setShowSuccessMessage(true);
       // Don't call onSuccess immediately as user needs to verify email first
@@ -275,6 +277,36 @@ const RegisterForm: React.FC<RegisterFormProps> = ({onSwitchToLogin}) => {
                     {formErrors.gamertag}
                   </span>
                 )}
+              </div>
+
+              <div className="register-form__field">
+                <div className="register-form__toggle-row">
+                  <div className="register-form__toggle-info">
+                    <span className="register-form__toggle-label">
+                      Am Leaderboard teilnehmen
+                    </span>
+                    <span className="register-form__toggle-hint">
+                      Deine Leistungen werden im Leaderboard für andere Nutzer
+                      sichtbar. Wenn du nicht teilnehmen möchtest, deaktiviere
+                      diese Option.
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    className={`register-form__toggle ${formData.leaderboardOptIn ? 'register-form__toggle--active' : ''}`}
+                    onClick={() =>
+                      setFormData(prev => ({
+                        ...prev,
+                        leaderboardOptIn: !prev.leaderboardOptIn,
+                      }))
+                    }
+                    role="switch"
+                    aria-checked={formData.leaderboardOptIn}
+                    aria-label="Am Leaderboard teilnehmen"
+                    disabled={loading}>
+                    <span className="register-form__toggle-thumb" />
+                  </button>
+                </div>
               </div>
 
               <div className="register-form__field">

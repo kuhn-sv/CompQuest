@@ -6,6 +6,7 @@ import SettingsModal from './components/SettingsModal.component';
 import InstructionsOverlay from './components/InstructionsOverlay.component';
 import PerformanceWarning from './components/PerformanceWarning.component';
 import ViewToggleButton from './components/ViewToggleButton.component';
+import {Toast} from '../../shared/components/Toast/Toast.component';
 import {useAuth} from '../auth';
 import {useSettingsModal} from './hooks/useSettingsModal';
 import {useViewMode} from './hooks/useViewMode';
@@ -29,6 +30,10 @@ const DashboardPage: React.FC = () => {
     handleSignOut,
     handleNavigateToAdmin,
     isAdmin,
+    leaderboardOptIn,
+    handleLeaderboardOptInChange,
+    toastMessages,
+    dismissToast,
   } = useSettingsModal();
   const {
     is3DView,
@@ -71,7 +76,11 @@ const DashboardPage: React.FC = () => {
         onSignOut={handleSignOut}
         isAdmin={isAdmin}
         onNavigateToAdmin={handleNavigateToAdmin}
+        leaderboardOptIn={leaderboardOptIn}
+        onLeaderboardOptInChange={handleLeaderboardOptInChange}
       />
+
+      <Toast messages={toastMessages} onDismiss={dismissToast} />
 
       <div className="dashboard__3d-container">
         {is3DView ? (

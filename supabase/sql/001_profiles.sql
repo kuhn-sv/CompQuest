@@ -14,6 +14,7 @@ create table if not exists public.profiles (
                   check (gamertag ~ '^[a-zA-Z0-9_]{3,20}$'),
   role          text not null default 'student'
                   check (role in ('student','admin')),
+  leaderboard_opt_in boolean not null default true,
   preferences   jsonb not null default '{}'::jsonb,
   progress      jsonb not null default '{}'::jsonb,
   created_at    timestamptz not null default now(),

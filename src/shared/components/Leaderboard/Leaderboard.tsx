@@ -11,11 +11,13 @@ import {PAGE_SIZE, RANK_ICONS} from './leaderboard.constants';
 interface LeaderboardProps {
   taskId: string;
   className?: string;
+  userOptedOut?: boolean;
 }
 
 export const Leaderboard: React.FC<LeaderboardProps> = ({
   taskId,
   className,
+  userOptedOut = false,
 }) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [currentUser, setCurrentUser] = useState<LeaderboardEntry | null>(null);
@@ -197,6 +199,13 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({
             disabled={loadingMore}>
             {loadingMore ? 'Wird geladen…' : 'Weitere Plätze laden'}
           </button>
+        </div>
+      )}
+
+      {userOptedOut && !currentUser && (
+        <div className="leaderboard__opt-out-info">
+          <span className="leaderboard__opt-out-icon">ℹ️</span>
+          <span>Du nimmst aktuell nicht am Leaderboard teil. Du kannst dies in den Einstellungen ändern.</span>
         </div>
       )}
     </div>
