@@ -4,8 +4,8 @@ import ExercisesModal from './components/exercises-modal/ExercisesModal.componen
 import DashboardHeader from './components/dashboard-header/DashboardHeader.component';
 import SettingsModal from './components/settings-modal/SettingsModal.component';
 import InstructionsOverlay from './components/instructions-overlay/InstructionsOverlay.component';
-import PerformanceWarning from './components/PerformanceWarning.component';
-import ViewToggleButton from './components/ViewToggleButton.component';
+import PerformanceWarning from './components/performance-warning/PerformanceWarning.component';
+import ViewToggleButton from './components/view-toggle-button/ViewToggleButton.component';
 import {Toast} from '@shared/components/ui/toast/Toast.component';
 import {useAuth} from '../auth';
 import {useSettingsModal} from './hooks/useSettingsModal';
