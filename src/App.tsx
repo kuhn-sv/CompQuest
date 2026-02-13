@@ -21,14 +21,14 @@ import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
 import AuthPage from './features/auth/auth.page';
 import ResetPasswordPage from './features/auth/reset.page';
-import PracticeTaskOnePage from './features/tasks/practiceTaskOne/PracticeTaskOne.page';
-import PracticeTaskTwoPage from './features/tasks/practiceTaskTwo/PracticeTaskTwo.page';
 import HelperModulePage from './features/helpers/HelperModule.page';
 import OnboardingPage from './features/onboarding/onboarding.page';
-import {ProfessorDashboardPage} from './features/professorDashboard';
 import {TaskId} from './shared/enums/taskId.enum';
 import {useOrientation} from './shared/hooks/useOrientation';
 import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
+import { ProfessorDashboardPage } from './features/professor-dashboard';
+import PracticeTaskTwoPage from './features/tasks/microprocessor/PracticeTaskTwo.page';
+import PracticeTaskOnePage from './features/tasks/number-representation/PracticeTaskOne.page';
 
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)
