@@ -3,7 +3,7 @@ import './VonNeumannFunctions.scss';
 import {
   ConnectionOverlay,
   ConnectionLine,
-} from '../../../../shared/components/ConnectionOverlay/ConnectionOverlay.component';
+} from '../../../../shared/components/task/connection-overlay/ConnectionOverlay.component';
 import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
 
 interface PairItem {

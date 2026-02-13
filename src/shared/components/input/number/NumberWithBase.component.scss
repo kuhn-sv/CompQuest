@@ -1,0 +1,12 @@
+@use '../../../../styles/_variables' as *;
+
+.nwb {
+  display: inline-flex;
+  align-items: baseline;
+}
+
+.nwb__sub {
+  margin-left: 2px;
+  color: var(--text-secondary);
+  font-size: 1.0em; // Increased from 0.85em to make base numbers more readable
+}

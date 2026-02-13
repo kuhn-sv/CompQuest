@@ -1,8 +1,7 @@
 import React, {useCallback, useMemo, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
 import './Umrechnungshelfer.scss';
-import TabRow from '../../../shared/components/tabRow/TabRow.component';
-import '../../../shared/components/BaseValueSpinner/BaseValueSpinner.scss';
+import TabRow from '../../../shared/components/ui/tabRow/TabRow.component';
 import StepPanel from './components/StepPanel/StepPanel';
 import './components/StepPanel/StepPanel.scss';
 import './components/PlaceValueInputGrid/PlaceValueInputGrid.scss';

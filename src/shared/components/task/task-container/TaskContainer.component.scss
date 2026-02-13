@@ -1,0 +1,184 @@
+@use '../../../../styles/_variables' as *;
+
+.task-container {
+  height: calc(100vh - 60px); // lock viewport height minus TopNavbar height to avoid page scroll
+  overflow-y: hidden; // disable vertical page scrolling
+  overflow-x: visible; // allow horizontal overflow for drag and drop
+  padding: 0; // avoid adding to 100vh which would force scroll
+  display: flex;
+
+  &__container {
+    position: relative; // provide positioning context for overlays
+    width: 100vw; // full width
+    height: 100%; // full height of parent
+    max-width: none;
+    background: var(--surface);
+  // Avoid clipping native UI like <select> dropdowns inside content; let them render outside if needed
+  overflow: visible;
+    display: flex;
+    flex-direction: column;
+  }
+
+  &__header {
+    position: relative;
+    padding: 1.25rem 1.75rem;
+    border-bottom: 1px solid var(--surface-border);
+    background: var(--highlight);
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+
+    .header-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .header-row--top {
+      gap: $spacing-lg;
+    }
+
+    .header-row--bottom {
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .task-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .task-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .task-description {
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .task-hud {
+      display: flex;
+      align-items: center;
+      gap: $spacing-lg;
+      flex: 0 0 auto;
+    }
+
+    .task-progress__meta {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    .task-progress__label {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .task-progress__percent {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      white-space: nowrap;
+    }
+
+    .task-progress__bar {
+      width: 100%;
+      height: 6px;
+      background: var(--surface);
+      border-radius: 3px;
+      overflow: hidden;
+    }
+
+    .task-progress__fill {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 3px;
+      transition: width 0.3s ease;
+    }
+  }
+
+  &__task-content {
+    flex: 1;
+    // Allow content to scroll when it exceeds available height (e.g. with leaderboard)
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-top: 20px;
+    place-items: center; // center on both axes
+    min-height: 0; // allow the grid to size within the container
+    
+    // Remove the ns-header padding for container mode
+    .number-system-container {
+      padding-top: 0;
+      
+      .ns-header {
+        display: none; // Hidden in container mode since we have our own header
+      }
+    }
+  }
+
+  &__footer {
+    height: 80px;
+    padding: 0 20px;
+    border-top: 1px solid var(--surface-border);
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .task-action-buttons {
+      margin: 0; // override any internal margins
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .task-container {
+    padding: 0;
+
+    &__container {
+      width: 100vw;
+      height: 100%;
+    }
+
+    &__header {
+      padding: 1rem 1.5rem;
+      flex-direction: column;
+      gap: 1rem;
+      align-items: stretch;
+
+      .task-title {
+        font-size: 1.25rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .task-container {
+    padding: 0;
+
+    &__container {
+      width: 100vw;
+      height: 100%;
+    }
+  }
+}
+
+/* Add responsive behavior for medium screens <= 1200px */
+@media (max-width: 1200px) {
+  .task-container {
+    &__container {
+      width: 100vw;
+      height: 100%;
+      overflow-y: hidden;
+      overflow-x: visible;
+    }
+  }
+}

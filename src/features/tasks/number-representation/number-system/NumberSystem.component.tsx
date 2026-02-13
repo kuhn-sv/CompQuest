@@ -8,11 +8,11 @@ import type {
 } from './interfaces/numberSystem.interface';
 import type {StageScore} from './interfaces/evaluation.interface';
 import type {AssignmentMap} from './numberSystem.types';
-import {ResultsSection} from './components';
-import {EquationRow as SharedEquationRow} from '../../../../shared/components/equationrow/EquationRow';
-import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
+import {EquationRow as SharedEquationRow} from '../../../../shared/components/input/equation-row/EquationRow';
+import NumberWithBase from '../../../../shared/components/input/number/NumberWithBase.component';
 import {
   ConnectionOverlay,
+  DndProvider,
   GameStartScreen,
 } from '../../../../shared/components';
 import {DragOverlay} from '@dnd-kit/core';
@@ -24,8 +24,8 @@ import {
   useGameStartScreen,
   CONNECTION_LINE_PRESETS,
 } from '../../../../shared/hooks';
+import { ResultsSection } from '../shared/number-task/ResultsSection';
 // dnd-kit event types are referenced inline where needed; no top-level type import
-import DndProvider from '../../../../shared/components/DndProvider';
 
 const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,

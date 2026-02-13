@@ -1,5 +1,5 @@
 @use '../../../../styles/_variables' as *;
-@use '../../../../shared/numberTask/numberTask.shared' as *;
+@use '../shared/number-task/numberTask.shared.scss' as *;
 
 // Local fallbacks
 $ns-box-width: 120px;
@@ -265,5 +265,3 @@ $ns-field-height: 40px; // Fixed field height
 		gap: $spacing-sm;
 	}
 }
-
-// Summary overlay styles are defined in shared/components/ResultSummary/ResultSummary.scss

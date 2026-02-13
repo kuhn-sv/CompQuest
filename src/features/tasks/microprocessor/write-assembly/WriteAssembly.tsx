@@ -25,7 +25,7 @@ import {
   DragOverlay,
   DragStartEvent,
 } from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import {useDndSensors} from '../../../../shared/utils/dnd/dndSensors';
 import {generateRounds} from './writeAssembly.utils';
 
 const WriteAssembly: React.FC<SubTaskComponentProps> = ({

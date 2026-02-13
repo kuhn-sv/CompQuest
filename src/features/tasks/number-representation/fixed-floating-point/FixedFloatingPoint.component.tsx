@@ -2,8 +2,8 @@ import React from 'react';
 import {SubTaskComponentProps} from '../interfaces';
 import {useFixedFloatingPoint} from './useFixedFloatingPoint';
 import {GameStartScreen} from '../../../../shared/components';
-import TargetValueDisplay from '../../../../shared/components/TargetValueDisplay/TargetValueDisplay.component';
-import BitToggleRow from '../../../../shared/components/bitToggleRow/BitToggleRow';
+import TargetValueDisplay from '../../../../shared/components/task/target-value-display/TargetValueDisplay.component';
+import BitToggleRow from '../../../../shared/components/input/bit-toggle-row/BitToggleRow';
 import {computeEvalStates} from '../../../../shared/utils/evalStates';
 import './FixedFloatingPoint.scss';
 

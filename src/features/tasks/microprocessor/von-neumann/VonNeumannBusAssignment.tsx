@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './VonNeumannBusAssignment.scss';
 import {DndContext, DragEndEvent, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import {useDndSensors} from '../../../../shared/utils/dnd/dndSensors';
 import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
 import type {Placements} from './vonneumann.helper';
 

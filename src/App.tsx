@@ -7,7 +7,7 @@ import {
   Navigate,
   useLocation,
 } from 'react-router-dom';
-import TopNavbar from './shared/components/TopNavbar/TopNavbar.component';
+import TopNavbar from './shared/components/ui/top-navbar/TopNavbar.component';
 import {
   AuthProvider,
   ProtectedRoute,
@@ -16,7 +16,6 @@ import {
 } from './features/auth';
 import {BadgeNotificationProvider} from './shared/context/BadgeNotificationContext';
 import {UserBadgesProvider} from './shared/context/UserBadgesContext';
-import BadgeCelebrationPopup from './shared/components/BadgeCelebrationPopup/BadgeCelebrationPopup.component';
 import './App.scss';
 import DashboardPage from './features/dashboard/dashboard.page';
 import AuthPage from './features/auth/auth.page';
@@ -25,10 +24,11 @@ import HelperModulePage from './features/helpers/HelperModule.page';
 import OnboardingPage from './features/onboarding/onboarding.page';
 import {TaskId} from './shared/enums/taskId.enum';
 import {useOrientation} from './shared/hooks/useOrientation';
-import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
+import OrientationOverlay from './shared/components/task/orientation-overlay/OrientationOverlay';
 import { ProfessorDashboardPage } from './features/professor-dashboard';
 import MicroProcessorPage from './features/tasks/microprocessor/MicroProcessor.page';
 import NumberRepresentation from './features/tasks/number-representation/NumberRepresentation.page';
+import BadgeCelebrationPopup from './shared/components/ui/badge-celebration-popup/BadgeCelebrationPopup.component';
 
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)

@@ -1,13 +1,13 @@
 import React, {useMemo, useState} from 'react';
 import {SubTaskConfig, SubTaskComponentProps} from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
-import PositiveArithmeticComponent from './arithmetic/arithmetic';
-import ComplementsComponent from './complements/Complements.component';
 import FixedFloatingPointComponent from './fixed-floating-point/FixedFloatingPoint.component';
 import Quiz from './quiz/Quiz.component';
 import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
 import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
+import { PositiveArithmeticComponent } from './arithmetic';
+import ComplementsComponent from './complements';
 
 interface NumberRepresentationPageProps {
   initialSubTask?: TaskId;

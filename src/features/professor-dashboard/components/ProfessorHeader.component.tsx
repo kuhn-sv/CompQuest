@@ -1,6 +1,6 @@
 import React from 'react';
 import {Link} from 'react-router-dom';
-import TabRow from '../../../shared/components/tabRow/TabRow.component';
+import TabRow from '../../../shared/components/ui/tabRow/TabRow.component';
 import {DASHBOARD_TABS} from '../constants/professorDashboard.constants';
 import type {ProfessorDashboardView} from '../interfaces/professorDashboard.interfaces';
 import './ProfessorHeader.component.scss';

@@ -26,7 +26,7 @@ import {
   DragOverlay,
   DragStartEvent,
 } from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import {useDndSensors} from '../../../../shared/utils/dnd/dndSensors';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {generateRounds} from './javaToAssembly.utils';

@@ -3,6 +3,7 @@ import {Link} from 'react-router-dom';
 import '../number-system/number-system.page.scss';
 import {
   ConnectionOverlay,
+  DndProvider,
   GameStartScreen,
 } from '../../../../shared/components';
 // Footer buttons are rendered in parent; we expose controls upwards
@@ -14,17 +15,16 @@ import {
   useGameStartScreen,
   CONNECTION_LINE_PRESETS,
 } from '../../../../shared/hooks';
-import {EquationRow as SharedEquationRow} from '../../../../shared/components/equationrow/EquationRow';
-import NumberWithBase from '../../../../shared/components/number/NumberWithBase.component';
-import {ResultsSection} from '../../../../shared/numberTask/ResultsSection';
-import type {AnswerOptionBase} from '../../../../shared/numberTask/NumberTask.types';
+import {EquationRow as SharedEquationRow} from '../../../../shared/components/input/equation-row/EquationRow';
+import NumberWithBase from '../../../../shared/components/input/number/NumberWithBase.component';
 import {generateAdditionSet, AdditionTask} from './addition.helper';
 import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import type {ArithmeticMode} from '../interfaces';
 import {TaskId} from '../../../../shared/enums/taskId.enum';
-import DndProvider from '../../../../shared/components/DndProvider';
 import {DragOverlay} from '@dnd-kit/core';
 import type {PAStageScore} from './arithmetic.interfaces';
+import { AnswerOptionBase } from '../shared/number-task/NumberTask.types';
+import { ResultsSection } from '../shared/number-task/ResultsSection';
 
 const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
@@ -467,7 +467,7 @@ const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
                 keyPrefix={
                   arithmeticMode === 'twos-complement' ? 'tc-pa' : 'pa'
                 }
-                renderAnswer={a =>
+                renderAnswer={(a: AnswerOptionBase) =>
                   typeof a.base === 'number' ? (
                     <NumberWithBase
                       value={a.value}

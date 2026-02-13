@@ -1,10 +1,10 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
-import BitToggleRow from '../../../shared/components/bitToggleRow/BitToggleRow';
+import BitToggleRow from '../../../shared/components/input/bit-toggle-row/BitToggleRow';
 import {DigitsRow, StaticDigitsRow} from '../../../shared/components';
-import CarryCheckbox from '../../../shared/components/CarryCheckbox/CarryCheckbox';
-import OverflowToggle from '../../../shared/components/OverflowToggle/OverflowToggle';
-import TabRow from '../../../shared/components/tabRow/TabRow.component';
+import CarryCheckbox from '../../../shared/components/input/carry-checkbox/CarryCheckbox';
+import OverflowToggle from '../../../shared/components/input/overflow-toggle/OverflowToggle';
+import TabRow from '../../../shared/components/ui/tabRow/TabRow.component';
 import {useHelperTask} from '../../../shared/hooks';
 import {
   useAdditionTask,
