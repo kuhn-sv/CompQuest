@@ -1,5 +1,5 @@
 import React, {useEffect, useRef} from 'react';
-import type {SettingsModalProps} from '../interfaces/settings.interface';
+import type {SettingsModalProps} from '../../interfaces/settings.interface';
 import './SettingsModal.component.scss';
 
 const SettingsModal: React.FC<SettingsModalProps> = ({

@@ -1,10 +1,10 @@
 import React from 'react';
 import './ExercisesList.component.scss';
 import {Link} from 'react-router-dom';
-import type {Exercise} from '../interfaces/exercise.interface';
-import {getProgressClass} from '../utils/progressClass.utils';
+import type {Exercise} from '../../interfaces/exercise.interface';
+import {getProgressClass} from '../../utils/progressClass.utils';
 
-export type {Exercise} from '../interfaces/exercise.interface';
+export type {Exercise} from '../../interfaces/exercise.interface';
 
 interface ExercisesListProps {
   exercises: Exercise[];

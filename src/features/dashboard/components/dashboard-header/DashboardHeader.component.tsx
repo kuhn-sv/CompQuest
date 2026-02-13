@@ -1,5 +1,5 @@
 import React from 'react';
-import type {DashboardHeaderProps} from '../interfaces/settings.interface';
+import type {DashboardHeaderProps} from '../../interfaces/settings.interface';
 import './DashboardHeader.component.scss';
 
 const DashboardHeader: React.FC<DashboardHeaderProps> = ({

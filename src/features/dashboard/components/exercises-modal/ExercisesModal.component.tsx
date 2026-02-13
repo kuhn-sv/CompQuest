@@ -1,15 +1,15 @@
 import React, {useEffect, useState} from 'react';
 import './ExercisesModal.component.scss';
-import ExercisesList, {type Exercise} from './ExercisesList.component';
-import {trainingService} from '../../../services/supabase/training.service';
+import ExercisesList, {type Exercise} from '../exercises-list/ExercisesList.component';
+import {trainingService} from '../../../../services/supabase/training.service';
 import {
   BADGE_CONFIG,
   BADGE_LEGEND_TIERS,
   isBadgeLevelSufficient,
 } from '@shared/interfaces';
 import {useUserBadges} from '@shared/hooks/useUserBadges';
-import {EXERCISE_CATEGORIES} from './constants/categories';
-import type {ExerciseCategory} from '../interfaces/exercise.interface'; // Correct import path
+import {EXERCISE_CATEGORIES} from '../constants/categories';
+import type {ExerciseCategory} from '../../interfaces/exercise.interface'; // Correct import path
 
 interface ExercisesModalProps {
   show: boolean;

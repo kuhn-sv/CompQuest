@@ -1,9 +1,9 @@
 import React, {useState, useEffect, useCallback, Suspense} from 'react';
 import {useLocation, useNavigate} from 'react-router-dom';
-import ExercisesModal from './components/ExercisesModal.component';
-import DashboardHeader from './components/DashboardHeader.component';
-import SettingsModal from './components/SettingsModal.component';
-import InstructionsOverlay from './components/InstructionsOverlay.component';
+import ExercisesModal from './components/exercises-modal/ExercisesModal.component';
+import DashboardHeader from './components/dashboard-header/DashboardHeader.component';
+import SettingsModal from './components/settings-modal/SettingsModal.component';
+import InstructionsOverlay from './components/instructions-overlay/InstructionsOverlay.component';
 import PerformanceWarning from './components/PerformanceWarning.component';
 import ViewToggleButton from './components/ViewToggleButton.component';
 import {Toast} from '@shared/components/ui/toast/Toast.component';

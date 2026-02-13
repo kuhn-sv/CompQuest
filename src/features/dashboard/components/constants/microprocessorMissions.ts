@@ -1,5 +1,5 @@
 import { TASK_DISPLAY_NAMES } from '@shared/constants/taskDisplayNames';
-import { Exercise } from '../ExercisesList.component';
+import { Exercise } from '../exercises-list/ExercisesList.component';
 
 export const MICROPROCESSOR_MISSIONS: Exercise[] = [
     {
