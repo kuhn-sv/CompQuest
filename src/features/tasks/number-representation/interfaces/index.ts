@@ -1,4 +1,4 @@
-export * from './practiceTaskOne.interface';
+export * from './number-representation.interface';
 export type {
 	SubTaskComponentProps,
 	TaskFooterControls,

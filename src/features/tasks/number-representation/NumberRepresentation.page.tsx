@@ -9,7 +9,7 @@ import {TaskContainer} from '../../../shared/components';
 import {TaskId} from '../../../shared/enums/taskId.enum';
 import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
 
-interface PracticeTaskOnePageProps {
+interface NumberRepresentationPageProps {
   initialSubTask?: TaskId;
 }
 
@@ -20,7 +20,7 @@ const TwosComplementArithmeticSubtask: React.FC<
   <PositiveArithmeticComponent {...props} arithmeticMode="twos-complement" />
 );
 
-const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
+const NumberRepresentation: React.FC<NumberRepresentationPageProps> = ({
   initialSubTask = TaskId.NumberSystem,
 }) => {
   const [currentSubTask] = useState<TaskId>(initialSubTask);
@@ -134,4 +134,4 @@ const PracticeTaskOne: React.FC<PracticeTaskOnePageProps> = ({
   );
 };
 
-export default PracticeTaskOne;
+export default NumberRepresentation;

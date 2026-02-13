@@ -9,7 +9,7 @@ import Befehlhelfer from './befehlhelfer/Befehlhelfer.component';
 import Potenzrechner from './potenzrechner/Potenzrechner.component';
 import Umrechnungshelfer from './umrechnungshelfer/Umrechnungshelfer.component';
 import Uebertragshelfer from './uebertragshelfer/Uebertragshelfer.component';
-import { SubTaskComponentProps } from '../tasks/practiceTaskOne/interfaces';
+import { SubTaskComponentProps } from '../tasks/number-representation/interfaces';
 
 // Component Mapping
 const HELPER_COMPONENTS: Record<string, React.ComponentType<SubTaskComponentProps>> = {

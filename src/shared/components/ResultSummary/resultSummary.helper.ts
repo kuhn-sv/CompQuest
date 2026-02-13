@@ -1,4 +1,4 @@
-import { IChapter } from "../../../features/tasks/practiceTaskOne";
+import { IChapter } from "../../../features/tasks/number-representation";
 
 export interface FeedbackInput {
   taskId?: string;
@@ -70,7 +70,7 @@ export function generateFeedback({
     return `🐢 Ungenau & Langsam\n„Okay, das war ein harter Ritt – aber du hast's durchgezogen! 💪 Ich würd dir empfehlen, dir das Helfermodul im Übungsmenü nochmal anzusehen und ggf. das Buchkapitel ${chaptersStr} durchzulesen. Danach läuft das deutlich flüssiger."`;
   }
 
-  // Default feedback for PracticeTaskOne tasks
+  // Default feedback for NumberRepresentation tasks
   if (isAccurate && !isFast) {
     return `⏱️ Genau, aber Langsam\n„Gute Arbeit – alles richtig, nur etwas gemütlich. Keine Sorge, das ist normal! Mit mehr Routine geht's schneller. Wenn du magst, übe nochmal mit den Helfermodulen oder schau ins Buch ${chaptersStr} für ein paar Tricks, wie man sicherer wird."`;
   }

@@ -1,4 +1,4 @@
-import { AnswerOption } from "../../features/tasks/practiceTaskOne/number-system/interfaces/numberSystem.interface";
+import { AnswerOption } from "../../features/tasks/number-representation/number-system/interfaces/numberSystem.interface";
 
 export const DRAG_TYPES = {
   ANSWER: 'answer',

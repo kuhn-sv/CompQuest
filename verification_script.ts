@@ -1,4 +1,4 @@
-import { toFixedPointBits, bitsToString } from './src/features/tasks/practiceTaskOne/fixedFloatingPoint/fixedFloatingPoint.helper';
+import { toFixedPointBits, bitsToString } from './src/features/tasks/number-representation/fixed-floating-point/fixedFloatingPoint.helper';
 
 // Simple manual test runner since I cannot run full project tests easily in this environment without setup.
 

@@ -1,5 +1,5 @@
 import { TaskId } from '../../../../shared/enums/taskId.enum';
-import type { SubTaskComponentProps, SubTaskConfig as BaseSubTaskConfig } from '../../../../shared/interfaces/tasking.interfaces';
+import type { SubTaskConfig as BaseSubTaskConfig } from '../../../../shared/interfaces/tasking.interfaces';
 
 export type ArithmeticMode = 'positive' | 'twos-complement';
 

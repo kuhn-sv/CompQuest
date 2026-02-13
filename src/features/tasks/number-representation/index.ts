@@ -1,2 +1,2 @@
-export { default as PracticeTaskOne } from './PracticeTaskOne.page';
+export { default as NumberRepresentation } from './NumberRepresentation.page';
 export * from './interfaces';

@@ -28,7 +28,7 @@ import {useOrientation} from './shared/hooks/useOrientation';
 import OrientationOverlay from './shared/components/OrientationOverlay/OrientationOverlay';
 import { ProfessorDashboardPage } from './features/professor-dashboard';
 import MicroProcessorPage from './features/tasks/microprocessor/MicroProcessor.page';
-import PracticeTaskOnePage from './features/tasks/number-representation/PracticeTaskOne.page';
+import NumberRepresentation from './features/tasks/number-representation/NumberRepresentation.page';
 
 const App: React.FC = () => {
   // Initialize theme handling (forced to dark by useTheme implementation)
@@ -152,7 +152,7 @@ const AppWithNavbar: React.FC = () => {
           path="/practice-task-one"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage />
+              <NumberRepresentation />
             </ProtectedRoute>
           }
         />
@@ -171,7 +171,7 @@ const AppWithNavbar: React.FC = () => {
           path="/task/number-system"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage initialSubTask={TaskId.NumberSystem} />
+              <NumberRepresentation initialSubTask={TaskId.NumberSystem} />
             </ProtectedRoute>
           }
         />
@@ -180,7 +180,7 @@ const AppWithNavbar: React.FC = () => {
           path="/task/positive-arithmetic"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage initialSubTask={TaskId.PositiveArithmetic} />
+              <NumberRepresentation initialSubTask={TaskId.PositiveArithmetic} />
             </ProtectedRoute>
           }
         />
@@ -189,7 +189,7 @@ const AppWithNavbar: React.FC = () => {
           path="/task/twos-complement-arithmetic"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage
+              <NumberRepresentation
                 initialSubTask={TaskId.TwosComplementArithmetic}
               />
             </ProtectedRoute>
@@ -200,7 +200,7 @@ const AppWithNavbar: React.FC = () => {
           path="/task/complements"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage initialSubTask={TaskId.Complements} />
+              <NumberRepresentation initialSubTask={TaskId.Complements} />
             </ProtectedRoute>
           }
         />
@@ -209,7 +209,7 @@ const AppWithNavbar: React.FC = () => {
           path="/task/fixed-floating-point"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage initialSubTask={TaskId.FixedFloatingPoint} />
+              <NumberRepresentation initialSubTask={TaskId.FixedFloatingPoint} />
             </ProtectedRoute>
           }
         />
@@ -218,7 +218,7 @@ const AppWithNavbar: React.FC = () => {
           path="/task/quiz"
           element={
             <ProtectedRoute>
-              <PracticeTaskOnePage initialSubTask={TaskId.Quiz} />
+              <NumberRepresentation initialSubTask={TaskId.Quiz} />
             </ProtectedRoute>
           }
         />
