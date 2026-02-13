@@ -1,5 +1,5 @@
 import type { VonNeumannRound } from './vonneumann.helper';
-import vonNeumannData from '../../../../../data/tasks/von-neumann.json';
+import vonNeumannData from '../../../../data/tasks/von-neumann.json';
 import { shuffle } from '../shared';
 
 type RoundType = 'quiz' | 'functions' | 'reconstruct' | 'busAssignment';

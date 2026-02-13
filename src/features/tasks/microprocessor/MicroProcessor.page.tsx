@@ -11,7 +11,7 @@ import {
   ReadAssembly,
   WriteAssembly,
   JavaToAssembly,
-} from './components';
+} from '.';
 
 interface MicroProcessorPageProps {
   initialSubTask?: TaskId;

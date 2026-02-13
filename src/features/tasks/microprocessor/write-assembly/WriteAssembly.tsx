@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../../shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './WriteAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -16,16 +16,16 @@ import {
   useFooterControls,
   useHudState,
   useGameStartScreen,
-} from '../../../../../shared/hooks';
-import {GameStartScreen} from '../../../../../shared/components';
-import {Difficulty} from '../../../../../shared/enums/difficulty.enum';
+} from '../../../../shared/hooks';
+import {GameStartScreen} from '../../../../shared/components';
+import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import {
   DndContext,
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
 } from '@dnd-kit/core';
-import {useDndSensors} from '../../../../../shared/hooks/dndSensors';
+import {useDndSensors} from '../../../../shared/hooks/dndSensors';
 import {generateRounds} from './writeAssembly.utils';
 
 const WriteAssembly: React.FC<SubTaskComponentProps> = ({

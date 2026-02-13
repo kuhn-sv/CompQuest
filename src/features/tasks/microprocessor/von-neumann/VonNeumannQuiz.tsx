@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import './VonNeumannQuiz.component.scss';
-import { TaskStageScore } from '../../../number-representation';
+import { TaskStageScore } from '../../number-representation';
 
 interface QuizItem {
   id: string;

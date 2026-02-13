@@ -1,5 +1,5 @@
-import type {AssemblyCommand} from './assembly.types';
-import {Difficulty} from '../../../../../shared/enums/difficulty.enum';
+import type { AssemblyCommand } from './assembly.types';
+import { Difficulty } from '../../../../shared/enums/difficulty.enum';
 
 /**
  * Calculates the score based on correct and wrong answers
@@ -46,9 +46,9 @@ export const DIFFICULTY_MAP: Record<string, Difficulty> = {
 export const parseAssemblerCommand = (cmd: string): AssemblyCommand => {
   const parts = cmd.trim().split(' ');
   if (parts.length === 1) {
-    return {op: parts[0], arg: null};
+    return { op: parts[0], arg: null };
   }
-  return {op: parts[0], arg: parts.slice(1).join(' ')};
+  return { op: parts[0], arg: parts.slice(1).join(' ') };
 };
 
 /**
@@ -99,7 +99,7 @@ export const generateAvailableCommands = (
  * @param progression - Array defining the difficulty progression (e.g., ['leicht', 'leicht', 'mittel', 'schwer'])
  * @returns Array of selected tasks following the progression
  */
-export const generateRounds = <T extends {difficulty: string}>(
+export const generateRounds = <T extends { difficulty: string }>(
   tasks: T[],
   progression: string[],
 ): T[] => {

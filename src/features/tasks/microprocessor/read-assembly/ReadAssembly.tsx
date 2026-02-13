@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../../shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import {
   useFooterControls,
   useHudState,
   useGameStartScreen,
-} from '../../../../../shared/hooks';
-import {GameStartScreen} from '../../../../../shared/components';
-import {Difficulty} from '../../../../../shared/enums/difficulty.enum';
+} from '../../../../shared/hooks';
+import {GameStartScreen} from '../../../../shared/components';
+import {Difficulty} from '../../../../shared/enums/difficulty.enum';
 import type {AssemblyTask} from './readAssembly.interfaces';
 import {generateRounds} from './readAssembly.utils';
 
