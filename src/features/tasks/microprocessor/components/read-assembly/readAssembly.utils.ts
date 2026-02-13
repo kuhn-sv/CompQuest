@@ -1,6 +1,6 @@
-import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
-import {shuffle} from './shared';
-import type {AssemblyTask} from './readAssembly.interfaces';
+import readAssemblyTasksData from '../../../../../data/tasks/read-assembly.json';
+import { shuffle } from '../shared';
+import type { AssemblyTask } from './readAssembly.interfaces';
 
 export const generateRounds = (): AssemblyTask[] => {
   const tasks = readAssemblyTasksData as AssemblyTask[];

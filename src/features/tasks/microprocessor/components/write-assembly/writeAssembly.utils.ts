@@ -1,6 +1,6 @@
-import writeAssemblyTasksData from '../../../../data/tasks/write-assembly.json';
-import {shuffle} from './shared';
-import type {WriteAssemblyTask} from './writeAssembly.helper';
+import writeAssemblyTasksData from '../../../../../data/tasks/write-assembly.json';
+import { shuffle } from '../shared/assembly.utils';
+import type { WriteAssemblyTask } from './writeAssembly.helper';
 
 /** Generate rounds from JSON data: 2x leicht, 1x mittel, 1x schwer */
 export const generateRounds = (): WriteAssemblyTask[] => {

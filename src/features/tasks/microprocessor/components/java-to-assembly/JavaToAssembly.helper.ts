@@ -1,8 +1,8 @@
-import type {AssemblyCommand, BaseAssemblyTask} from './shared/assembly.types';
+import type { AssemblyCommand, BaseAssemblyTask } from '../shared/assembly.types';
 import {
   parseAssemblerCommand,
   generateAvailableCommands as generateAvailableCommandsBase,
-} from './shared/assembly.utils';
+} from '../shared/assembly.utils';
 
 /**
  * Task interface for Java to Assembly conversion exercises
@@ -25,19 +25,19 @@ export interface JavaToAssemblyTask extends BaseAssemblyTask {
  * These are incorrect commands used to increase difficulty
  */
 const DISTRACTOR_COMMANDS: AssemblyCommand[] = [
-  {op: 'LDA', arg: '(14)'},
-  {op: 'LDA', arg: '#1'},
-  {op: 'LDA', arg: '#2'},
-  {op: 'ADD', arg: '(14)'},
-  {op: 'ADD', arg: '#1'},
-  {op: 'SUB', arg: '(13)'},
-  {op: 'SUB', arg: '#1'},
-  {op: 'STA', arg: '14'},
-  {op: 'STA', arg: '13'},
-  {op: 'BRZ', arg: '0100'},
-  {op: 'JMP', arg: '0000'},
-  {op: 'MUL', arg: '(13)'},
-  {op: 'DIV', arg: '(14)'},
+  { op: 'LDA', arg: '(14)' },
+  { op: 'LDA', arg: '#1' },
+  { op: 'LDA', arg: '#2' },
+  { op: 'ADD', arg: '(14)' },
+  { op: 'ADD', arg: '#1' },
+  { op: 'SUB', arg: '(13)' },
+  { op: 'SUB', arg: '#1' },
+  { op: 'STA', arg: '14' },
+  { op: 'STA', arg: '13' },
+  { op: 'BRZ', arg: '0100' },
+  { op: 'JMP', arg: '0000' },
+  { op: 'MUL', arg: '(13)' },
+  { op: 'DIV', arg: '(14)' },
 ];
 
 /**
@@ -65,4 +65,4 @@ export const getTaskCommands = (task: JavaToAssemblyTask): AssemblyCommand[] => 
 };
 
 // Re-export shared types for convenience
-export type {AssemblyCommand};
+export type { AssemblyCommand };

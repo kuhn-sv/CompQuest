@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps} from '../../../../../shared/interfaces/tasking.interfaces';
 import './JavaToAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -12,21 +12,21 @@ import {
   AssemblyDroppableSlot,
   calculateScore,
   DIFFICULTY_MAP,
-} from './shared';
+} from '../shared';
 import {
   useFooterControls,
   useHudState,
   useGameStartScreen,
-} from '../../../../shared/hooks';
-import {GameStartScreen} from '../../../../shared/components';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+} from '../../../../../shared/hooks';
+import {GameStartScreen} from '../../../../../shared/components';
+import {Difficulty} from '../../../../../shared/enums/difficulty.enum';
 import {
   DndContext,
   DragEndEvent,
   DragOverlay,
   DragStartEvent,
 } from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
+import {useDndSensors} from '../../../../../shared/hooks/dndSensors';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {generateRounds} from './javaToAssembly.utils';

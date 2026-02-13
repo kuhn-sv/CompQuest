@@ -1,10 +1,12 @@
-import type {AssemblyCommand, BaseAssemblyTask} from './shared/assembly.types';
-import {generateAvailableCommands as generateAvailableCommandsBase} from './shared/assembly.utils';
+import type { AssemblyCommand, BaseAssemblyTask } from '../shared/assembly.types';
+import { generateAvailableCommands as generateAvailableCommandsBase } from '../shared/assembly.utils';
 
 /**
  * Task interface for Write Assembly exercises
  */
 export interface WriteAssemblyTask extends BaseAssemblyTask {
+  id: any;
+  difficulty: any;
   /** Descriptive text explaining what the program should do */
   prosa_text: string;
   /** Array of assembly commands that form the correct solution */
@@ -16,16 +18,16 @@ export interface WriteAssemblyTask extends BaseAssemblyTask {
  * These are incorrect commands used to increase difficulty
  */
 const DISTRACTOR_COMMANDS: AssemblyCommand[] = [
-  {op: 'LDA', arg: '(14)'},
-  {op: 'LDA', arg: '#1'},
-  {op: 'ADD', arg: '(14)'},
-  {op: 'ADD', arg: '#1'},
-  {op: 'SUB', arg: '(13)'},
-  {op: 'SUB', arg: '#1'},
-  {op: 'STA', arg: '14'},
-  {op: 'STA', arg: '13'},
-  {op: 'BRZ', arg: '0100'},
-  {op: 'JMP', arg: '0000'},
+  { op: 'LDA', arg: '(14)' },
+  { op: 'LDA', arg: '#1' },
+  { op: 'ADD', arg: '(14)' },
+  { op: 'ADD', arg: '#1' },
+  { op: 'SUB', arg: '(13)' },
+  { op: 'SUB', arg: '#1' },
+  { op: 'STA', arg: '14' },
+  { op: 'STA', arg: '13' },
+  { op: 'BRZ', arg: '0100' },
+  { op: 'JMP', arg: '0000' },
 ];
 
 /**
@@ -42,4 +44,4 @@ export const generateAvailableCommands = (
 };
 
 // Re-export shared types for convenience
-export type {AssemblyCommand};
+export type { AssemblyCommand };

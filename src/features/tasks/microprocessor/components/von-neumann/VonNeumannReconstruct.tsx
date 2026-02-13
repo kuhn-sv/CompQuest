@@ -1,8 +1,8 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import './VonNeumannReconstruct.scss';
 import {DndContext, DragEndEvent, DragOverlay, useDraggable, useDroppable} from '@dnd-kit/core';
-import {useDndSensors} from '../../../../shared/hooks/dndSensors';
-import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
+import {useDndSensors} from '../../../../../shared/hooks/dndSensors';
+import type {TaskStageScore} from '../../../../../shared/interfaces/tasking.interfaces';
 import type {Placements} from './vonneumann.helper';
 
 interface Props {

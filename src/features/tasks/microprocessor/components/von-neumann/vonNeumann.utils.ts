@@ -1,6 +1,6 @@
-import type {VonNeumannRound} from './vonneumann.helper';
-import vonNeumannData from '../../../../data/tasks/von-neumann.json';
-import {shuffle} from './shared';
+import type { VonNeumannRound } from './vonneumann.helper';
+import vonNeumannData from '../../../../../data/tasks/von-neumann.json';
+import { shuffle } from '../shared';
 
 type RoundType = 'quiz' | 'functions' | 'reconstruct' | 'busAssignment';
 
@@ -10,7 +10,7 @@ export const DEFAULT_ROUNDS = 4;
 export const generateRounds = (count: number): VonNeumannRound[] => {
   const rounds: VonNeumannRound[] = [];
   const data = vonNeumannData as {
-    quizItems: {id: string; label: string; isCore: boolean}[];
+    quizItems: { id: string; label: string; isCore: boolean }[];
     reconstructComponents: string[];
     busComponents: string[];
     idToLabel: Record<string, string>;
@@ -29,12 +29,12 @@ export const generateRounds = (count: number): VonNeumannRound[] => {
     ];
     const shuffledIds = shuffle(poolIds);
     const chosenIds = shuffledIds.slice(0, 4);
-    const leftItems = chosenIds.map(id => ({id, label: data.idToLabel[id]}));
+    const leftItems = chosenIds.map(id => ({ id, label: data.idToLabel[id] }));
     const rightItems = shuffle(
-      chosenIds.map(id => ({id, label: data.idToDesc[id]})),
+      chosenIds.map(id => ({ id, label: data.idToDesc[id] })),
     );
 
-    return {left: leftItems, right: rightItems};
+    return { left: leftItems, right: rightItems };
   };
 
   for (let i = 0; i < count; i++) {

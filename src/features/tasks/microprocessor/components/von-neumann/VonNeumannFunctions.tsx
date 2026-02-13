@@ -3,8 +3,8 @@ import './VonNeumannFunctions.scss';
 import {
   ConnectionOverlay,
   ConnectionLine,
-} from '../../../../shared/components/ConnectionOverlay/ConnectionOverlay.component';
-import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
+} from '../../../../../shared/components/ConnectionOverlay/ConnectionOverlay.component';
+import type {TaskStageScore} from '../../../../../shared/interfaces/tasking.interfaces';
 
 interface PairItem {
   id: string;

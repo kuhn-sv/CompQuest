@@ -1,6 +1,6 @@
-import javaToAssemblyTasksData from '../../../../data/tasks/java-to-assembly.json';
-import {shuffle} from './shared';
-import type {JavaToAssemblyTask} from './JavaToAssembly.helper';
+import javaToAssemblyTasksData from '../../../../../data/tasks/java-to-assembly.json';
+import { shuffle } from '../shared';
+import type { JavaToAssemblyTask } from './JavaToAssembly.helper';
 
 /** Generate rounds from JSON data: 2x leicht, 1x mittel, 1x schwer */
 export const generateRounds = (): JavaToAssemblyTask[] => {

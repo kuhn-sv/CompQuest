@@ -1,21 +1,18 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../../shared/interfaces/tasking.interfaces';
 import './VonNeumannQuiz.component.scss';
 import {VonNeumannRound} from './vonneumann.helper';
-import {
-  useFooterControls,
-  useHudState,
-  useGameStartScreen,
-} from '../../../../shared/hooks';
-import {GameStartScreen} from '../../../../shared/components';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+
+
 import VonNeumannQuiz from './VonNeumannQuiz';
 import VonNeumannFunctions from './VonNeumannFunctions';
 import VonNeumannReconstruct from './VonNeumannReconstruct';
 import VonNeumannBusAssignment from './VonNeumannBusAssignment';
-import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
-import {shuffle} from './shared';
 import {generateRounds, DEFAULT_ROUNDS} from './vonNeumann.utils';
+import { GameStartScreen } from '../../../../../shared/components';
+import { Difficulty } from '../../../../../shared/enums/difficulty.enum';
+import { useGameStartScreen, useFooterControls, useHudState } from '../../../../../shared/hooks';
+import { SubTaskComponentProps, TaskStageScore } from '../../../number-representation';
+import { shuffle } from '../shared';
 
 const VonNeumann: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
