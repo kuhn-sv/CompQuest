@@ -1,4 +1,4 @@
-import type { TabItem } from '../../../shared/components/ui/tabRow/TabRow.component';
+import type { TabItem } from '@shared/components/ui/tab-row/TabRow.component';
 import type { ProfessorDashboardView } from '../interfaces/professorDashboard.interfaces';
 
 /** Tabs for the main professor dashboard navigation */

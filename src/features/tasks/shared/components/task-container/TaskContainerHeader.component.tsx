@@ -1,9 +1,9 @@
 import React, {useState, useCallback} from 'react';
 import {useNavigate} from 'react-router-dom';
-import {Timer} from '../..';
-import ConfirmModal from '../../ui/confirm-modal/ConfirmModal.component';
-import type {TaskHudState} from '../../../interfaces/tasking.interfaces';
+import ConfirmModal from '@shared/components/ui/confirm-modal/ConfirmModal.component';
+import type {TaskHudState} from '@shared/interfaces/tasking.interfaces';
 import './TaskContainerHeader.component.scss';
+import { Timer } from '../timer';
 
 interface Props {
   title: string;

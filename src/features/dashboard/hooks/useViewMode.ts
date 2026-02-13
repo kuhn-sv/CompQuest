@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import useDeviceType from '../../../shared/hooks/useDeviceType';
+import useDeviceType from '@shared/hooks/useDeviceType';
 
 const VIEW_MODE_STORAGE_KEY = 'compquest-view-mode';
 

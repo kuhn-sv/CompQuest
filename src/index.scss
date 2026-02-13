@@ -1,5 +1,5 @@
-@use './styles/_variables' as *;
-@use './styles/_theme' as *;
+@use '@styles/_variables' as *;
+@use '@styles/_theme' as *;
 @use './features/tasks/number-representation/shared/number-task/numberTask.shared.scss' as *;
 
 :root {

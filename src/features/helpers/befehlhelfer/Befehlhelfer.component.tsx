@@ -1,9 +1,9 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps} from '@shared/interfaces/tasking.interfaces';
 import './Befehlhelfer.scss';
 import OperationMatcher from './components/OperationMatcher';
 import type {Operation} from './types';
-import {useHelperTask} from '../../../shared/hooks';
+import {useHelperTask} from '@shared/hooks';
 
 // All 12 operations from the microprocessor instruction set
 const ALL_OPERATIONS: Operation[] = [

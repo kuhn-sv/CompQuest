@@ -1,5 +1,5 @@
 import supabase from './client';
-import type { BadgeLevel, UserTopicBadge } from '../../shared/interfaces';
+import type { BadgeLevel, UserTopicBadge } from '@shared/interfaces';
 
 export interface AttemptMetrics {
   timeMs: number;

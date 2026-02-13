@@ -5,7 +5,7 @@ import type {
   AnswerOptionBase,
   AssignmentMapBase,
 } from './NumberTask.types';
-import {AnswerDragData, DRAG_TYPES} from '../../../../../shared/interfaces/dnd.types';
+import {AnswerDragData, DRAG_TYPES} from '@shared/interfaces/dnd.types';
 
 interface ResultsSectionProps {
   answerPool: AnswerOptionBase[];

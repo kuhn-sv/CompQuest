@@ -1,5 +1,5 @@
 import React from 'react';
-import {BaseValueSpinner} from '../../../../../shared/components';
+import {BaseValueSpinner} from '@shared/components';
 import './PlaceValueInputGrid.scss';
 
 export type PlaceValueInputGridProps = {

@@ -4,9 +4,9 @@ import type {
   BestAttempt,
   GameStartScreenProps,
 } from './gameStartScreen.interfaces';
-import { useAuth } from '../../../../features/auth';
-import { trainingService } from '../../../../services/supabase';
-import { formatDuration } from '../../../utils/formatTime.utils';
+import { useAuth } from '../../../../auth';
+import { trainingService } from '../../../../../services/supabase';
+import { formatDuration } from '@shared/utils/formatTime.utils';
 import Leaderboard from '../leaderboard/Leaderboard';
 
 export type {

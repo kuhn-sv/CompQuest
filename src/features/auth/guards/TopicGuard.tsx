@@ -1,10 +1,10 @@
 import React from 'react';
 import {Navigate} from 'react-router-dom';
-import {useUserBadges} from '../../../shared/hooks/useUserBadges';
+import {useUserBadges} from '@shared/hooks/useUserBadges';
 import {
   isBadgeLevelSufficient,
   type BadgeLevel,
-} from '../../../shared/interfaces/badge.interfaces';
+} from '@shared/interfaces/badge.interfaces';
 import './TopicGuard.scss';
 
 interface TopicGuardProps {

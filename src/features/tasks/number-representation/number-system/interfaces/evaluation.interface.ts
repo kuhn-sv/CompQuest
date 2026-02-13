@@ -1,4 +1,4 @@
-import { Difficulty } from '../../../../../shared/enums/difficulty.enum';
+import { Difficulty } from '@shared/enums/difficulty.enum';
 
 export interface StageScore {
   difficulty: Difficulty;

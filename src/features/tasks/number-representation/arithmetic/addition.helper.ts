@@ -1,4 +1,4 @@
-import type { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import type { Difficulty } from '@shared/enums/difficulty.enum';
 import type { ArithmeticMode } from '../interfaces';
 
 export interface AdditionTask {

@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useState} from 'react';
-import { trainingService } from '../../../../services/supabase';
-import { LeaderboardEntry, LeaderboardResult } from '../../../../services/supabase/training.service';
-import { formatDuration } from '../../../utils/formatTime.utils';
+import { trainingService } from '../../../../../services/supabase';
+import { LeaderboardEntry, LeaderboardResult } from '../../../../../services/supabase/training.service';
+import { formatDuration } from '@shared/utils/formatTime.utils';
 import { PAGE_SIZE, RANK_ICONS } from './leaderboard.constants';
 import './Leaderboard.scss';
 

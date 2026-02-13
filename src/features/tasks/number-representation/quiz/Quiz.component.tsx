@@ -1,10 +1,9 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import './quiz.page.scss';
-import {GameStartScreen} from '../../../../shared/components';
 import type {SubTaskComponentProps, TaskStageScore} from '../interfaces';
-import {useGameStartScreen, useHudState} from '../../../../shared/hooks';
-import type {QuizQuestion} from './quiz.interfaces';
+import {useGameStartScreen, useHudState} from '@shared/hooks';
 import {QUESTIONS, TOTAL} from './quiz.data';
+import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 
 const Quiz: React.FC<SubTaskComponentProps> = ({
   onControlsChange,

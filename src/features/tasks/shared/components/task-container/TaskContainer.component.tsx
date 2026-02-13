@@ -2,20 +2,20 @@ import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import TaskContainerHeader from './TaskContainerHeader.component';
 import TaskActionButtons from '../task-action-buttons/TaskActionButtons.component';
 import ResultSummary from '../result-summary/ResultSummary';
-import {useTimer} from '../../../hooks';
-import {trainingService} from '../../../../services/supabase/training.service';
+import {useTimer} from '@shared/hooks';
+import {trainingService} from '../../../../../services/supabase/training.service';
 import type {
   TaskFooterControls,
   TaskHudState,
   TaskSummaryState,
-} from '../../../interfaces/tasking.interfaces';
+} from '@shared/interfaces/tasking.interfaces';
 import './TaskContainer.component.scss';
 import {
   TaskContainerProps,
   TaskContainerInjectedProps,
-} from '../../../interfaces/taskContainerProps.interface';
-import {useBadgeNotification} from '../../../hooks/useBadgeNotification';
-import {useUserBadges} from '../../../hooks/useUserBadges';
+} from '@shared/interfaces/taskContainerProps.interface';
+import {useBadgeNotification} from '@shared/hooks/useBadgeNotification';
+import {useUserBadges} from '@shared/hooks/useUserBadges';
 import {
   hudShallowEqual,
   summaryShallowEqual,

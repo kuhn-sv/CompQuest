@@ -1,7 +1,7 @@
 import React from 'react';
-import AccuracyRing from '../../../shared/components/task/accuracy-ring/AccuracyRing.component';
-import {CATEGORY_DISPLAY_NAMES} from '../../../shared/context/badgeNotification.constants';
-import {BADGE_TIERS} from '../../../shared/interfaces';
+import { AccuracyRing } from '../../tasks/shared/components';
+import {CATEGORY_DISPLAY_NAMES} from '@shared/context/badgeNotification.constants';
+import {BADGE_TIERS} from '@shared/interfaces';
 import type {StudentBadgeDto} from '../../../services/supabase/professor.service';
 import './CategorySummaryCards.component.scss';
 

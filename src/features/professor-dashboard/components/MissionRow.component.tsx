@@ -1,5 +1,5 @@
 import React from 'react';
-import AccuracyRing from '../../../shared/components/task/accuracy-ring/AccuracyRing.component';
+import { AccuracyRing } from '../../tasks/shared/components';
 import {formatTimeFromMs} from '../utils/professorDashboard.utils';
 import type {MissionStats} from '../interfaces/professorDashboard.interfaces';
 import './MissionRow.component.scss';

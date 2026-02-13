@@ -6,16 +6,16 @@ import SettingsModal from './components/SettingsModal.component';
 import InstructionsOverlay from './components/InstructionsOverlay.component';
 import PerformanceWarning from './components/PerformanceWarning.component';
 import ViewToggleButton from './components/ViewToggleButton.component';
-import {Toast} from '../../shared/components/ui/toast/Toast.component';
+import {Toast} from '@shared/components/ui/toast/Toast.component';
 import {useAuth} from '../auth';
 import {useSettingsModal} from './hooks/useSettingsModal';
 import {useViewMode} from './hooks/useViewMode';
 import './dashboard.page.scss';
-import type {DashboardNavigationState} from '../../shared/interfaces';
+import type {DashboardNavigationState} from '@shared/interfaces';
+import BoardWithHotspots from '@shared/components/input/image-hotspots/BoardWithHotspots';
 const Model3D = React.lazy(
   () => import('./components/model3d/model3d.component'),
 );
-import {BoardWithHotspots} from '../../shared/components';
 
 const DashboardPage: React.FC = () => {
   const location = useLocation();

@@ -1,5 +1,5 @@
 import type { AssemblyCommand } from './assembly.types';
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import { Difficulty } from '@shared/enums/difficulty.enum';
 
 /**
  * Calculates the score based on correct and wrong answers

@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { generateRounds, FixedFloatingRound, bitsToString } from './fixedFloatingPoint.helper';
-import { useGameStartScreen, useHudState } from '../../../../shared/hooks';
+import { useGameStartScreen, useHudState } from '@shared/hooks';
 import type { SubTaskComponentProps } from '../interfaces';
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import { Difficulty } from '@shared/enums/difficulty.enum';
 
 export const useFixedFloatingPoint = ({
     onControlsChange,

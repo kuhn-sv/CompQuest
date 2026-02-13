@@ -1,13 +1,13 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import '../number-system/number-system.page.scss';
 import './complements.page.scss';
-import BitToggleRow from '../../../../shared/components/input/bit-toggle-row/BitToggleRow.tsx';
-import {computeEvalStates} from '../../../../shared/utils/evalStates';
-import TargetValueDisplay from '../../../../shared/components/task/target-value-display/TargetValueDisplay.component.tsx';
-import {GameStartScreen} from '../../../../shared/components';
+import BitToggleRow from '@shared/components/input/bit-toggle-row/BitToggleRow.tsx';
+import {computeEvalStates} from '@shared/utils/evalStates';
+import TargetValueDisplay from '../../../../features/tasks/shared/components/target-value-display/TargetValueDisplay.component';
+import {GameStartScreen} from '../../../../features/tasks/shared/components';
 // Footer buttons rendered by parent
 import type {SubTaskComponentProps} from '../interfaces';
-import {useGameStartScreen, useHudState} from '../../../../shared/hooks';
+import {useGameStartScreen, useHudState} from '@shared/hooks';
 import {
   generateRounds,
   ComplementRound,
@@ -15,7 +15,7 @@ import {
   twosComplement,
   bitsToString,
 } from './complements.helper.ts';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import {Difficulty} from '@shared/enums/difficulty.enum';
 
 type Round = ComplementRound;
 

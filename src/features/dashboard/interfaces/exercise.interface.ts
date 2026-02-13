@@ -1,4 +1,4 @@
-import type { BadgeLevel } from '../../../shared/interfaces';
+import type { BadgeLevel } from '@shared/interfaces';
 
 export interface Exercise {
   id: string;

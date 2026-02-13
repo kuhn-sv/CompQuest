@@ -2,7 +2,7 @@ import type {
   TaskFooterControls,
   TaskHudState,
   TaskSummaryState,
-} from '../../../interfaces/tasking.interfaces';
+} from '@shared/interfaces/tasking.interfaces';
 
 export const hudShallowEqual = (
   a: TaskHudState | null,

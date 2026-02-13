@@ -5,4 +5,4 @@ export type {
 	TaskHudState,
 	TaskSummaryState,
 	TaskStageScore,
-} from '../../../../shared/interfaces/tasking.interfaces';
+} from '@shared/interfaces/tasking.interfaces';

@@ -1,11 +1,7 @@
 import React, {useMemo, useRef, useState, useCallback, useEffect} from 'react';
 import {Link} from 'react-router-dom';
 import '../number-system/number-system.page.scss';
-import {
-  ConnectionOverlay,
-  DndProvider,
-  GameStartScreen,
-} from '../../../../shared/components';
+
 // Footer buttons are rendered in parent; we expose controls upwards
 import type {SubTaskComponentProps} from '../interfaces';
 import {
@@ -14,17 +10,20 @@ import {
   useHudState,
   useGameStartScreen,
   CONNECTION_LINE_PRESETS,
-} from '../../../../shared/hooks';
-import {EquationRow as SharedEquationRow} from '../../../../shared/components/input/equation-row/EquationRow';
-import NumberWithBase from '../../../../shared/components/input/number/NumberWithBase.component';
+} from '@shared/hooks';
+import {EquationRow as SharedEquationRow} from '@shared/components/input/equation-row/EquationRow';
+import NumberWithBase from '@shared/components/input/number/NumberWithBase.component';
 import {generateAdditionSet, AdditionTask} from './addition.helper';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import {Difficulty} from '@shared/enums/difficulty.enum';
 import type {ArithmeticMode} from '../interfaces';
-import {TaskId} from '../../../../shared/enums/taskId.enum';
+import {TaskId} from '@shared/enums/taskId.enum';
 import {DragOverlay} from '@dnd-kit/core';
 import type {PAStageScore} from './arithmetic.interfaces';
 import { AnswerOptionBase } from '../shared/number-task/NumberTask.types';
 import { ResultsSection } from '../shared/number-task/ResultsSection';
+import DndProvider from '@shared/utils/dnd/DndProvider';
+import { ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay';
+import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 
 const PositiveArithmeticComponent: React.FC<SubTaskComponentProps> = ({
   onControlsChange,

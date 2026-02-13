@@ -1,4 +1,4 @@
-import { TaskId } from '../../../../shared/enums/taskId.enum';
+import { TaskId } from '@shared/enums/taskId.enum';
 import type { Exercise } from '../../interfaces/exercise.interface';
 
 export const NUMBER_REPRESENTATION_HELPERS: Exercise[] = [

@@ -1,5 +1,5 @@
 import { useCallback, useMemo } from 'react';
-import { computeEvalStates } from '../../../../shared/utils/evalStates';
+import { computeEvalStates } from '@shared/utils/evalStates';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types

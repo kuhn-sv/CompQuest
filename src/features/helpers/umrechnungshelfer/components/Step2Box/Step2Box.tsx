@@ -1,5 +1,5 @@
 import React, {useEffect, useMemo, useState} from 'react';
-import {BaseValueSpinner} from '../../../../../shared/components';
+import {BaseValueSpinner} from '@shared/components';
 import './Step2Box.scss';
 
 export type Step2BoxProps = {

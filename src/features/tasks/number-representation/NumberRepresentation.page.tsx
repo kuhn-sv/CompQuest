@@ -3,11 +3,11 @@ import {SubTaskConfig, SubTaskComponentProps} from './interfaces';
 import NumberSystemComponent from './number-system/NumberSystem.component';
 import FixedFloatingPointComponent from './fixed-floating-point/FixedFloatingPoint.component';
 import Quiz from './quiz/Quiz.component';
-import {TaskContainer} from '../../../shared/components';
-import {TaskId} from '../../../shared/enums/taskId.enum';
-import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
+import {TaskId} from '@shared/enums/taskId.enum';
+import {TASK_DISPLAY_NAMES} from '@shared/constants/taskDisplayNames';
 import { PositiveArithmeticComponent } from './arithmetic';
 import ComplementsComponent from './complements';
+import TaskContainer from '@features/tasks/shared/components/task-container/TaskContainer.component';
 
 interface NumberRepresentationPageProps {
   initialSubTask?: TaskId;

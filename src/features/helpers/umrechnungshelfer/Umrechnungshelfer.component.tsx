@@ -1,13 +1,13 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
+import { SubTaskComponentProps } from '@shared/interfaces/tasking.interfaces';
 import './Umrechnungshelfer.scss';
-import TabRow from '../../../shared/components/ui/tabRow/TabRow.component';
+import TabRow from '@shared/components/ui/tab-row/TabRow.component';
 import StepPanel from './components/StepPanel/StepPanel';
 import './components/StepPanel/StepPanel.scss';
 import './components/PlaceValueInputGrid/PlaceValueInputGrid.scss';
 import Step1Box from './components/Step1Box/Step1Box';
 import Step2Box from './components/Step2Box/Step2Box';
-import {useHelperTask} from '../../../shared/hooks';
+import {useHelperTask} from '@shared/hooks';
 import ResultLine from './components/ResultLine/ResultLine';
 import {useBaseConvert} from './hooks/useBaseConvert';
 import {useStepperExpanded} from './hooks/useStepperExpanded';

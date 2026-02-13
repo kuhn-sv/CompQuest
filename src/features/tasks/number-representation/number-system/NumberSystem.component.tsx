@@ -1,20 +1,18 @@
 import React, {useMemo, useRef, useState, useCallback, useEffect} from 'react';
 import './number-system.page.scss';
 import {generateSet} from './numberSystem.helper';
-import {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import {Difficulty} from '@shared/enums/difficulty.enum';
 import type {
   NumberTask,
   AnswerOption,
 } from './interfaces/numberSystem.interface';
 import type {StageScore} from './interfaces/evaluation.interface';
 import type {AssignmentMap} from './numberSystem.types';
-import {EquationRow as SharedEquationRow} from '../../../../shared/components/input/equation-row/EquationRow';
-import NumberWithBase from '../../../../shared/components/input/number/NumberWithBase.component';
+import {EquationRow as SharedEquationRow} from '@shared/components/input/equation-row/EquationRow';
+import NumberWithBase from '@shared/components/input/number/NumberWithBase.component';
 import {
-  ConnectionOverlay,
   DndProvider,
-  GameStartScreen,
-} from '../../../../shared/components';
+} from '@shared/components';
 import {DragOverlay} from '@dnd-kit/core';
 import type {SubTaskComponentProps} from '../interfaces';
 import {
@@ -23,8 +21,10 @@ import {
   useHudState,
   useGameStartScreen,
   CONNECTION_LINE_PRESETS,
-} from '../../../../shared/hooks';
+} from '@shared/hooks';
 import { ResultsSection } from '../shared/number-task/ResultsSection';
+import { ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay/ConnectionOverlay.component';
+import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 // dnd-kit event types are referenced inline where needed; no top-level type import
 
 const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({

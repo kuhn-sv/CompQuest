@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../auth';
-import { useToast } from '../../../shared/hooks/useToast';
+import { useToast } from '@shared/hooks/useToast';
 
 export const useSettingsModal = () => {
   const [showSettings, setShowSettings] = useState(false);

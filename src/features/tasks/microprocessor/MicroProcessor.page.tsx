@@ -1,17 +1,17 @@
 import React, {useMemo, useState} from 'react';
-import {TaskContainer} from '../../../shared/components';
-import {TaskId} from '../../../shared/enums/taskId.enum';
-import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
+import {TaskId} from '@shared/enums/taskId.enum';
+import {TASK_DISPLAY_NAMES} from '@shared/constants/taskDisplayNames';
 import type {
   SubTaskConfig,
   SubTaskComponentProps,
-} from '../../../shared/interfaces/tasking.interfaces';
+} from '@shared/interfaces/tasking.interfaces';
 import {
   VonNeumann,
   ReadAssembly,
   WriteAssembly,
   JavaToAssembly,
 } from '.';
+import TaskContainer from '@features/tasks/shared/components/task-container/TaskContainer.component';
 
 interface MicroProcessorPageProps {
   initialSubTask?: TaskId;

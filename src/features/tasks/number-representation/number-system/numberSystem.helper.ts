@@ -1,4 +1,4 @@
-import { Difficulty } from '../../../../shared/enums/difficulty.enum';
+import { Difficulty } from '@shared/enums/difficulty.enum';
 import type { Base } from './types/bases.type';
 import type { NumberTask, GeneratedSet, AnswerOption } from './interfaces/numberSystem.interface';
 
@@ -28,20 +28,20 @@ const generateUniqueRandomInts = (count: number, min: number, max: number): numb
   if (count > range) {
     throw new Error(`Cannot generate ${count} unique values from range [${min}, ${max}]`);
   }
-  
+
   const values = new Set<number>();
   let attempts = 0;
   const maxAttempts = 1000;
-  
+
   while (values.size < count && attempts < maxAttempts) {
     values.add(randomInt(min, max));
     attempts++;
   }
-  
+
   if (values.size < count) {
     throw new Error(`Failed to generate ${count} unique values after ${maxAttempts} attempts`);
   }
-  
+
   return Array.from(values);
 };
 
@@ -92,7 +92,7 @@ export const generateLeichtSet = (): GeneratedSet => {
   // Easy: Always decimal (left) to binary (right), 4 tasks
   // Generate 4 unique decimal values
   const uniqueValues = generateUniqueRandomInts(4, min, max);
-  
+
   const tasks: NumberTask[] = uniqueValues.map(n => {
     const fromBase: Base = 10;
     const toBaseVal: Base = 2;

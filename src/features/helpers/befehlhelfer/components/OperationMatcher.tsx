@@ -1,10 +1,8 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './OperationMatcher.scss';
-import {
-  ConnectionOverlay,
-  ConnectionLine,
-} from '../../../../shared/components/task/connection-overlay/ConnectionOverlay.component';
+
 import type {Operation} from '../types';
+import { ConnectionLine, ConnectionOverlay } from '../../../tasks/shared/components/connection-overlay';
 
 interface Props {
   operations: Operation[];

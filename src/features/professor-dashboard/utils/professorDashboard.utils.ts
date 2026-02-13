@@ -1,6 +1,6 @@
-import {CATEGORY_DISPLAY_NAMES} from '../../../shared/context/badgeNotification.constants';
-import {TASK_DISPLAY_NAMES} from '../../../shared/constants/taskDisplayNames';
-import type {MissionStatsDto, StudentExerciseStatDto} from '../../../services/supabase/professor.service';
+import { CATEGORY_DISPLAY_NAMES } from '@shared/context/badgeNotification.constants';
+import { TASK_DISPLAY_NAMES } from '@shared/constants/taskDisplayNames';
+import type { MissionStatsDto, StudentExerciseStatDto } from '../../../services/supabase/professor.service';
 import type {
   CategoryMissionGroup,
   MissionStats,

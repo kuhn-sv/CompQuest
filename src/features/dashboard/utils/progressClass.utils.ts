@@ -1,4 +1,4 @@
-import {getBadgeLevelForAccuracy} from '../../../shared/interfaces';
+import { getBadgeLevelForAccuracy } from '@shared/interfaces';
 
 export const getProgressClass = (percent: number): string => {
   const level = getBadgeLevelForAccuracy(percent);

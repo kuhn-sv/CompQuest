@@ -1,10 +1,7 @@
 import React, {useCallback, useEffect, useRef, useState} from 'react';
 import './VonNeumannFunctions.scss';
-import {
-  ConnectionOverlay,
-  ConnectionLine,
-} from '../../../../shared/components/task/connection-overlay/ConnectionOverlay.component';
-import type {TaskStageScore} from '../../../../shared/interfaces/tasking.interfaces';
+import type {TaskStageScore} from '@shared/interfaces/tasking.interfaces';
+import { ConnectionLine, ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay';
 
 interface PairItem {
   id: string;

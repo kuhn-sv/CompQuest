@@ -1,6 +1,6 @@
 import React, {useEffect, useMemo, useRef, useState} from 'react';
 import './AskTimModal.component.scss';
-import { trainingService } from '../../../../services/supabase';
+import { trainingService } from '../../../../../services/supabase';
 
 interface AskTimModalProps {
   open: boolean;

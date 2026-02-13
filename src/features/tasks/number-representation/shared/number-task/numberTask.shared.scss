@@ -1,5 +1,5 @@
 // Shared styles for number system and positive arithmetic tasks
-@use '../../../../../styles/_variables' as *;
+@use '@styles/_variables' as *;
 
 // Provide sensible defaults; pages can ignore or override via their own layout
 $ns-box-width: 120px !default;

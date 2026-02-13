@@ -1,6 +1,5 @@
 import React, { useMemo } from 'react';
 import { useParams, Navigate } from 'react-router-dom';
-import { TaskContainer } from '../../shared/components';
 import { NUMBER_REPRESENTATION_HELPERS } from '../dashboard/components/constants/numberRepresentationHelpers';
 import { MICROPROCESSOR_HELPERS } from '../dashboard/components/constants/microprocessorHelpers';
 
@@ -10,6 +9,7 @@ import Potenzrechner from './potenzrechner/Potenzrechner.component';
 import Umrechnungshelfer from './umrechnungshelfer/Umrechnungshelfer.component';
 import Uebertragshelfer from './uebertragshelfer/Uebertragshelfer.component';
 import { SubTaskComponentProps } from '../tasks/number-representation/interfaces';
+import TaskContainer from '../tasks/shared/components/task-container/TaskContainer.component';
 
 // Component Mapping
 const HELPER_COMPONENTS: Record<string, React.ComponentType<SubTaskComponentProps>> = {

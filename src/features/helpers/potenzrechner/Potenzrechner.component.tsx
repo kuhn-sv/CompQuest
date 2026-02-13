@@ -1,12 +1,12 @@
 import React, {useCallback, useMemo, useState} from 'react';
-import {computeEvalStates} from '../../../shared/utils/evalStates';
-import type {SubTaskComponentProps} from '../../../shared/interfaces/tasking.interfaces';
-import BitToggleRow from '../../../shared/components/input/bit-toggle-row/BitToggleRow';
-import {DigitsRow} from '../../../shared/components';
+import {computeEvalStates} from '@shared/utils/evalStates';
+import type {SubTaskComponentProps} from '@shared/interfaces/tasking.interfaces';
+import BitToggleRow from '@shared/components/input/bit-toggle-row/BitToggleRow';
+import {DigitsRow} from '@shared/components';
 import './Potenzrechner.scss';
 import ValueExpression from './components/PotenzValueExpression.component';
-import TabRow from '../../../shared/components/ui/tabRow/TabRow.component';
-import {useHelperTask} from '../../../shared/hooks';
+import TabRow from '@shared/components/ui/tab-row/TabRow.component';
+import {useHelperTask} from '@shared/hooks';
 
 type Mode = 'binary' | 'octal' | 'hex';
 

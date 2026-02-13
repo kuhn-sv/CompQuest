@@ -24,7 +24,7 @@ import HelperModulePage from './features/helpers/HelperModule.page';
 import OnboardingPage from './features/onboarding/onboarding.page';
 import {TaskId} from './shared/enums/taskId.enum';
 import {useOrientation} from './shared/hooks/useOrientation';
-import OrientationOverlay from './shared/components/task/orientation-overlay/OrientationOverlay';
+import OrientationOverlay from './features/tasks/shared/components/orientation-overlay/OrientationOverlay';
 import { ProfessorDashboardPage } from './features/professor-dashboard';
 import MicroProcessorPage from './features/tasks/microprocessor/MicroProcessor.page';
 import NumberRepresentation from './features/tasks/number-representation/NumberRepresentation.page';

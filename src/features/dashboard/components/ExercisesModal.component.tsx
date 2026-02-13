@@ -6,8 +6,8 @@ import {
   BADGE_CONFIG,
   BADGE_LEGEND_TIERS,
   isBadgeLevelSufficient,
-} from '../../../shared/interfaces';
-import {useUserBadges} from '../../../shared/hooks/useUserBadges';
+} from '@shared/interfaces';
+import {useUserBadges} from '@shared/hooks/useUserBadges';
 import {EXERCISE_CATEGORIES} from './constants/categories';
 import type {ExerciseCategory} from '../interfaces/exercise.interface'; // Correct import path
 

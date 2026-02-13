@@ -1,5 +1,5 @@
-import { TaskId } from '../../../../shared/enums/taskId.enum';
-import { TASK_DISPLAY_NAMES } from '../../../../shared/constants/taskDisplayNames';
+import { TaskId } from '@shared/enums/taskId.enum';
+import { TASK_DISPLAY_NAMES } from '@shared/constants/taskDisplayNames';
 import type { Exercise } from '../ExercisesList.component';
 
 export const NUMBER_REPRESENTATION_MISSIONS: Exercise[] = [

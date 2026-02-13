@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import type { ConnectionLine } from '../components/task/connection-overlay';
+import type { ConnectionLine } from '../../features/tasks/shared/components/connection-overlay';
 
 export interface ConnectionLineSelectors {
   taskContainerSelector: string;

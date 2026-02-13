@@ -1,4 +1,4 @@
-import type {Difficulty} from '../../../../shared/enums/difficulty.enum';
+import type { Difficulty } from '@shared/enums/difficulty.enum';
 
 export interface PAStageScore {
   difficulty: Difficulty;

@@ -4,7 +4,7 @@ import {generateFeedback} from './resultSummary.helper';
 import {Link} from 'react-router-dom';
 import {Leaderboard} from '../leaderboard/Leaderboard';
 import type {SummaryResultLike} from './resultSummary.interfaces';
-import { useAuth } from '../../../../features/auth';
+import { useAuth } from '../../../../auth';
 
 export type {SummaryResultLike} from './resultSummary.interfaces';
 
