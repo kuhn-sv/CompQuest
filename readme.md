@@ -1,12 +1,33 @@
-# React + Vite
+# CompQuest - Gamified Computer Science Learning Platform
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**CompQuest** ist eine interaktive Lernplattform, die Studierenden der "Start Informatik"-Module spielerisch Konzepte der Technischen Informatik vermittelt.
 
-Currently, two official plugins are available:
+## 🚀 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+*   **Interaktive Missionen**:
+    *   **Zahlensysteme**: Umrechnung zwischen Binär, Dezimal und Hexadezimal.
+    *   **Logikgatter**: Visualisierung und Verständnis digitaler Schaltungen.
+    *   **Von-Neumann-Architektur**: Interaktiver Aufbau und Verständnis der CPU-Komponenten.
+*   **KI-Assistent**: Ein integrierter Chatbot (basiert auf OpenAI), der als virtueller Tutor fungiert und kontextbezogene Hilfestellung gibt.
+*   **Fortschrittssystem**: Gamification-Elemente wie Badges und Levels, gespeichert via Supabase.
+*   **Professor-Dashboard**: Übersicht über den Lernfortschritt der Studierenden.
 
-## Expanding the ESLint configuration
+## 🛠 Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+*   **Frontend**: React (v19), TypeScript, Vite
+*   **Styling**: SCSS (Sass), Vanilla CSS
+*   **Backend / Datenbank**: Supabase (PostgreSQL, Auth, Realtime)
+*   **Serverless Functions**: Netlify Functions (für OpenAI Proxy)
+*   **KI**: OpenAI API (Standard: chatgpt-4o-latest, konfigurierbar via `TIM_MODEL`)
+
+## 📦 Installation & Deployment
+
+Eine detaillierte Anleitung zur **lokalen Einrichtung** und zum **Deployment** (Netlify & Supabase sowie Alternativen) finden Sie in der Übergabedokumentation:
+
+👉 **[HANDOVER_DOC.md](./HANDOVER_DOC.md)**
+
+Bitte lesen Sie dieses Dokument sorgfältig durch, bevor Sie das Projekt aufsetzen.
+
+## 📝 Lizenz
+
+Dieses Projekt wurde für akademische Zwecke entwickelt.

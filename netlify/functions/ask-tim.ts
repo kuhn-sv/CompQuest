@@ -19,11 +19,11 @@ const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
 export const handler: NetlifyHandler = async (event) => {
 	if (event.httpMethod !== 'POST') {
-			return {
-				statusCode: 405,
-				body: 'Method Not Allowed',
-				headers: { Allow: 'POST' } as HeadersLike,
-			};
+		return {
+			statusCode: 405,
+			body: 'Method Not Allowed',
+			headers: { Allow: 'POST' } as HeadersLike,
+		};
 	}
 
 	try {
@@ -36,12 +36,12 @@ export const handler: NetlifyHandler = async (event) => {
 			};
 		}
 
-		const body = event.body ? (JSON.parse(event.body) as { question?: string; taskMeta?: any; taskContext?: any; contextPreview?: string; messages?: Array<{role: string; content: string}> }) : {};
+		const body = event.body ? (JSON.parse(event.body) as { question?: string; taskMeta?: any; taskContext?: any; contextPreview?: string; messages?: Array<{ role: string; content: string }> }) : {};
 		const question = (body.question ?? '').toString().trim();
 		const taskMeta = body.taskMeta ?? null;
 		const taskContext = body.taskContext ?? null;
 		const contextPreview = (body.contextPreview ?? null) as string | null;
-		const priorMessages = Array.isArray(body.messages) ? body.messages.slice(-20).map(m => ({role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content ?? '')})) : [];
+		const priorMessages = Array.isArray(body.messages) ? body.messages.slice(-20).map(m => ({ role: m.role === 'assistant' ? 'assistant' : 'user', content: String(m.content ?? '') })) : [];
 		if (!question) {
 			return {
 				statusCode: 400,
@@ -57,7 +57,7 @@ export const handler: NetlifyHandler = async (event) => {
 			};
 		}
 
-		const systemPrompt =  `Du bist Tim, ein NPC welcher in dieser Anwendung als Arbeitskollege im Gebiet der Informatik auftritt.
+		const systemPrompt = `Du bist Tim, ein NPC welcher in dieser Anwendung als Arbeitskollege im Gebiet der Informatik auftritt.
 		Aber hinter der Facade bist du ein digitaler Lernassistent für das Modul 'Start Informatik'.
 		Deine Aufgabe ist es, Studierende beim Verstehen der technischen Informatik zu unterstützen – nicht, ihnen Aufgabenlösungen direkt zu verraten.
 		Dein Wissen basiert auf dem Buch 'Grundlagen der Technischen Informatik' von Dirk W. Hoffmann, insbesondere:\n- Kapitel 3: Zahlendarstellung (Zahlensysteme, Einer-/Zweierkomplement, Fest- & Gleitkommadarstellung, Arithmetik, Komplemente)\n- Kapitel 11: Mikroprozessortechnik (Von-Neumann-Architektur, Assembly, Java zu Assembly)\n\nDidaktische Leitlinien:
@@ -86,7 +86,7 @@ export const handler: NetlifyHandler = async (event) => {
 		if (taskMeta && (taskMeta.id || taskMeta.title)) {
 			contextMsgParts.push(`Aufgabe: ${taskMeta.title ?? taskMeta.id}`);
 		}
-		
+
 		// Load solution server-side based on task identifiers
 		let solutionContext: any = null;
 		if (taskContext && typeof taskContext === 'object') {
@@ -154,12 +154,12 @@ export const handler: NetlifyHandler = async (event) => {
 				}
 			}
 		}
-		
+
 		// Format task context intelligently based on task type
 		if (taskContext && typeof taskContext === 'object') {
 			try {
 				const ctx = taskContext as any;
-				
+
 				if (ctx.subtaskType === 'JavaToAssembly') {
 					contextMsgParts.push(`\nAufgabentyp: Java → Assembler`);
 					contextMsgParts.push(`Thema: ${ctx.topic || 'unbekannt'}`);
@@ -269,6 +269,7 @@ export const handler: NetlifyHandler = async (event) => {
 		// finally add the newest user question
 		messages.push({ role: 'user', content: question });
 
+		console.log(process.env.TIM_MODEL, 'tim model')
 		const resp = await fetch(OPENAI_API_URL, {
 			method: 'POST',
 			headers: {
@@ -276,7 +277,7 @@ export const handler: NetlifyHandler = async (event) => {
 				Authorization: `Bearer ${apiKey}`,
 			},
 			body: JSON.stringify({
-				model: 'gpt-3.5-turbo',
+				model: process.env.TIM_MODEL ?? 'chatgpt-4o-latest',
 				messages,
 				temperature: 0.2,
 				max_tokens: 350,
