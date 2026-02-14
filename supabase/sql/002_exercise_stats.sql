@@ -13,7 +13,6 @@ create table if not exists public.exercise_stats (
   best_time_ms   int,
   best_accuracy  numeric(5,2),
   best_points    int,
-  questions_count int not null default 0,
   last_attempt_at timestamptz,
   created_at     timestamptz not null default now(),
   updated_at     timestamptz not null default now(),

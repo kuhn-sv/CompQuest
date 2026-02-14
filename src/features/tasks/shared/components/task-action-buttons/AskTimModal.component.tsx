@@ -115,7 +115,6 @@ const AskTimModal: React.FC<AskTimModalProps> = ({
           await trainingService.recordTimMessage(
             taskMeta.id,
             taskMeta.title,
-            taskMeta.level ?? '',
             TIM_VERSION,
             question.trim(),
             data.answer ?? '',
