@@ -41,6 +41,7 @@ export interface TimConversationRow {
   task_title: string;
   messages: any[]; // JSONB
   rating: number | null;
+  tim_version: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -64,7 +65,8 @@ export const trainingService = {
     taskId: string,
     taskTitle: string,
     messages: any[], // The full conversation array
-    rating?: number
+    rating?: number,
+    timVersion?: string
   ): Promise<void> => {
     const { error } = await supabase.rpc('save_tim_conversation', {
       p_id: id,
@@ -72,6 +74,7 @@ export const trainingService = {
       p_task_title: taskTitle,
       p_messages: messages,
       p_rating: rating ?? null,
+      p_tim_version: timVersion ?? null,
     });
     if (error) throw error;
   },
@@ -81,13 +84,15 @@ export const trainingService = {
     conversationId: string,
     messageIndex: number,
     messageContent: object, // Now expects { question: string, answer: string }
-    isHelpful: boolean
+    isHelpful: boolean,
+    timVersion?: string
   ): Promise<void> => {
     const { error } = await supabase.rpc('rate_tim_message', {
       p_conversation_id: conversationId,
       p_message_index: messageIndex,
       p_message_content: messageContent,
       p_is_helpful: isHelpful,
+      p_tim_version: timVersion ?? null,
     });
 
     if (error) {

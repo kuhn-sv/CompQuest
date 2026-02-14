@@ -51,12 +51,14 @@ export const useAskTimConversation = ({ open, taskMeta, taskContext }: UseAskTim
     // Persist conversation whenever messages or rating change
     useEffect(() => {
         if (sessionId && taskMeta?.id && taskMeta?.title && messages.length > 0) {
+            const timVersion = import.meta.env.VITE_TIM_VERSION;
             trainingService.saveTimConversation(
                 sessionId,
                 taskMeta.id,
                 taskMeta.title,
                 messages, // feedback is part of message object now, so saved in JSON too!
-                rating ?? undefined
+                rating ?? undefined,
+                timVersion
             ).catch(err => console.warn('Failed to save Tim conversation:', err));
         }
     }, [sessionId, messages, rating, taskMeta]);
@@ -156,7 +158,8 @@ export const useAskTimConversation = ({ open, taskMeta, taskContext }: UseAskTim
 
         // Send to server (separate table)
         try {
-            await trainingService.rateTimMessage(sessionId, index, context, isHelpful);
+            const timVersion = import.meta.env.VITE_TIM_VERSION;
+            await trainingService.rateTimMessage(sessionId, index, context, isHelpful, timVersion);
         } catch (e) {
             console.warn('Failed to rate message:', e);
         }

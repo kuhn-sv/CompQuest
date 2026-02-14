@@ -11,6 +11,7 @@ create table if not exists public.tim_conversations (
   task_title  text,
   messages    jsonb not null default '[]'::jsonb,
   rating      int check (rating >= 1 and rating <= 5),
+  tim_version text,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -38,6 +39,7 @@ create table if not exists public.tim_message_feedback (
   message_index   int not null, -- Index of the message in the conversation array
   message_content jsonb not null, -- Storing { question: string, answer: string }
   is_helpful      boolean not null,
+  tim_version     text,
   created_at      timestamptz not null default now()
 );
 

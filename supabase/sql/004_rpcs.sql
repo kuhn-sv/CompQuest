@@ -75,7 +75,8 @@ create or replace function public.save_tim_conversation(
   p_task_id text,
   p_task_title text,
   p_messages jsonb,
-  p_rating int default null
+  p_rating int default null,
+  p_tim_version text default null
 ) returns void
 language plpgsql
 security definer
@@ -86,17 +87,18 @@ begin
     raise exception 'not authenticated';
   end if;
 
-  insert into public.tim_conversations (id, task_id, task_title, messages, rating, updated_at)
-  values (p_id, p_task_id, p_task_title, p_messages, p_rating, now())
+  insert into public.tim_conversations (id, task_id, task_title, messages, rating, tim_version, updated_at)
+  values (p_id, p_task_id, p_task_title, p_messages, p_rating, p_tim_version, now())
   on conflict (id)
   do update set
     messages = excluded.messages,
     rating = coalesce(excluded.rating, public.tim_conversations.rating),
+    tim_version = coalesce(excluded.tim_version, public.tim_conversations.tim_version),
     updated_at = now();
 end;
 $$;
 
-grant execute on function public.save_tim_conversation(uuid, text, text, jsonb, int) to authenticated;
+grant execute on function public.save_tim_conversation(uuid, text, text, jsonb, int, text) to authenticated;
 
 -- =============================================================
 -- 3) Rate Tim Message (Feedback)
@@ -105,7 +107,8 @@ create or replace function public.rate_tim_message(
   p_conversation_id uuid,
   p_message_index int,
   p_message_content jsonb,
-  p_is_helpful boolean
+  p_is_helpful boolean,
+  p_tim_version text default null
 ) returns void
 language plpgsql
 security definer
@@ -116,12 +119,12 @@ begin
     raise exception 'not authenticated';
   end if;
 
-  insert into public.tim_message_feedback (conversation_id, message_index, message_content, is_helpful)
-  values (p_conversation_id, p_message_index, p_message_content, p_is_helpful);
+  insert into public.tim_message_feedback (conversation_id, message_index, message_content, is_helpful, tim_version)
+  values (p_conversation_id, p_message_index, p_message_content, p_is_helpful, p_tim_version);
 end;
 $$;
 
-grant execute on function public.rate_tim_message(uuid, int, jsonb, boolean) to authenticated;
+grant execute on function public.rate_tim_message(uuid, int, jsonb, boolean, text) to authenticated;
 
 -- =============================================================
 -- 6) Leaderboard RPC
