@@ -1,0 +1,63 @@
+.asktim-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.asktim-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  resize: vertical;
+  min-height: 130px;
+  padding: 0.75rem;
+  background:  var(--surface);
+  color: var(--text-color);
+  border: 1px solid var(--surface-border);
+  border-radius: 8px;
+  font-size: 1rem;
+}
+
+.asktim-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.asktim-remaining {
+  color: var(--muted-text-color, #666);
+  &.error { color: #b00020; }
+}
+
+.asktim-error {
+  color: #b00020;
+  background: rgba(176,0,32,0.08);
+  border: 1px solid rgba(176,0,32,0.35);
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  margin-top: 0.25rem;
+}
+
+.asktim-controls {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  background: var(--surface-ground); 
+  border-top: 1px solid var(--surface-border);
+  padding: 1rem 0 0 0;
+  margin-top: 0.5rem;
+}
+
+.task-action-btn {
+  &.primary {
+    color: var(--primary-btn-text);
+    background: var(--primary-btn-bg);
+    border-color: transparent;
+  }
+
+  &.secondary {
+    background: var(--secondary-btn-bg);
+    color: var(--secondary-btn-text);
+  }
+}

@@ -1,39 +1,54 @@
 -- ============================================================
--- 003 – Tim messages table, RLS, sync trigger
+-- 003 – Tim Conversations & Feedback
 -- ============================================================
--- Run order: 3 of 5  (depends on: 001 for is_admin(), 002 for exercise_stats)
+-- Run order: 3 of 5
 -- ============================================================
 
--- 1. Table
-create table if not exists public.tim_messages (
+-- 1. Conversations Table
+create table if not exists public.tim_conversations (
   id          uuid primary key default gen_random_uuid(),
   task_id     text not null,
-  task_title  text not null,
-  tim_version text,
-  request     text not null,
-  response    text not null,
-  created_at  timestamptz not null default now()
+  task_title  text,
+  messages    jsonb not null default '[]'::jsonb,
+  rating      int check (rating >= 1 and rating <= 5),
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
 );
 
--- 2. Indexes
-create index if not exists tim_messages_task_created_idx
-  on public.tim_messages (task_id, created_at desc);
+-- Index for task-based lookups (optional, usually we lookup by ID)
+create index if not exists tim_conversations_task_idx
+  on public.tim_conversations (task_id);
 
--- 3. Enable RLS
-alter table public.tim_messages enable row level security;
+alter table public.tim_conversations enable row level security;
 
--- 4. RLS policies
-drop policy if exists "tim_messages_select" on public.tim_messages;
-drop policy if exists "tim_messages_insert_self" on public.tim_messages;
-drop policy if exists "tim_messages_update_admin" on public.tim_messages;
-drop policy if exists "tim_messages_delete_admin" on public.tim_messages;
-
--- Allow insert by authenticated users (any logged in user can ask Tim)
-create policy "tim_messages_insert_any" on public.tim_messages
-for insert to authenticated
+-- Policies for conversations
+-- Since we removed user_id, ownership is via the UUID (session ID).
+-- We allow authenticated users to perform operations.
+drop policy if exists "tim_conversations_policy" on public.tim_conversations;
+create policy "tim_conversations_policy" on public.tim_conversations
+for all to authenticated
+using (true)
 with check (true);
 
--- Allow select only by service_role (admins/system)
-create policy "tim_messages_select_admin" on public.tim_messages
-for select to service_role
-using (true);
+
+-- 2. Message Feedback Table (Thumbs Up/Down)
+create table if not exists public.tim_message_feedback (
+  id              uuid primary key default gen_random_uuid(),
+  conversation_id uuid not null references public.tim_conversations(id) on delete cascade,
+  message_index   int not null, -- Index of the message in the conversation array
+  message_content jsonb not null, -- Storing { question: string, answer: string }
+  is_helpful      boolean not null,
+  created_at      timestamptz not null default now()
+);
+
+create index if not exists tim_feedback_conversation_idx
+  on public.tim_message_feedback (conversation_id);
+
+alter table public.tim_message_feedback enable row level security;
+
+-- Policies for feedback
+drop policy if exists "tim_feedback_policy" on public.tim_message_feedback;
+create policy "tim_feedback_policy" on public.tim_message_feedback
+for all to authenticated
+using (true)
+with check (true);

@@ -1,13 +1,11 @@
 -- ============================================================
--- 004 – RPCs (exercise attempts, Tim messages, leaderboard)
+-- 004 – RPCs (exercise attempts, Tim conversations, leaderboard)
 -- ============================================================
 -- Run order: 4 of 5  (depends on: 002, 003 tables)
 -- ============================================================
 
 -- =============================================================
 -- 1) Record an exercise attempt
---    Priority: accuracy > points > lower time
---    All best_* fields are updated together from the same attempt
 -- =============================================================
 create or replace function public.record_exercise_attempt(
   p_task_id text,
@@ -32,7 +30,6 @@ begin
     raise exception 'not authenticated';
   end if;
 
-  -- Upsert row and increment attempts, capture current best metrics
   insert into public.exercise_stats as es (
     user_id, task_id, task_title, attempts_count, best_time_ms, best_accuracy, best_points, last_attempt_at
   ) values (
@@ -46,7 +43,6 @@ begin
   returning best_time_ms, best_accuracy, best_points
   into v_best_time, v_best_accuracy, v_best_points;
 
-  -- Decide if the new attempt is better: accuracy > points > lower time
   v_is_better := (
     v_best_accuracy is null or p_accuracy > v_best_accuracy
     or (
@@ -61,7 +57,6 @@ begin
     )
   );
 
-  -- If better, promote all best_* from this single attempt (no partial updates)
   update public.exercise_stats
   set best_points   = case when v_is_better then p_points   else best_points   end,
       best_accuracy = case when v_is_better then p_accuracy else best_accuracy end,
@@ -73,36 +68,63 @@ $$;
 grant execute on function public.record_exercise_attempt(text, text, int, numeric, int) to authenticated;
 
 -- =============================================================
--- 2) Record a Tim message (Anonymous, no user_id, no level)
+-- 2) Save Tim Conversation (Upsert: Create or Update)
 -- =============================================================
-create or replace function public.record_tim_message(
+create or replace function public.save_tim_conversation(
+  p_id uuid,
   p_task_id text,
   p_task_title text,
-  p_tim_version text,
-  p_request text,
-  p_response text
-) returns uuid
+  p_messages jsonb,
+  p_rating int default null
+) returns void
 language plpgsql
 security definer
 set search_path = public
 as $$
-declare
-  v_id uuid;
 begin
-  insert into public.tim_messages (task_id, task_title, tim_version, request, response)
-  values (p_task_id, p_task_title, p_tim_version, p_request, p_response)
-  returning id into v_id;
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
 
-  return v_id;
+  insert into public.tim_conversations (id, task_id, task_title, messages, rating, updated_at)
+  values (p_id, p_task_id, p_task_title, p_messages, p_rating, now())
+  on conflict (id)
+  do update set
+    messages = excluded.messages,
+    rating = coalesce(excluded.rating, public.tim_conversations.rating),
+    updated_at = now();
 end;
 $$;
 
-grant execute on function public.record_tim_message(text, text, text, text, text) to authenticated;
+grant execute on function public.save_tim_conversation(uuid, text, text, jsonb, int) to authenticated;
+
+-- =============================================================
+-- 3) Rate Tim Message (Feedback)
+-- =============================================================
+create or replace function public.rate_tim_message(
+  p_conversation_id uuid,
+  p_message_index int,
+  p_message_content jsonb,
+  p_is_helpful boolean
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not authenticated';
+  end if;
+
+  insert into public.tim_message_feedback (conversation_id, message_index, message_content, is_helpful)
+  values (p_conversation_id, p_message_index, p_message_content, p_is_helpful);
+end;
+$$;
+
+grant execute on function public.rate_tim_message(uuid, int, jsonb, boolean) to authenticated;
 
 -- =============================================================
 -- 6) Leaderboard RPC
---    Paginated, ranked by accuracy then time
---    Always includes the current user's row
 -- =============================================================
 create or replace function public.get_leaderboard(
   p_task_id text,
@@ -156,9 +178,7 @@ $$;
 grant execute on function public.get_leaderboard(text, int, int) to authenticated;
 
 -- =============================================================
--- 7) Get topic badges for the current user (Dynamic Calculation)
---    Returns one row per category with avg accuracy & badge level
---    Calculated on-the-fly from task_categories and exercise_stats
+-- 7) Get topic badges for the current user
 -- =============================================================
 create or replace function public.get_user_badges()
 returns table (
@@ -207,7 +227,6 @@ $$;
 
 -- =============================================================
 -- 8) Get exercise stats for the current user (Single Task)
---    Bypasses RLS to ensure consistent data retrieval
 -- =============================================================
 create or replace function public.get_my_exercise_stats(p_task_id text)
 returns setof public.exercise_stats

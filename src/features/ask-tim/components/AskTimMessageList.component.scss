@@ -1,0 +1,34 @@
+/* Conversation container (stacked bubbles) */
+.asktim-conversation {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem;
+  /* make the conversation take available space but cap it so the form stays visible */
+  flex: 1 1 auto;
+  max-height: 300px; /* explicit cap for chat history */
+  min-height: 80px;
+  overflow-y: auto;
+  align-items: stretch;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.asktim-empty {
+  text-align: center;
+  color: var(--muted-text-color);
+  padding: 2rem;
+  font-style: italic;
+}
+
+/* subtle custom scrollbar for better visibility */
+.asktim-conversation::-webkit-scrollbar {
+  width: 10px;
+}
+.asktim-conversation::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.08);
+  border-radius: 8px;
+}
+.asktim-conversation::-webkit-scrollbar-track {
+  background: transparent;
+}

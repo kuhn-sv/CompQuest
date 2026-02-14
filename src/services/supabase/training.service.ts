@@ -34,14 +34,15 @@ export interface ExerciseStatsRow {
   last_attempt_at: string | null;
 }
 
-export interface TimMessageRow {
+export interface TimConversationRow {
   id: string;
+  // user_id removed for anonymity
   task_id: string;
   task_title: string;
-  tim_version: string | null;
-  request: string;
-  response: string;
+  messages: any[]; // JSONB
+  rating: number | null;
   created_at: string;
+  updated_at: string;
 }
 
 export const trainingService = {
@@ -57,24 +58,42 @@ export const trainingService = {
     if (error) throw error;
   },
 
-  // Record a Tim question/answer pair; returns created message id
-  recordTimMessage: async (
+  // Save or update a Tim conversation (UPSERT)
+  saveTimConversation: async (
+    id: string,
     taskId: string,
     taskTitle: string,
-    timVersion: string,
-    request: string,
-    response: string
-  ): Promise<string> => {
-    // level parameter removed
-    const { data, error } = await supabase.rpc('record_tim_message', {
+    messages: any[], // The full conversation array
+    rating?: number
+  ): Promise<void> => {
+    const { error } = await supabase.rpc('save_tim_conversation', {
+      p_id: id,
       p_task_id: taskId,
       p_task_title: taskTitle,
-      p_tim_version: timVersion,
-      p_request: request,
-      p_response: response,
+      p_messages: messages,
+      p_rating: rating ?? null,
     });
     if (error) throw error;
-    return data as string;
+  },
+
+  // Rate a specific message (Thumbs Up/Down)
+  rateTimMessage: async (
+    conversationId: string,
+    messageIndex: number,
+    messageContent: object, // Now expects { question: string, answer: string }
+    isHelpful: boolean
+  ): Promise<void> => {
+    const { error } = await supabase.rpc('rate_tim_message', {
+      p_conversation_id: conversationId,
+      p_message_index: messageIndex,
+      p_message_content: messageContent,
+      p_is_helpful: isHelpful,
+    });
+
+    if (error) {
+      console.error('RPC rate_tim_message failed:', error, { conversationId, messageIndex, messageContent, isHelpful });
+      throw error;
+    }
   },
 
   // Fetch aggregated stats for current user for one task
