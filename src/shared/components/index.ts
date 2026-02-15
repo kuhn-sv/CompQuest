@@ -14,7 +14,7 @@ export type { StaticDigitsRowProps } from './input/static-digits-row/StaticDigit
 
 export { default as Toast } from './ui/toast/Toast.component';
 export { default as NumberWithBase } from './input/number/NumberWithBase.component';
-export { default as NumberInput } from './input/number-input/NumberInput.component';
+export { default as NumberInput } from './input/number-input/numberInput.component';
 export { default as TabRow } from './ui/tab-row/TabRow.component';
 export { EquationRow } from './input/equation-row/EquationRow.component';
 export { default as BitToggleRow } from './input/bit-toggle-row/BitToggleRow.component';
