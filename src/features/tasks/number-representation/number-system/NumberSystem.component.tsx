@@ -25,6 +25,7 @@ import {
 import { ResultsSection } from '../shared/number-task/ResultsSection';
 import { ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay/ConnectionOverlay.component';
 import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
+import { TaskContext } from '@/shared/interfaces/tasking.interfaces';
 // dnd-kit event types are referenced inline where needed; no top-level type import
 
 const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
@@ -68,24 +69,39 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       onTaskContextChange(null);
       return;
     }
-    // Send an overview: stage, number of tasks, and a sample task (first)
-    const sample = tasks[0];
-    const ctx = {
-      title: taskMeta?.title ?? 'Zahlensystem',
-      stage: stageIndex + 1,
-      totalStages: stages.length,
-      taskCount: tasks.length,
-      sampleTask: sample
-        ? {
-            id: sample.id,
-            fromValue: sample.sourceValue,
-            fromBase: sample.fromBase,
-            toBase: sample.toBase,
-            expected: sample.expectedValue,
-          }
-        : null,
-    } as const;
-    onTaskContextChange(ctx);
+    
+    const taskContext: TaskContext = {
+      subtaskType: 'NumberSystem',
+      taskId: activeTaskId || taskMeta?.id || 'NumberSystem', // Use current active or generic
+      taskTitle: taskMeta?.title ?? 'Zahlensystem',
+      description: 'Stelle den Datenfluss wieder her, indem du jede Zahl mit ihrem passenden Gegenstück verbindest.',
+      contextData: {
+          stage: stageIndex + 1,
+          totalStages: stages.length,
+          taskCount: tasks.length,
+          tasks: tasks.map(t => ({
+              id: t.id,
+              fromValue: t.sourceValue,
+              fromBase: t.fromBase,
+              toBase: t.toBase,
+          })),
+      },
+      userState: {
+          assignments: Object.entries(assignments).map(([taskId, assign]) => ({
+              taskId,
+              assignedValue: assign?.value,
+              assignedBase: assign?.base
+          }))
+      },
+      solution: {
+          correctAssignments: tasks.map(t => ({
+              taskId: t.id,
+              expectedValue: t.expectedValue,
+              expectedBase: t.toBase
+          }))
+      }
+    };
+    onTaskContextChange(taskContext);
     return () => onTaskContextChange(null);
   }, [
     onTaskContextChange,
@@ -94,6 +110,8 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     tasks,
     taskMeta,
     stages.length,
+    activeTaskId,
+    assignments
   ]);
 
   // dnd-kit local drag state (replaces useDragAndDrop in this component)

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
-import type {SubTaskComponentProps} from '@shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps, TaskContext} from '@shared/interfaces/tasking.interfaces';
 import './ReadAssembly.component.scss';
 import {
   useFooterControls,
@@ -76,23 +76,33 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
       return;
     }
 
-    const taskContext = {
+    const taskContext: TaskContext = {
       subtaskType: 'ReadAssembly',
       taskId: current.id,
-      roundIndex: roundIndex,
-      variant: current.variant,
-      question: current.question,
-      assemblyProgram: current.program.map(instr => ({
-        address: instr.addr,
-        operation: instr.op,
-        argument: instr.arg,
-      })),
-      answerOptions: current.options,
-      initialValues: current.initial_values || null,
+      taskTitle: 'Assembler lesen',
+      description: current.question,
+      contextData: {
+          roundIndex: roundIndex,
+          variant: current.variant,
+          assemblyProgram: current.program.map(instr => ({
+            address: instr.addr,
+            operation: instr.op,
+            argument: instr.arg,
+          })),
+          answerOptions: current.options,
+          initialValues: current.initial_values || null,
+      },
+      userState: {
+          selectedAnswer: selectedAnswer !== null ? current.options[selectedAnswer] : null
+      },
+      solution: {
+          correctAnswer: current.options[current.correct_index],
+          correctAnswerIndex: current.correct_index
+      }
     };
 
     onTaskContextChange?.(taskContext);
-  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange, selectedAnswer]);
 
   const startTask = useCallback(() => {
     baseStart();

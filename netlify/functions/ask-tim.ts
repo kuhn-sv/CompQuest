@@ -75,9 +75,12 @@ export const handler: NetlifyHandler = async (event) => {
 		\n- Hilf, Konzepte und Zusammenhänge zu verstehen.
 		\n- Bei Unsicherheit immer Erklärung statt Lösung.
 		\n- Wenn der Student explizit nach der Lösung fragt: 'Ich kann dir die Lösung nicht direkt sagen, aber ich kann dir helfen, sie zu finden. Möchtest du, dass ich dir einen Hinweis gebe?'
+		\n- Wenn der Student nach einem Beispiel fragt, achte darauf niemals Beispiele mit den Werten aus der aktuellen Aufgabe zu geben.
+		\n- Wenn der Student explizit nach der Lösung fragt: 'Ich kann dir die Lösung nicht direkt sagen, aber ich kann dir helfen, sie zu finden. Möchtest du, dass ich dir einen Hinweis gebe?'
 		\n\nDatenstruktur-Kontext:\n- 
-		Für jede Aufgabe bekommst du: 'question' (Aufgabenstellung), 'availableItems' (Antwortoptionen), 'correctItems' (richtige Antworten, nicht verraten).
-		\n- Nutze 'correctItems' nur, um zu prüfen, was der Student versteht, nicht um Antworten zu nennen.`;
+		Für jede Aufgabe bekommst du: 'description' (Aufgabenstellung), 'contextData' (Variablen/Zustand), 'userState' (Eingabe des Nutzers) und 'solution' (Korrekte Lösung).
+		\n- Nutze 'solution' und 'userState' um zu analysieren, wo der Nutzer steht und welche Fehler er gemacht hat.
+		\n- VERRATE NIEMALS DIE LÖSUNG DIREKT, auch wenn sie im Context steht. Nutze sie nur für präzise, sokratische Hinweise.`;
 
 		// Build messages. If the client provided a taskContext, include a
 		// formatted, human-readable representation as an extra user message so
@@ -87,170 +90,40 @@ export const handler: NetlifyHandler = async (event) => {
 			contextMsgParts.push(`Aufgabe: ${taskMeta.title ?? taskMeta.id}`);
 		}
 
-		// Load solution server-side based on task identifiers
-		let solutionContext: any = null;
-		if (taskContext && typeof taskContext === 'object') {
-			const ctx = taskContext as any;
-			const subtaskType = ctx.subtaskType;
-			const taskId = ctx.taskId;
-			const roundIndex = ctx.roundIndex;
 
-			if (subtaskType === 'WriteAssembly' && taskId) {
-				const task = writeAssemblyTasks.find((t: any) => t.id === taskId);
-				if (task) {
-					solutionContext = {
-						correctSequence: task.commands,
-					};
-				}
-			} else if (subtaskType === 'ReadAssembly' && taskId) {
-				const task = readAssemblyTasks.find((t: any) => t.id === taskId);
-				if (task) {
-					solutionContext = {
-						correctAnswerIndex: task.correct_index,
-						correctAnswer: task.options[task.correct_index],
-					};
-				}
-			} else if (subtaskType === 'JavaToAssembly' && taskId) {
-				const task = javaToAssemblyTasks.find((t: any) => t.id === taskId);
-				if (task) {
-					solutionContext = {
-						correctSequence: task.assembler,
-					};
-				}
-			} else if (subtaskType === 'VonNeumann' && ctx.roundType) {
-				const data = vonNeumannData as any;
-				if (ctx.roundType === 'quiz') {
-					solutionContext = {
-						correctItems: data.quizItems
-							.filter((item: any) => item.isCore)
-							.map((item: any) => item.label),
-					};
-				} else if (ctx.roundType === 'functions' && ctx.selectedComponentIds) {
-					// Reconstruct the correct matches from the selected IDs
-					const correctMatches: Record<string, string> = {};
-					ctx.selectedComponentIds.forEach((id: string) => {
-						const label = data.idToLabel[id];
-						const desc = data.idToDesc[id];
-						if (label && desc) {
-							correctMatches[label] = desc;
-						}
-					});
-					solutionContext = { correctMatches };
-				} else if (ctx.roundType === 'reconstruct') {
-					solutionContext = {
-						correctPlacements: {
-							cpuZones: ['Steuerwerk', 'Rechenwerk'],
-							transportZone: 'Transportmedium',
-							bottomZones: ['RAM', 'ROM', 'Peripherie'],
-						},
-					};
-				} else if (ctx.roundType === 'busAssignment') {
-					solutionContext = {
-						correctAssignments: {
-							leftZone: 'Datenbus',
-							rightZones: ['Adressbus', 'Steuerbus'],
-						},
-					};
-				}
-			}
-		}
 
-		// Format task context intelligently based on task type
 		if (taskContext && typeof taskContext === 'object') {
 			try {
 				const ctx = taskContext as any;
 
-				if (ctx.subtaskType === 'JavaToAssembly') {
-					contextMsgParts.push(`\nAufgabentyp: Java → Assembler`);
-					contextMsgParts.push(`Thema: ${ctx.topic || 'unbekannt'}`);
-					contextMsgParts.push(`Schwierigkeit: ${ctx.difficulty || 'unbekannt'}`);
-					if (ctx.javaCode) {
-						contextMsgParts.push(`\nJava-Code:\n${ctx.javaCode}`);
+				// Generic handling for new TaskContext interface
+				if (ctx.subtaskType) {
+					contextMsgParts.push(`\nAufgabentyp: ${ctx.subtaskType}`);
+					contextMsgParts.push(`Titel: ${ctx.taskTitle || 'Unbekannt'}`);
+
+					if (ctx.description) {
+						contextMsgParts.push(`\nAufgabenstellung:\n${ctx.description}`);
 					}
-					contextMsgParts.push(`\nAnzahl benötigter Assembler-Befehle: ${ctx.numberOfCommands || '?'}`);
-					if (ctx.addresses && Array.isArray(ctx.addresses)) {
-						contextMsgParts.push(`Speicheradressen: ${ctx.addresses.join(', ')}`);
+
+					if (ctx.contextData) {
+						contextMsgParts.push(`\nSzenario / Daten:\n${JSON.stringify(ctx.contextData, null, 2)}`);
 					}
-					// Add solution context
-					if (solutionContext && solutionContext.correctSequence) {
-						contextMsgParts.push(`\nKorrekte Assembler-Sequenz: ${solutionContext.correctSequence.join(', ')}`);
+
+					if (ctx.userState) {
+						contextMsgParts.push(`\nAktuelle Eingabe des Nutzers:\n${JSON.stringify(ctx.userState, null, 2)}`);
 					}
-				} else if (ctx.subtaskType === 'ReadAssembly') {
-					contextMsgParts.push(`\nAufgabentyp: Assembler-Programm lesen`);
-					contextMsgParts.push(`Frage: ${ctx.question || 'unbekannt'}`);
-					if (ctx.assemblyProgram && Array.isArray(ctx.assemblyProgram)) {
-						contextMsgParts.push(`\nAssembler-Programm:`);
-						ctx.assemblyProgram.forEach((instr: any) => {
-							contextMsgParts.push(`  ${instr.address}: ${instr.operation} ${instr.argument || ''}`);
-						});
-					}
-					if (ctx.answerOptions && Array.isArray(ctx.answerOptions)) {
-						contextMsgParts.push(`\nAntwortoptionen: ${ctx.answerOptions.join(', ')}`);
-					}
-					if (ctx.initialValues) {
-						contextMsgParts.push(`\nInitiale Speicherwerte: ${JSON.stringify(ctx.initialValues)}`);
-					}
-					// Add solution context
-					if (solutionContext && solutionContext.correctAnswer) {
-						contextMsgParts.push(`\nKorrekte Antwort: ${solutionContext.correctAnswer}`);
-					}
-				} else if (ctx.subtaskType === 'WriteAssembly') {
-					contextMsgParts.push(`\nAufgabentyp: Assembler-Programm schreiben`);
-					contextMsgParts.push(`Aufgabenbeschreibung: ${ctx.taskDescription || 'unbekannt'}`);
-					contextMsgParts.push(`Schwierigkeit: ${ctx.difficulty || 'unbekannt'}`);
-					contextMsgParts.push(`Anzahl benötigter Befehle: ${ctx.numberOfCommands || '?'}`);
-					// Add solution context
-					if (solutionContext && solutionContext.correctSequence) {
-						contextMsgParts.push(`\nKorrekte Befehls-Sequenz:`);
-						solutionContext.correctSequence.forEach((cmd: any) => {
-							contextMsgParts.push(`  ${cmd.op} ${cmd.arg !== null ? cmd.arg : ''}`);
-						});
-					}
-				} else if (ctx.subtaskType === 'VonNeumann') {
-					contextMsgParts.push(`\nAufgabentyp: Von-Neumann-Architektur`);
-					contextMsgParts.push(`Rundentyp: ${ctx.roundType || 'unbekannt'}`);
-					if (ctx.question) {
-						contextMsgParts.push(`Frage: ${ctx.question}`);
-					}
-					if (ctx.availableItems) {
-						contextMsgParts.push(`Verfügbare Elemente: ${ctx.availableItems.join(', ')}`);
-					}
-					if (ctx.components) {
-						contextMsgParts.push(`Komponenten: ${ctx.components.join(', ')}`);
-					}
-					if (ctx.availableComponents) {
-						contextMsgParts.push(`Verfügbare Komponenten: ${ctx.availableComponents.join(', ')}`);
-					}
-					// Add solution context
-					if (solutionContext) {
-						if (solutionContext.correctItems) {
-							contextMsgParts.push(`\nKorrekte Komponenten: ${solutionContext.correctItems.join(', ')}`);
-						}
-						if (solutionContext.correctMatches) {
-							contextMsgParts.push(`\nKorrekte Zuordnungen:`);
-							Object.entries(solutionContext.correctMatches).forEach(([comp, desc]) => {
-								contextMsgParts.push(`  ${comp} → ${desc}`);
-							});
-						}
-						if (solutionContext.correctPlacements) {
-							contextMsgParts.push(`\nKorrekte Platzierung:`);
-							contextMsgParts.push(`  CPU-Zonen: ${solutionContext.correctPlacements.cpuZones.join(', ')}`);
-							contextMsgParts.push(`  Transport: ${solutionContext.correctPlacements.transportZone}`);
-							contextMsgParts.push(`  Bottom-Zonen: ${solutionContext.correctPlacements.bottomZones.join(', ')}`);
-						}
-						if (solutionContext.correctAssignments) {
-							contextMsgParts.push(`\nKorrekte Bus-Zuordnung:`);
-							contextMsgParts.push(`  Links: ${solutionContext.correctAssignments.leftZone}`);
-							contextMsgParts.push(`  Rechts: ${solutionContext.correctAssignments.rightZones.join(', ')}`);
-						}
+
+					if (ctx.solution) {
+						contextMsgParts.push(`\n--- INTERNE LÖSUNG (NICHT VERRATEN) ---\n${JSON.stringify(ctx.solution, null, 2)}\n---------------------------------------`);
 					}
 				} else {
-					// Fallback: use the preview or raw JSON
+					// Fallback for legacy or unknown structure
 					const preview = contextPreview || JSON.stringify(taskContext).slice(0, 800);
 					contextMsgParts.push(`\nKontext: ${preview}`);
 				}
+
 			} catch (err) {
-				contextMsgParts.push('\nKontext: [konnte nicht gelesen werden]');
+				contextMsgParts.push('\nKontext: [Fehler beim Lesen des TaskContext]');
 			}
 		} else if (contextPreview) {
 			contextMsgParts.push(`\nKontext: ${contextPreview}`);

@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '@shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps, TaskContext} from '@shared/interfaces/tasking.interfaces';
 import './WriteAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -104,17 +104,28 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
       return;
     }
 
-    const taskContext = {
+    const taskContext: TaskContext = {
       subtaskType: 'WriteAssembly',
       taskId: current.id,
-      roundIndex: roundIndex,
-      taskDescription: current.prosa_text,
-      difficulty: current.difficulty,
-      numberOfCommands: current.commands.length,
+      taskTitle: 'Assembler schreiben',
+      description: 'Rekonstruiere aus der Prosa-Beschreibung ein korrektes Assembler-Programm.',
+      contextData: {
+          roundIndex: roundIndex,
+          taskDescription: current.prosa_text,
+          difficulty: current.difficulty,
+          numberOfCommands: current.commands.length,
+          availableCommands: availableCommands, 
+      },
+      userState: {
+          placedCommands: placedCommands.map(p => p ? { op: p.command.op, arg: p.command.arg } : null)
+      },
+      solution: {
+          correctSequence: current.commands
+      }
     };
 
     onTaskContextChange?.(taskContext);
-  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange, placedCommands, availableCommands]);
 
   const startTask = useCallback(() => {
     baseStart();

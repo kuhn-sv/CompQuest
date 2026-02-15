@@ -1,5 +1,5 @@
 import React, {useCallback, useEffect, useMemo, useState} from 'react';
-import type {SubTaskComponentProps} from '@shared/interfaces/tasking.interfaces';
+import type {SubTaskComponentProps, TaskContext} from '@shared/interfaces/tasking.interfaces';
 import './JavaToAssembly.component.scss';
 import {
   generateAvailableCommands,
@@ -145,19 +145,31 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
       return;
     }
 
-    const taskContext = {
+    const taskContext: TaskContext = {
       subtaskType: 'JavaToAssembly',
       taskId: current.id,
-      roundIndex: roundIndex,
-      topic: current.topic,
-      difficulty: current.difficulty,
-      javaCode: current.java,
-      numberOfCommands: current.assembler.length,
-      addresses: current.addresses,
+      taskTitle: 'Java zu Assembler',
+      description: 'Übersetze den gegebenen Java-Code in funktional äquivalenten Assembler.',
+      contextData: {
+          roundIndex: roundIndex,
+          topic: current.topic,
+          difficulty: current.difficulty,
+          javaCode: current.java,
+          numberOfCommands: current.assembler.length,
+          addresses: current.addresses,
+          hint: current.hint,
+          availableCommands: availableCommands,
+      },
+      userState: {
+          placedCommands: placedCommands.map(p => p ? { op: p.op, arg: p.arg } : null)
+      },
+      solution: {
+          correctSequence: current.assembler
+      }
     };
 
     onTaskContextChange?.(taskContext);
-  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange]);
+  }, [current, roundIndex, rounds.length, hasStarted, onTaskContextChange, placedCommands, availableCommands]);
 
   const startTask = useCallback(() => {
     baseStart();

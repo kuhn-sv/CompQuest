@@ -16,6 +16,7 @@ import {
 } from './complements.helper.ts';
 import {Difficulty} from '@shared/enums/difficulty.enum';
 import { BitToggleRow } from '@/shared/components/index.ts';
+import { TaskContext } from '@/shared/interfaces/tasking.interfaces.ts';
 
 type Round = ComplementRound;
 
@@ -206,15 +207,27 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
       onTaskContextChange(null);
       return;
     }
-    const ctx = {
-      title: taskMeta?.title ?? 'Einer-/Zweierkomplement',
-      round: roundIndex + 1,
-      totalRounds: rounds.length,
-      mode: current.mode,
-      sourceBits: bitsToString(current.sourceBits),
-      bitCount: current.bitCount,
-    } as const;
-    onTaskContextChange(ctx);
+
+    const taskContext: TaskContext = {
+      subtaskType: 'Complements', // New type, needs to be handled in ask-tim if specific logic is needed, or just use generic
+      taskId: taskMeta?.id || 'Complements',
+      taskTitle: taskMeta?.title ?? 'Einer-/Zweierkomplement',
+      description: current.mode === 'ones' ? 'Bilden Sie das Einerkomplement.' : 'Bilden Sie das Zweierkomplement.',
+      contextData: {
+          round: roundIndex + 1,
+          totalRounds: rounds.length,
+          mode: current.mode,
+          sourceBits: bitsToString(current.sourceBits),
+          bitCount: current.bitCount,
+      },
+      userState: {
+          currentBits: bitsToString(bits)
+      },
+      solution: {
+          expectedBits: bitsToString(expectedBits)
+      }
+    };
+    onTaskContextChange(taskContext);
     return () => onTaskContextChange(null);
   }, [
     onTaskContextChange,
@@ -223,6 +236,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
     current,
     taskMeta,
     rounds.length,
+    bits,
+    expectedBits
   ]);
 
   return (

@@ -3,7 +3,6 @@ import {Link} from 'react-router-dom';
 import '../number-system/number-system.page.scss';
 
 // Footer buttons are rendered in parent; we expose controls upwards
-import type {SubTaskComponentProps} from '../interfaces';
 import {
   useConnectionLines,
   useFooterControls,
@@ -14,7 +13,7 @@ import {
 import NumberWithBase from '@shared/components/input/number/NumberWithBase.component';
 import {AdditionSet, AdditionTask} from './addition.helper';
 import {Difficulty} from '@shared/enums/difficulty.enum';
-import type {ArithmeticMode} from '../interfaces';
+import type {ArithmeticMode, SubTaskComponentProps} from '../interfaces';
 import {DragOverlay} from '@dnd-kit/core';
 import {AnswerOptionBase} from '../shared/number-task/NumberTask.types';
 import {ResultsSection} from '../shared/number-task/ResultsSection';
@@ -24,6 +23,7 @@ import GameStartScreen from '@features/tasks/shared/components/game-start-screen
 import {EquationRow} from '@/shared/components';
 import {useArithmeticTaskLogic} from './hooks/useArithmeticTaskLogic';
 import {useArithmeticDnD} from './hooks/useArithmeticDnD';
+import { TaskContext } from '@/shared/interfaces/tasking.interfaces';
 
 export interface GenericArithmeticTaskProps extends SubTaskComponentProps {
   // Title displayed in the header
@@ -142,28 +142,51 @@ const GenericArithmeticTask: React.FC<GenericArithmeticTaskProps> = ({
     evaluateStatus: evaluateStatusCb,
   });
 
-  // Provide compact context for AskTim: which stage and a sample task
+  // Provide compact context for AskTim
   useEffect(() => {
     if (!onTaskContextChange) return;
     if (!hasStarted) {
       onTaskContextChange(null);
       return;
     }
-    const sample = tasks[0];
-    const ctx = {
-      title: taskMeta?.title ?? title,
-      stage: stageIndex + 1,
-      totalStages: stages.length,
-      sampleTask: sample
-        ? {
-            id: sample.id,
-            left: sample.left,
-            expected: sample.expected,
-            base: sample.base,
-          }
-        : null,
-    } as const;
-    onTaskContextChange(ctx);
+    
+    // Extract description text if it's react node we can't fully serialize it, 
+    // so we use a fallback or try to get string representation if possible.
+    // Since startScreen.description is ReactNode, we use a generic description here for the context.
+    const description = arithmeticMode === 'twos-complement' 
+        ? 'Berechne die Ergebnisse im Zweierkomplement.' 
+        : 'Addiere die Zahlen in den angegebenen Basen.';
+
+    const taskContext: TaskContext = {
+      subtaskType: arithmeticMode === 'twos-complement' ? 'TwosComplementArithmetic' : 'PositiveArithmetic',
+      taskId: activeTaskId || taskMeta?.id || 'Arithmetic',
+      taskTitle: taskMeta?.title ?? title,
+      description: description,
+      contextData: {
+          stage: stageIndex + 1,
+          totalStages: stages.length,
+          tasks: tasks.map(t => ({
+              id: t.id,
+              equation: t.left,
+              base: t.base
+          })),
+      },
+      userState: {
+           assignments: Object.entries(assignments).map(([taskId, assign]) => ({
+              taskId,
+              assignedValue: assign?.value,
+              assignedBase: assign?.base
+          }))
+      },
+      solution: {
+          correctAssignments: tasks.map(t => ({
+              taskId: t.id,
+              expectedValue: t.expected,
+              expectedBase: t.base
+          }))
+      }
+    };
+    onTaskContextChange(taskContext);
     return () => onTaskContextChange(null);
   }, [
     onTaskContextChange,
@@ -173,6 +196,9 @@ const GenericArithmeticTask: React.FC<GenericArithmeticTaskProps> = ({
     taskMeta,
     title,
     stages.length,
+    activeTaskId,
+    assignments,
+    arithmeticMode
   ]);
 
   // Provide footer controls to parent (stabilised via hook)

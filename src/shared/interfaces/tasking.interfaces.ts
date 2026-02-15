@@ -33,7 +33,7 @@ export interface SubTaskComponentProps {
   // Optional: allow a subtask to provide the current visible task context
   // (human-readable prompt, variables). This will be forwarded to the
   // AskTim modal so the assistant can use the exact task statement.
-  onTaskContextChange?: (context: unknown | null) => void;
+  onTaskContextChange?: (context: TaskContext | null) => void;
   // Returns the container-level elapsed time in ms (single source of truth).
   // Subtasks should use this instead of running their own timer.
   getElapsed?: () => number;
@@ -91,3 +91,23 @@ export interface TaskSummaryState {
   totalPoints: number;
   thresholdMs: number; // used for display
 }
+
+// Standardized Context for "Ask Tim" AI Assistant
+export interface TaskContext {
+  taskId: string;
+  taskTitle: string;
+  subtaskType: string; // e.g., 'VonNeumann', 'NumberSystem'
+
+  // Factual description of the task (no gamification text)
+  description?: string;
+
+  // Dynamic state (generated numbers, etc.)
+  contextData: Record<string, unknown>;
+
+  // User input state (what the user has selected/typed)
+  userState?: Record<string, unknown>;
+
+  // The correct solution (for internal AI reference only)
+  solution?: Record<string, unknown>;
+}
+

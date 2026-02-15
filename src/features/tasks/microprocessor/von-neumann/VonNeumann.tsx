@@ -13,6 +13,7 @@ import { Difficulty } from '@shared/enums/difficulty.enum';
 import { useGameStartScreen, useFooterControls, useHudState } from '@shared/hooks';
 import { SubTaskComponentProps, TaskStageScore } from '../../number-representation';
 import { shuffle } from '../shared';
+import { TaskContext } from '@/shared/interfaces/tasking.interfaces';
 
 const VonNeumann: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
@@ -91,41 +92,86 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     const baseContext = {
       subtaskType: 'VonNeumann',
       taskId: current.id,
-      roundIndex: roundIndex,
-      roundType: current.type,
+      taskTitle: 'Von-Neumann-Architektur', // Generic title for this subtask type
     };
 
-    let taskContext: Record<string, unknown> = baseContext;
+    let taskContext: TaskContext;
 
     if (current.type === 'quiz' && current.items) {
       taskContext = {
         ...baseContext,
-        question:
-          'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur aus.',
-        availableItems: current.items.map(item => item.label),
+        description: 'Wähle die zentralen Komponenten der Von‑Neumann‑Architektur aus.',
+        contextData: {
+            roundType: current.type,
+            roundIndex: roundIndex,
+            availableItems: current.items.map(item => item.label),
+        },
+        solution: {
+            correctItems: current.items.filter(i => i.isCore).map(i => i.label)
+        }
       };
     } else if (current.type === 'functions' && current.functionPairs) {
-      // Send the selected component IDs so server can reconstruct the correct matches
       taskContext = {
         ...baseContext,
-        question: 'Ordne die Komponenten ihren Funktionen zu.',
-        components: current.functionPairs.left.map(item => item.label),
-        descriptions: current.functionPairs.right.map(item => item.label),
-        selectedComponentIds: current.functionPairs.left.map(item => item.id),
+        description: 'Ordne die Komponenten ihren Funktionen zu.',
+        contextData: {
+            roundType: current.type,
+            roundIndex: roundIndex,
+            components: current.functionPairs.left.map(item => item.label),
+            descriptions: current.functionPairs.right.map(item => item.label),
+        },
+        userState: {
+           // We could track current selection here if we had access to it easily, 
+           // but for now we only send setup data.
+        },
+        solution: {
+            // Map Id to Description for verification
+            correctMatches: current.functionPairs.left.reduce((acc, item) => {
+                const partner = current.functionPairs!.right.find(r => r.id === item.id);
+                if (partner) acc[item.label] = partner.label;
+                return acc;
+            }, {} as Record<string, string>)
+        }
       };
     } else if (current.type === 'reconstruct' && current.components) {
       taskContext = {
         ...baseContext,
-        question:
-          'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.',
-        availableComponents: current.components,
+        description: 'Rekonstruiere die Von‑Neumann‑Architektur. Ziehe dafür die Komponenten an ihren Platz.',
+        contextData: {
+            roundType: current.type,
+            roundIndex: roundIndex,
+            availableComponents: current.components,
+        },
+        solution: {
+            correctPlacements: {
+                cpuZones: ['Steuerwerk', 'Rechenwerk'],
+                transportZone: 'Transportmedium',
+                bottomZones: ['RAM', 'ROM', 'Peripherie'],
+            }
+        }
       };
     } else if (current.type === 'busAssignment' && current.buses) {
       taskContext = {
         ...baseContext,
-        question: 'Ordne die Bussysteme ihren Funktionen zu.',
-        buses: current.buses,
+        description: 'Ordne die Bussysteme ihren Funktionen zu.',
+        contextData: {
+            roundType: current.type,
+            roundIndex: roundIndex,
+            buses: current.buses,
+        },
+        solution: {
+            correctAssignments: {
+                leftZone: 'Datenbus',
+                rightZones: ['Adressbus', 'Steuerbus'],
+            }
+        }
       };
+    } else {
+        // Fallback for unknown types to satisfy TS
+        taskContext = {
+            ...baseContext,
+            contextData: { roundType: current.type }
+        };
     }
 
     onTaskContextChange?.(taskContext);
