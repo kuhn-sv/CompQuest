@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { generateRounds, FixedFloatingRound, bitsToString } from './fixedFloatingPoint.helper';
 import { useGameStartScreen, useHudState } from '@shared/hooks';
 import type { SubTaskComponentProps } from '../interfaces';
+import type { TaskContext } from '@shared/interfaces/tasking.interfaces';
 import { Difficulty } from '@shared/enums/difficulty.enum';
 
 export const useFixedFloatingPoint = ({
@@ -148,13 +149,31 @@ export const useFixedFloatingPoint = ({
             onTaskContextChange(null);
             return;
         }
-        onTaskContextChange({
-            title: taskMeta?.title,
-            round: roundIndex + 1,
-            mode: currentRound.mode,
-            targetValue: currentRound.targetValue,
-        });
-    }, [onTaskContextChange, hasStarted, roundIndex, currentRound, taskMeta]);
+
+        const description = currentRound.mode === 'fixed'
+            ? `Stelle die Zahl ${currentRound.targetValue} im Festkommaformat (4 Vorkomma, 4 Nachkomma) dar.`
+            : `Stelle die Zahl ${currentRound.targetValue} im Gleitkommaformat (1 Vorzeichen, 4 Exponent, 3 Mantisse) dar.`;
+
+        const taskContext: TaskContext = {
+            subtaskType: 'FixedFloatingPoint',
+            taskId: taskMeta?.id ?? 'fixed-floating-point',
+            taskTitle: taskMeta?.title ?? 'Festkomma / Gleitkomma',
+            description,
+            contextData: {
+                roundIndex,
+                mode: currentRound.mode,
+                targetValue: currentRound.targetValue,
+            },
+            userState: {
+                currentBits: bits,
+            },
+            solution: {
+                expectedBits: currentRound.expectedBits,
+            }
+        };
+
+        onTaskContextChange(taskContext);
+    }, [onTaskContextChange, hasStarted, roundIndex, currentRound, taskMeta, bits]);
 
     return {
         hasStarted,
