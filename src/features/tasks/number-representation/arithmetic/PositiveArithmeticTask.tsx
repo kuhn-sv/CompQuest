@@ -19,17 +19,12 @@ const PositiveArithmeticTask: React.FC<SubTaskComponentProps> = (props) => {
       generateTasks={generateTasks}
       arithmeticMode="positive"
       startScreen={{
-        title: 'Rechenmodul offline!',
+        title: 'Additions-Schaltkreis beschädigt!',
         description: (
           <>
-            Der zentrale Rechenkern ist abgestürzt, weil Zahlen
-            unterschiedlicher Systeme nicht mehr korrekt miteinander
-            interagieren.
-            <strong>Deine Mission: </strong>Führe die Grundrechenoperationen
-            in Binär-, Oktal- und Hexadezimaldarstellung korrekt durch,
-            indem du jeder Rechnung das passende Gegenstück zuordnest.
-            Stelle sicher, dass alle Zahlensysteme wieder synchron rechnen –
-            nur dann kann der Rechenkern neu starten.
+            „Der Additions-Schaltkreis hat einen Fehler! Der Rechner kann zwar Zahlen erkennen, aber nicht mehr in verschiedenen Zahlensystemen addieren. Die Rechenoperationen liefern falsche Ergebnisse."
+            <br /><br />
+            <strong>Ziel der Reparatur:</strong> Führe Additionen in binär, oktal und hexadezimal korrekt durch. Zeige dem System, wie man in unterschiedlichen Zahlensystemen rechnet, damit die Recheneinheit wieder zuverlässig arbeitet.
           </>
         ),
         taskId: TaskId.PositiveArithmetic,

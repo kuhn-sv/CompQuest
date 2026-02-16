@@ -283,17 +283,13 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
 
       {!hasStarted && (
         <GameStartScreen
-          statusTitle="Bit-Inversion erforderlich!"
+          statusTitle="Negativzahlen-Modul ausgefallen!"
           statusDescription={
             <>
-              Einige Speicherzellen enthalten defekte oder invertierte Werte. Um
-              die Signale wieder korrekt zu interpretieren, musst du ihre
-              Komplementdarstellungen erzeugen.
+              „Kritischer Fehler! Das Modul zur Darstellung negativer Zahlen ist ausgefallen. Der Computer kann positive von negativen Zahlen nicht unterscheiden und speichert sie falsch im Binärsystem."
               <br />
               <br />
-              <strong>Deine Mission:</strong> Entsprechend dem Modus erzeuge die
-              Einer-/ Zweierkomplement, um den Speicher wieder funktionsfähig zu
-              machen.
+              <strong>Ziel der Reparatur:</strong> Stelle negative Zahlen korrekt im Binärsystem dar, indem du Einer- und Zweierkomplement anwendest.
             </>
           }
           taskCount={rounds.length}

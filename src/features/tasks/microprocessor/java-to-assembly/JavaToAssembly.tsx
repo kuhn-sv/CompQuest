@@ -478,21 +478,13 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     <div className="java-to-assembly">
       {!hasStarted ? (
         <GameStartScreen
-          statusTitle="Compiler defekt!"
+          statusTitle="Compiler-Brücke unterbrochen!"
           statusDescription={
             <>
-              Der Hochsprachen-Parser liefert nur Fragmente – der Codegenerator
-              zur CPU ist getrennt. Ohne korrekte Übersetzung bricht die
-              Pipeline zwischen Java und Instruktionssatz.
+              „Die Compiler-Brücke ist unterbrochen! Das System kann High-Level-Code nicht mehr in Maschinensprache übersetzen. Java-Programme kommen nicht mehr beim Prozessor an."
               <br />
               <br />
-              <strong>Deine Mission:</strong> Übersetze den gegebenen Java-Code
-              in funktional äquivalenten Assembler:
-              <br />
-              <br />
-              • Wähle nur passende Befehle aus dem Pool. <br />
-              • Ordne sie in die richtige Reihenfolge. <br />• Filtere
-              falsche/irrelevante Instruktionen konsequent heraus. <br />
+              <strong>Ziel der Reparatur:</strong> Übersetze Java-Code in Assembler-Befehle. Zeige, dass du die Transformation von abstrakten Anweisungen in konkrete Prozessor-Befehle verstehst, damit die Compiler-Brücke wieder funktioniert.
             </>
           }
           taskCount={rounds.length}

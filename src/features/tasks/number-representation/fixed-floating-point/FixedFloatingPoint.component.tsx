@@ -23,12 +23,12 @@ const FixedFloatingPointComponent: React.FC<SubTaskComponentProps> = (props) => 
   if (!hasStarted) {
     return (
       <GameStartScreen
-        statusTitle="Rechenwerk"
+        statusTitle="Floating-Point Unit fehlkonfiguriert!"
         statusDescription={
           <>
-            Die Recheneinheit des Systems weist kritische Verarbeitungsfehler auf. Durch eine Fehlkonfiguration werden Bitfolgen falsch interpretiert, was zu massiven Rundungsfehlern führt.
+            „Die Floating-Point Unit (FPU) ist fehlkonfiguriert! Der Rechner kann Dezimalzahlen nicht mehr richtig speichern und umrechnen. Programme, die mit Kommazahlen arbeiten, stürzen ab."
             <br /><br />
-            <strong>Deine Mission:</strong> Repariere das Rechenwerk, indem du die Kalibrierungsprotokolle manuell ausführst. Wandle dazu jeden Dezimalwert präzise in das geforderte Bit-Muster für Fest- oder Gleitkomma um. Nur durch exakte Werte kann die Hardware wieder stabil werden.
+            <strong>Ziel der Reparatur:</strong> Wandle Dezimalzahlen zwischen Festkomma- und Gleitkommadarstellung um. Verstehe die IEEE-754-Notation und ordne Dezimalzahlen ihren binären Gleitkomma-Repräsentationen zu, damit der Computer wieder präzise rechnen kann.
           </>
         }
         taskCount={roundsCount}

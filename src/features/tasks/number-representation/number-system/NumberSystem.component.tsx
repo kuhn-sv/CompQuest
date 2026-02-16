@@ -502,18 +502,13 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       {/* Initial start overlay with a large round button */}
       {!hasStarted && (
         <GameStartScreen
-          statusTitle="Datenfluss gestört!"
+          statusTitle="Zahlensystem-Decoder beschädigt!"
           statusDescription={
             <>
-              "Ein Fehler in der Systemkonvertierung hat den Informationsfluss
-              unterbrochen. Die Zahlenpakete liegen jetzt in unterschiedlichen
-              Systemen vor – einige in Binär, andere in Dezimal."
+              „Oh nein! Der Zahlensystem-Decoder des Rechners ist beschädigt. Er kann binäre, oktale und hexadezimale Zahlen nicht mehr richtig interpretieren. Ohne funktionierende Umrechnung kann der Computer keine Maschinenbefehle verarbeiten!"
               <br />
               <br />
-              <strong>Deine Mission:</strong> Stelle den Datenfluss wieder her,
-              indem du jede Zahl mit ihrem passenden Gegenstück verbindest. Nur
-              wenn die Systeme korrekt gekoppelt sind, kann die Datenübertragung
-              weiterlaufen.
+              <strong>Ziel der Reparatur:</strong> Ordne verschiedene Zahlendarstellungen (binär, oktal, hexadezimal) einander zu, damit der Decoder wieder weiß, welche Zahlen äquivalent sind. Konvertiere zwischen den Zahlensystemen, um die Übersetzungsfunktion wiederherzustellen.
             </>
           }
           taskCount={4}

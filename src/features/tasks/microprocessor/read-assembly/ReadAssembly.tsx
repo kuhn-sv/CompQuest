@@ -196,27 +196,13 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     <div className="read-assembly">
       {!hasStarted ? (
         <GameStartScreen
-          statusTitle="Instruktionsdecoder beschädigt!"
+          statusTitle="Code-Interpreter offline!"
           statusDescription={
             <>
-              Der Mikrocode deines Prozessors ist korrupt – Befehle werden nicht
-              mehr korrekt interpretiert. Die CPU versteht nur noch Fragmente
-              aus alten Assembler-Instruktionen.
+              „Der Code-Interpreter ist offline! Das Steuerwerk kann Assembler-Befehle nicht mehr verstehen und weiß nicht, welche Operationen ausgeführt werden sollen. Programme laufen ins Leere."
               <br />
               <br />
-              <strong>Deine Mission:</strong> Du musst du die verbleibenden
-              Assemblerfragmente analysieren, um ihre Bedeutung zu
-              rekonstruieren.
-              <br />
-              Beantworte Fragen wie:
-              <br />
-              <br />
-              • Was tut dieses Programm?
-              <br />• Welche Werte stehen am Ende in bestimmten Speicherzellen?{' '}
-              <br />
-              <br />
-              Nur wenn du die Logik der CPU wieder verstehst, kann der Prozessor
-              korrekt kompilierte Befehle ausführen.
+              <strong>Ziel der Reparatur:</strong> Lies Assembler-Code und beantworte Fragen dazu. Zeige, dass du verstehst, was die Befehle bewirken (ADD, SUB, JMP, etc.), damit das Steuerwerk wieder Programme interpretieren kann.
             </>
           }
           taskCount={rounds.length}

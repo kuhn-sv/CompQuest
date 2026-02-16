@@ -393,21 +393,13 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     <div className="write-assembly">
       {!hasStarted ? (
         <GameStartScreen
-          statusTitle="Assembler-Programm schreiben"
+          statusTitle="Befehlssequenzer durcheinander!"
           statusDescription={
             <>
-              Instruktionspfad korrupt! Die Steuerlogik versteht nur noch Prosa
-              – der Decoder kann keine gültigen Befehlsfolgen mehr erzeugen.
-              Falsche Instruktionen stören den Takt, der Programmzähler driftet.
+              „Der Befehlssequenzer ist durcheinander! Das Steuerwerk kann keine korrekten Befehlsfolgen mehr generieren. Die Reihenfolge der Operationen stimmt nicht mehr – Programme laufen chaotisch ab."
               <br />
               <br />
-              <strong>Deine Mission:</strong> Rekonstruiere aus der
-              Prosa-Beschreibung ein korrektes Assembler-Programm: <br /> <br />
-              • Wähle nur passende Befehle aus dem Pool. <br />
-              • Ordne sie in die richtige Reihenfolge. <br />• Filtere
-              falsche/irrelevante Instruktionen konsequent heraus. <br /> <br />
-              Erst wenn die Sequenz logisch kohärent ist, gibt der Decoder den
-              Datenpfad frei.
+              <strong>Ziel der Reparatur:</strong> Sortiere Assembler-Befehle in die richtige Reihenfolge. Erstelle logisch korrekte Befehlssequenzen, damit das Steuerwerk wieder strukturierte Programme ausführen kann.
             </>
           }
           taskCount={rounds.length}

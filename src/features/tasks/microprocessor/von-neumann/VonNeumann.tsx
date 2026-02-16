@@ -283,18 +283,13 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       className={`von-quizz ${evaluated && current.type === 'quiz' ? 'is-submitted' : ''}`}>
       {!hasStarted ? (
         <GameStartScreen
-          statusTitle="Systemkern fragmentiert!"
+          statusTitle="Systemarchitektur verloren!"
           statusDescription={
             <>
-              Ein Defekt in der Architektursteuerung hat den logischen Aufbau
-              deines Rechners zerstört. Speicher, Rechenwerk und Steuerwerk sind
-              isoliert – der Informationsfluss steht still.
+              „Das Steuerwerk hat die Systemarchitektur verloren! Der Computer weiß nicht mehr, wie seine Komponenten zusammenarbeiten. Ohne dieses Grundwissen kann er keine Programme ausführen."
               <br />
               <br />
-              <strong>Deine Mission:</strong> Identifiziere die Komponenten und
-              ihre Funktionen, rekonstruiere die Von-Neumann-Architektur und
-              verbinde die Komponenten miteinander, bis der Datenstrom wieder
-              fließt.
+              <strong>Ziel der Reparatur:</strong> Beantworte Quiz-Fragen zur Von-Neumann-Architektur. Zeige, dass du die Komponenten (Steuerwerk, Rechenwerk, Speicher, Ein-/Ausgabe) und ihr Zusammenspiel verstehst, damit das System wieder koordiniert arbeiten kann.
             </>
           }
           taskCount={rounds.length}

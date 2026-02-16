@@ -19,17 +19,12 @@ const TwosComplementArithmeticTask: React.FC<SubTaskComponentProps> = (props) =>
       generateTasks={generateTasks}
       arithmeticMode="twos-complement"
       startScreen={{
-        title: 'Rechenfehler erkannt!',
+        title: 'ALU streikt!',
         description: (
           <>
-            Beim Addieren negativer Zahlen im Zweierkomplement wurde der
-            Datenfluss gesprengt. Der Prozessor kann nicht mehr korrekt mit
-            negativen Zahlen umgehen.
-            <strong>Deine Mission: </strong> Verbinde zusammengehörige
-            Operationen im Zweierkomplement präzise und erkenne, wann ein
-            Überlauf entsteht. So stellst du sicher, dass der Datenfluss
-            wiederhergestellt wird und der Prozessor fehlerfrei rechnen
-            kann.
+            „Die ALU (Arithmetic Logic Unit) streikt! Sie kann zwar positive Zahlen verarbeiten, aber sobald negative Zahlen ins Spiel kommen, produziert sie Datenmüll. Berechnungen mit Vorzeichen funktionieren nicht mehr."
+            <br /><br />
+            <strong>Ziel der Reparatur:</strong> Wende das Zweierkomplement in Rechenoperationen an. Führe Additionen und Subtraktionen mit negativen Zahlen durch und verstehe, wie Overflow und Vorzeichenoperationen funktionieren, um die ALU zu kalibrieren.
           </>
         ),
         taskId: TaskId.TwosComplementArithmetic,

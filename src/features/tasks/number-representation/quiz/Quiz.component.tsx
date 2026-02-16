@@ -211,11 +211,13 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
         </div>
       ) : (
         <GameStartScreen
-          statusTitle="Timothy braucht deine Hilfe!"
+          statusTitle="Systemcheck – Tetraden-Codes"
           statusDescription={
             <>
-              Beantworte Tims Fragen korrekt und hilf ihm, sein Wissen über
-              Zahlendarstellung zu festigen.
+              „Bevor wir weitermachen, muss ich sichergehen, dass die Tetraden-Codes richtig funktionieren. Diese speziellen BCD-Codes sind wichtig für die korrekte Darstellung von Dezimalzahlen im Computer!"
+              <br />
+              <br />
+              <strong>Ziel der Reparatur:</strong> Tim stellt dir Kontrollfragen zu Tetraden-Codes (BCD, Aiken, Excess-3, Gray-Code). Beantworte die Fragen zu den verschiedenen Codesystemen und ihrer Anwendung, um zu beweisen, dass du die Tetraden-Darstellung beherrschst.
             </>
           }
           taskCount={TOTAL}
