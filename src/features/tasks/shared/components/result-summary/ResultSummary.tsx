@@ -4,6 +4,7 @@ import {generateFeedback} from './resultSummary.helper';
 import {Link} from 'react-router-dom';
 import {Leaderboard} from '../leaderboard/Leaderboard';
 import type {SummaryResultLike} from './resultSummary.interfaces';
+import type {TaskFeedback} from '@shared/interfaces/tasking.interfaces';
 import { useAuth } from '../../../../auth';
 
 export type {SummaryResultLike} from './resultSummary.interfaces';
@@ -17,7 +18,7 @@ interface ResultSummaryProps {
   endLabel?: string;
   endState?: Record<string, unknown>; // passed as location.state to the Link
   onClose?: () => void; // alternative to Link: render button
-  chapters?: {title: string; content?: string}[];
+  feedback?: TaskFeedback;
   timeLimit?: number; // milliseconds
 }
 
@@ -25,12 +26,12 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
   result,
   formatTime,
   taskId,
-  title = 'Zahlen-Konverter Abgeschlossen!',
+  title,
   endHref,
   endLabel,
   endState,
   onClose,
-  chapters,
+  feedback,
   timeLimit,
 }) => {
   const {userProfile} = useAuth();
@@ -38,14 +39,13 @@ export const ResultSummary: React.FC<ResultSummaryProps> = ({
   const accuracy = Math.round(
     (result.totalCorrect / Math.max(1, result.totalPossible)) * 100,
   );
-  const feedback = generateFeedback({
+  const feedbackText = generateFeedback({
     accuracyPercent: accuracy,
     elapsedMs: result.elapsedMs,
     timeLimit,
-    chapters,
-    taskId,
+    feedback,
   });
-  const [feedbackTitle, ...feedbackRest] = feedback.split('\n');
+  const [feedbackTitle, ...feedbackRest] = feedbackText.split('\n');
   const feedbackBody = feedbackRest.join('\n').trim();
   return (
     <div className="summary-overlay" role="dialog" aria-modal="true">

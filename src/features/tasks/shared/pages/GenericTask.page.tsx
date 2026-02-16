@@ -30,12 +30,14 @@ const GenericTaskPage: React.FC<GenericTaskPageProps> = ({
       title: currentTask?.title ?? '',
       chapters: currentTask?.chapters ?? [],
       timeLimit: currentTask?.timeLimit ?? 0,
+      feedback: currentTask?.feedback,
     }),
     [
       currentTask?.id,
       currentTask?.title,
       currentTask?.chapters,
       currentTask?.timeLimit,
+      currentTask?.feedback,
     ],
   );
 

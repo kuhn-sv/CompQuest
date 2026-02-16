@@ -8,7 +8,7 @@ import VonNeumannFunctions from './VonNeumannFunctions';
 import VonNeumannReconstruct from './VonNeumannReconstruct';
 import VonNeumannBusAssignment from './VonNeumannBusAssignment';
 import {generateRounds, DEFAULT_ROUNDS} from './vonNeumann.utils';
-import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
+import { GameStartScreen } from '../../shared/components';
 import { Difficulty } from '@shared/enums/difficulty.enum';
 import { useGameStartScreen, useFooterControls, useHudState } from '@shared/hooks';
 import { SubTaskComponentProps, TaskStageScore } from '../../number-representation';
@@ -298,7 +298,7 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={rounds.length}
-          estimatedTime="~8 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={startTask}

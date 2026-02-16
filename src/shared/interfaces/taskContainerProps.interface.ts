@@ -1,4 +1,5 @@
 import { TaskFooterControls, TaskHudState, TaskSummaryState } from "./tasking.interfaces";
+import type { TaskFeedback } from "./tasking.interfaces";
 
 export interface TaskContainerInjectedProps {
   onControlsChange: (controls: TaskFooterControls | null) => void;
@@ -19,12 +20,12 @@ export interface TaskContainerProps {
   endHref?: string;
   endLabel?: string;
   endState?: Record<string, unknown>; // passed as location.state when navigating via endHref
-  // Optional meta to record progress in DB on completion
   taskMeta?: {
     id: string;
     title: string;
-    chapters?: {title: string; content?: string}[];
+    chapters?: { title: string; content?: string }[];
     timeLimit?: number;
+    feedback?: TaskFeedback;
   };
   // When true, footer visibility ignores HUD gating (start screen/progress)
   forceShowFooter?: boolean;

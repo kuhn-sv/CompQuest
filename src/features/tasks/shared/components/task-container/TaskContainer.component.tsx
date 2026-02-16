@@ -269,7 +269,7 @@ export const TaskContainer: React.FC<TaskContainerProps> = ({
               endState={endState}
               taskId={taskMeta?.id}
               title={taskMeta?.title}
-              chapters={taskMeta?.chapters}
+              feedback={taskMeta?.feedback}
               timeLimit={taskMeta?.timeLimit}
               onClose={() => {
                 // Reset the task timer when closing the summary (e.g., on "Wiederholen")

@@ -18,7 +18,6 @@ import {
   useHudState,
   useGameStartScreen,
 } from '@shared/hooks';
-import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 import {Difficulty} from '@shared/enums/difficulty.enum';
 import {
   DndContext,
@@ -30,6 +29,7 @@ import {useDndSensors} from '@shared/utils/dnd/dndSensors';
 import {Prism as SyntaxHighlighter} from 'react-syntax-highlighter';
 import {vscDarkPlus} from 'react-syntax-highlighter/dist/esm/styles/prism';
 import {generateRounds} from './javaToAssembly.utils';
+import { GameStartScreen } from '../../shared/components';
 
 // Modal Component for expanded Java code
 const JavaCodeModal: React.FC<{
@@ -241,7 +241,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
       );
 
       // Calculate time bonus
-      const thresholdMs = taskMeta?.timeLimit ?? 3 * 60 * 1000; // default 3 minutes
+      const thresholdMs = taskMeta?.timeLimit ?? 3 * 60 * 1000;
       const withinThreshold = elapsedMs <= thresholdMs;
       const timeBonus = withinThreshold ? 1 : 0;
       const totalPoints = basePoints + timeBonus;
@@ -496,7 +496,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={rounds.length}
-          estimatedTime="~8 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={startTask}

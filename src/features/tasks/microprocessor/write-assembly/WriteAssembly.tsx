@@ -17,7 +17,7 @@ import {
   useHudState,
   useGameStartScreen,
 } from '@shared/hooks';
-import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
+import { GameStartScreen } from '../../shared/components';
 import {Difficulty} from '@shared/enums/difficulty.enum';
 import {
   DndContext,
@@ -411,7 +411,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={rounds.length}
-          estimatedTime="~8 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={startTask}

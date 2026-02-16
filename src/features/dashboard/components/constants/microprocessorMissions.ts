@@ -1,35 +1,35 @@
-import { TASK_DISPLAY_NAMES } from '@shared/constants/taskDisplayNames';
+import { TASKS_DATA } from '@features/tasks/shared/data/tasks.data';
 import { Exercise } from '../exercises-list/ExercisesList.component';
 
 export const MICROPROCESSOR_MISSIONS: Exercise[] = [
     {
         id: 'von-neumann',
-        title: TASK_DISPLAY_NAMES['von-neumann'],
-        description: 'Quiz zur Von-Neumann-Architektur',
+        title: TASKS_DATA['von-neumann']?.title,
+        description: TASKS_DATA['von-neumann']?.dashboardDescription ?? '',
         path: '/task/von-neumann',
         progressPercent: undefined,
         disabled: false,
     },
     {
         id: 'read-assembly',
-        title: TASK_DISPLAY_NAMES['read-assembly'],
-        description: 'Lies den Assembler-Code und beantworte die Fragen',
+        title: TASKS_DATA['read-assembly']?.title,
+        description: TASKS_DATA['read-assembly']?.dashboardDescription ?? '',
         path: '/task/read-assembly',
         progressPercent: undefined,
         disabled: false,
     },
     {
         id: 'write-assembly',
-        title: TASK_DISPLAY_NAMES['write-assembly'],
-        description: 'Sortiere die Befehle in die richtige Reihenfolge',
+        title: TASKS_DATA['write-assembly']?.title,
+        description: TASKS_DATA['write-assembly']?.dashboardDescription ?? '',
         path: '/task/write-assembly',
         progressPercent: undefined,
         disabled: false,
     },
     {
         id: 'java-to-assembly',
-        title: TASK_DISPLAY_NAMES['java-to-assembly'],
-        description: 'Übersetze Java Code in Assembler',
+        title: TASKS_DATA['java-to-assembly']?.title,
+        description: TASKS_DATA['java-to-assembly']?.dashboardDescription ?? '',
         path: '/task/java-to-assembly',
         progressPercent: undefined,
         disabled: false,

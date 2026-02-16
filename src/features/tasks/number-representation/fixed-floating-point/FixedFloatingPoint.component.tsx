@@ -32,7 +32,7 @@ const FixedFloatingPointComponent: React.FC<SubTaskComponentProps> = (props) => 
           </>
         }
         taskCount={roundsCount}
-        estimatedTime="~5 min"
+        estimatedTime={taskMeta?.timeLimit ?? 0}
         fetchBestAttempt
         taskId={taskMeta?.id}
         onStart={handleStart}

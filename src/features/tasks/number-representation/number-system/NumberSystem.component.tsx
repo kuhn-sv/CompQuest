@@ -24,8 +24,8 @@ import {
 } from '@shared/hooks';
 import { ResultsSection } from '../shared/number-task/ResultsSection';
 import { ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay/ConnectionOverlay.component';
-import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 import { TaskContext } from '@/shared/interfaces/tasking.interfaces';
+import { GameStartScreen } from '../../shared/components';
 // dnd-kit event types are referenced inline where needed; no top-level type import
 
 const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
@@ -517,7 +517,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={4}
-          estimatedTime="~5 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={handleInitialStart}

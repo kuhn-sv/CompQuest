@@ -15,7 +15,7 @@ export interface GameStartScreenProps {
 
   // Quick facts on the right
   taskCount: number;
-  estimatedTime: string; // display-ready, e.g. "~5 min"
+  estimatedTime: number; // milliseconds – rendered as "~X min"
 
   // Optional best attempt summary
   bestAttempt?: BestAttempt | null;

@@ -6,10 +6,10 @@ import {
   useHudState,
   useGameStartScreen,
 } from '@shared/hooks';
-import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 import {Difficulty} from '@shared/enums/difficulty.enum';
 import type {AssemblyTask} from './readAssembly.interfaces';
 import {generateRounds} from './readAssembly.utils';
+import { GameStartScreen } from '../../shared/components';
 
 const ReadAssembly: React.FC<SubTaskComponentProps> = ({
   onControlsChange,
@@ -220,7 +220,7 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={rounds.length}
-          estimatedTime="~8 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={startTask}

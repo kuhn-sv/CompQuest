@@ -7,7 +7,43 @@ export interface SubTaskConfig {
   description: string;
   component: React.ComponentType<SubTaskComponentProps>;
   chapters?: { title: string; content?: string }[];
-  timeLimit?: number; // milliseconds
+  timeLimit?: number;
+  feedback?: TaskFeedback;
+}
+
+/**
+ * Feedback text set for a single accuracy/speed combination.
+ * Each key maps to a feedback scenario shown in the ResultSummary.
+ */
+export interface TaskFeedback {
+  /** 💨 Accurate & Fast */
+  accurateAndFast: string;
+  /** ⏱️ Accurate but Slow */
+  accurateButSlow: string;
+  /** ⚡ Inaccurate but Fast */
+  inaccurateButFast: string;
+  /** 🐢 Inaccurate & Slow */
+  inaccurateAndSlow: string;
+}
+
+/**
+ * Centralised metadata for a single task / subtask.
+ *
+ * This is the **single source of truth** for every piece of content that
+ * describes a task: display title, user-facing description, related book
+ * chapters, time limit for the bonus, and the feedback strings shown in the
+ * result summary.
+ */
+export interface TaskMetadata {
+  id: string;
+  title: string;
+  description: string;
+  /** Short description displayed on the dashboard mission card. */
+  dashboardDescription?: string;
+  chapters?: { title: string; content?: string }[];
+  /** Time limit in milliseconds for the time-bonus calculation. */
+  timeLimit?: number;
+  feedback?: TaskFeedback;
 }
 
 // Props that any task-like child component can receive from the container host

@@ -1,6 +1,6 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import './quiz.page.scss';
-import type {SubTaskComponentProps, TaskStageScore} from '../interfaces';
+import type {SubTaskComponentProps, TaskStageScore, TaskContext} from '../interfaces';
 import {useGameStartScreen, useHudState} from '@shared/hooks';
 import {QUESTIONS, TOTAL} from './quiz.data';
 import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
@@ -150,15 +150,20 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
       onTaskContextChange(null);
       return;
     }
-    const ctx = {
-      id: current.id,
-      title: taskMeta?.title ?? 'Quiz',
-      prompt: current.text,
-      answers: current.answers,
-      correctIndex: current.correctIndex,
-      index: qIndex,
-      total: TOTAL,
-    } as const;
+    const ctx: TaskContext = {
+      taskId: current.id,
+      taskTitle: taskMeta?.title ?? 'Quiz',
+      subtaskType: 'Quiz',
+      contextData: {
+        prompt: current.text,
+        answers: current.answers,
+        index: qIndex,
+        total: TOTAL,
+      },
+      solution: {
+        correctIndex: current.correctIndex,
+      },
+    };
     onTaskContextChange(ctx);
     return () => onTaskContextChange(null);
   }, [onTaskContextChange, hasStarted, qIndex, current, taskMeta]);
@@ -214,7 +219,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={TOTAL}
-          estimatedTime="~2 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={handleStart}

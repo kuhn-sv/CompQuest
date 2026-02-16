@@ -1,5 +1,5 @@
 import { CATEGORY_DISPLAY_NAMES } from '@shared/context/badgeNotification.constants';
-import { TASK_DISPLAY_NAMES } from '@shared/constants/taskDisplayNames';
+import { TASKS_DATA } from '@features/tasks/shared/data/tasks.data';
 import type { MissionStatsDto, StudentExerciseStatDto } from '../../../services/supabase/professor.service';
 import type {
   CategoryMissionGroup,
@@ -44,7 +44,7 @@ export function groupMissionsByCategory(
   for (const m of missions) {
     const enriched: MissionStats = {
       ...m,
-      displayName: TASK_DISPLAY_NAMES[m.taskId] ?? m.taskId,
+      displayName: TASKS_DATA[m.taskId]?.title ?? m.taskId,
     };
 
     if (!grouped.has(m.category)) {
@@ -78,7 +78,7 @@ export function groupPlayerMissionsByCategory(
   for (const s of stats) {
     const enriched: PlayerMissionStats = {
       ...s,
-      displayName: TASK_DISPLAY_NAMES[s.taskId] ?? s.taskId,
+      displayName: TASKS_DATA[s.taskId]?.title ?? s.taskId,
     };
 
     if (!grouped.has(s.category)) {

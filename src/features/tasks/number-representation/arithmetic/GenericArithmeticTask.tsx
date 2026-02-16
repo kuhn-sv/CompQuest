@@ -19,11 +19,11 @@ import {AnswerOptionBase} from '../shared/number-task/NumberTask.types';
 import {ResultsSection} from '../shared/number-task/ResultsSection';
 import DndProvider from '@shared/utils/dnd/DndProvider';
 import {ConnectionOverlay} from '@features/tasks/shared/components/connection-overlay';
-import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
-import {EquationRow} from '@/shared/components';
+import { EquationRow } from '@/shared/components';
 import {useArithmeticTaskLogic} from './hooks/useArithmeticTaskLogic';
 import {useArithmeticDnD} from './hooks/useArithmeticDnD';
 import { TaskContext } from '@/shared/interfaces/tasking.interfaces';
+import { GameStartScreen } from '../../shared/components';
 
 export interface GenericArithmeticTaskProps extends SubTaskComponentProps {
   // Title displayed in the header
@@ -366,7 +366,7 @@ const GenericArithmeticTask: React.FC<GenericArithmeticTaskProps> = ({
           statusTitle={startScreen.title}
           statusDescription={startScreen.description}
           taskCount={4}
-          estimatedTime="~5 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={startScreen.taskId}
           onStart={onStart}

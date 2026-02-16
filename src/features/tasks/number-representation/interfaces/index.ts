@@ -5,4 +5,5 @@ export type {
 	TaskHudState,
 	TaskSummaryState,
 	TaskStageScore,
+	TaskContext,
 } from '@shared/interfaces/tasking.interfaces';

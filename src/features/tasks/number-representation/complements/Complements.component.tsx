@@ -297,7 +297,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
             </>
           }
           taskCount={rounds.length}
-          estimatedTime="~5 min"
+          estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}
           onStart={startTaskHandler}
