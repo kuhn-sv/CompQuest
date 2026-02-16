@@ -1,4 +1,4 @@
-import javaToAssemblyTasksData from '../../../../data/tasks/java-to-assembly.json';
+import javaToAssemblyTasksData from '../../data/tasks/java-to-assembly.json';
 import { shuffle } from '../shared';
 import type { JavaToAssemblyTask } from './JavaToAssembly.helper';
 

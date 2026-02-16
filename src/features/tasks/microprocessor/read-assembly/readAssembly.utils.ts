@@ -1,4 +1,4 @@
-import readAssemblyTasksData from '../../../../data/tasks/read-assembly.json';
+import readAssemblyTasksData from '../../data/tasks/read-assembly.json';
 import { shuffle } from '../shared';
 import type { AssemblyTask } from './readAssembly.interfaces';
 

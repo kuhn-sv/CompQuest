@@ -5,13 +5,13 @@ import { ProtectedRoute, TopicGuard } from '../features/auth';
 import DashboardPage from '../features/dashboard/dashboard.page';
 import AuthPage from '../features/auth/auth.page';
 import ResetPasswordPage from '../features/auth/reset.page';
-import HelperModulePage from '../features/helpers/HelperModule.page';
 import OnboardingPage from '../features/onboarding/onboarding.page';
 import { TaskId } from '../shared/enums/taskId.enum';
 import { ProfessorDashboardPage } from '../features/professor-dashboard';
 import GenericTaskPage from '../features/tasks/shared/pages/GenericTask.page';
 import { microprocessorConfig } from '../features/tasks/microprocessor/config/microprocessor.config';
 import { numberRepresentationConfig } from '@/features/tasks/number-representation/config/numberRepresentation.config';
+import HelperModulePage from '@/features/helper-modules/HelperModule.page';
 
 const AppRoutes: React.FC = () => {
   const location = useLocation();

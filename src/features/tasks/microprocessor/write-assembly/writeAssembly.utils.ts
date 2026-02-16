@@ -1,4 +1,4 @@
-import writeAssemblyTasksData from '../../../../data/tasks/write-assembly.json';
+import writeAssemblyTasksData from '../../data/tasks/write-assembly.json';
 import { shuffle } from '../shared/assembly.utils';
 import type { WriteAssemblyTask } from './writeAssembly.helper';
 
