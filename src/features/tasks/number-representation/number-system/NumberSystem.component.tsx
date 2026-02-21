@@ -511,7 +511,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
               <strong>Ziel der Reparatur:</strong> Ordne verschiedene Zahlendarstellungen (binär, oktal, hexadezimal) einander zu, damit der Decoder wieder weiß, welche Zahlen äquivalent sind. Konvertiere zwischen den Zahlensystemen, um die Übersetzungsfunktion wiederherzustellen.
             </>
           }
-          taskCount={4}
+          taskCount={stages.length}
           estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={taskMeta?.id}

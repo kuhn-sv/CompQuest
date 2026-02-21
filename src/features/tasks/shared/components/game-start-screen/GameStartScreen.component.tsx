@@ -110,7 +110,7 @@ export const GameStartScreen: React.FC<GameStartScreenProps> = ({
                 <div className="gss-fact-icon">⏱️</div>
                 <div className="gss-fact-text">
                   <div className="label">Geschätzte Zeit</div>
-                  <div className="value">{estimatedTime}</div>
+                  <div className="value">~{Math.round(estimatedTime / 60000)} min</div>
                 </div>
               </div>
             </div>

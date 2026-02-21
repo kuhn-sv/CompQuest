@@ -365,7 +365,7 @@ const GenericArithmeticTask: React.FC<GenericArithmeticTaskProps> = ({
         <GameStartScreen
           statusTitle={startScreen.title}
           statusDescription={startScreen.description}
-          taskCount={4}
+          taskCount={stages.length}
           estimatedTime={taskMeta?.timeLimit ?? 0}
           fetchBestAttempt
           taskId={startScreen.taskId}
