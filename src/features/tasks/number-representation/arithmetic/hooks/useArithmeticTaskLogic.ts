@@ -1,5 +1,6 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { Difficulty } from '@shared/enums/difficulty.enum';
+import { useFeedbackSound } from '@shared/hooks';
 import { AdditionTask, AdditionSet } from '../addition.helper';
 import { PAStageScore } from '../arithmetic.interfaces';
 import { AnswerOptionBase } from '../../shared/number-task/NumberTask.types';
@@ -39,6 +40,8 @@ export const useArithmeticTaskLogic = ({
     useEffect(() => {
         onHudChangeRef.current = onHudChange;
     }, [onHudChange]);
+
+    const { playFeedback } = useFeedbackSound();
 
     const startSetForStage = useCallback(
         (idx: number) => {
@@ -111,6 +114,7 @@ export const useArithmeticTaskLogic = ({
             return !!a && a.value === t.expected && aBase === t.base;
         }).length;
         const points = correct;
+        playFeedback(correct === total);
         setStageScores(prev => {
             const next = [...prev];
             next[stageIndex] = { difficulty, correct, total, points };

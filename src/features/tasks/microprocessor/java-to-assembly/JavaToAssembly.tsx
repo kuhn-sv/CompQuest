@@ -17,6 +17,7 @@ import {
   useFooterControls,
   useHudState,
   useGameStartScreen,
+  useFeedbackSound,
 } from '@shared/hooks';
 import {Difficulty} from '@shared/enums/difficulty.enum';
 import {
@@ -82,6 +83,8 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     subtitle:
       'Ordne die Befehle richtig an, um den Java Code in Assembler zu übersetzen',
   });
+
+  const { playFeedback } = useFeedbackSound();
 
   // State for placed commands (slots in the program)
   const [placedCommands, setPlacedCommands] = useState<
@@ -211,6 +214,7 @@ const JavaToAssembly: React.FC<SubTaskComponentProps> = ({
     const total = correctCommands.length;
     const wrong = total - correct;
     const points = calculateScore(correct, wrong);
+    playFeedback(correct === total);
 
     const difficulty = DIFFICULTY_MAP[current.difficulty] || Difficulty.Easy;
 

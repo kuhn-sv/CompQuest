@@ -1,7 +1,11 @@
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import './quiz.page.scss';
 import type {SubTaskComponentProps, TaskStageScore, TaskContext} from '../interfaces';
-import {useGameStartScreen, useHudState} from '@shared/hooks';
+import {
+  useHudState,
+  useGameStartScreen,
+  useFeedbackSound,
+} from '@shared/hooks';
 import {QUESTIONS, TOTAL} from './quiz.data';
 import GameStartScreen from '@features/tasks/shared/components/game-start-screen/GameStartScreen.component';
 
@@ -24,6 +28,8 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
     totalTasks: TOTAL,
     subtitle: 'Beweise dein Wissen. ',
   });
+
+  const { playFeedback } = useFeedbackSound();
 
   // refs for stable callbacks to parent
   const onControlsChangeRef = useRef(onControlsChange);
@@ -66,6 +72,7 @@ const Quiz: React.FC<SubTaskComponentProps> = ({
   const evaluate = useCallback(() => {
     setEvaluated(true);
     const correct = selected === QUESTIONS[qIndex].correctIndex ? 1 : 0;
+    playFeedback(correct === 1);
     const entry: TaskStageScore = {
       difficulty: `Frage ${qIndex + 1}`,
       correct,

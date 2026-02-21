@@ -12,5 +12,6 @@ export { useHelperTask } from './useHelperTask';
 export type { UseHelperTaskOptions, UseHelperTaskResult } from './useHelperTask';
 export { useGameStartScreen } from './useGameStartScreen';
 export type { UseGameStartScreenOptions, UseGameStartScreenResult } from './useGameStartScreen';
+export { useFeedbackSound } from './useFeedbackSound';
 export { useBadgeNotification } from './useBadgeNotification';
 export { useUserBadges } from './useUserBadges';

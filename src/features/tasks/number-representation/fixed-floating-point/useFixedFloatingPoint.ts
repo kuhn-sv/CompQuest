@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { generateRounds, FixedFloatingRound, bitsToString } from './fixedFloatingPoint.helper';
-import { useGameStartScreen, useHudState } from '@shared/hooks';
+import { useGameStartScreen, useHudState, useFeedbackSound } from '@shared/hooks';
 import type { SubTaskComponentProps } from '../interfaces';
 import type { TaskContext } from '@shared/interfaces/tasking.interfaces';
 import { Difficulty } from '@shared/enums/difficulty.enum';
@@ -35,6 +35,8 @@ export const useFixedFloatingPoint = ({
         subtitle: 'Kalibrierungsprotokolle',
     });
 
+    const { playFeedback } = useFeedbackSound();
+
     const isCorrect = useMemo(() => {
         return (
             evaluated && bitsToString(bits) === bitsToString(currentRound.expectedBits)
@@ -65,6 +67,7 @@ export const useFixedFloatingPoint = ({
     const handleEvaluate = useCallback(() => {
         setEvaluated(true);
         const correct = bitsToString(bits) === bitsToString(currentRound.expectedBits) ? 1 : 0;
+        playFeedback(correct === 1);
 
         // Score update
         setStageScores(prev => {

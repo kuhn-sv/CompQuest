@@ -5,6 +5,7 @@ import {
   useFooterControls,
   useHudState,
   useGameStartScreen,
+  useFeedbackSound,
 } from '@shared/hooks';
 import {Difficulty} from '@shared/enums/difficulty.enum';
 import type {AssemblyTask} from './readAssembly.interfaces';
@@ -31,6 +32,8 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
     totalTasks: rounds.length,
     subtitle: 'Wähle die richtige Antwort aus.',
   });
+
+  const { playFeedback } = useFeedbackSound();
 
   // Accumulate per-round scores (used via setStageScores updater function)
   const [_stageScores, setStageScores] = useState<
@@ -123,6 +126,7 @@ const ReadAssembly: React.FC<SubTaskComponentProps> = ({
       evaluationDataRef.current;
 
     const isCorrect = selectedAnswer === correctIndex;
+    playFeedback(isCorrect);
     const correct = isCorrect ? 1 : 0;
     const total = 1;
     const points = isCorrect ? 1 : 0;

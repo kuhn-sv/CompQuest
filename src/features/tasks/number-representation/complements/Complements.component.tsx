@@ -6,7 +6,7 @@ import TargetValueDisplay from '../../../../features/tasks/shared/components/tar
 import {GameStartScreen} from '../../../../features/tasks/shared/components';
 // Footer buttons rendered by parent
 import type {SubTaskComponentProps} from '../interfaces';
-import {useGameStartScreen, useHudState} from '@shared/hooks';
+import {useGameStartScreen, useHudState, useFeedbackSound} from '@shared/hooks';
 import {
   generateRounds,
   ComplementRound,
@@ -45,6 +45,8 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
     subtitle: 'Datenfluss wiederherstellen',
   });
 
+  const { playFeedback } = useFeedbackSound();
+
   // Accumulate per-round scores and final summary
   const [stageScores, setStageScores] = useState<
     Array<{
@@ -81,6 +83,7 @@ const ComplementsComponent: React.FC<SubTaskComponentProps> = ({
   const evaluate = React.useCallback(() => {
     setEvaluated(true);
     const correct = bitsToString(bits) === bitsToString(expectedBits) ? 1 : 0;
+    playFeedback(correct === 1);
     const total = 1;
     const points = correct;
     const difficulty = Difficulty.Easy; // Complements rounds have uniform difficulty for now

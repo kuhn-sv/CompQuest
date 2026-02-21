@@ -21,6 +21,7 @@ import {
   useHudState,
   useGameStartScreen,
   CONNECTION_LINE_PRESETS,
+  useFeedbackSound,
 } from '@shared/hooks';
 import { ResultsSection } from '../shared/number-task/ResultsSection';
 import { ConnectionOverlay } from '@features/tasks/shared/components/connection-overlay/ConnectionOverlay.component';
@@ -59,6 +60,8 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
     totalTasks: stages.length,
     subtitle: 'Datenfluss wiederherstellen',
   });
+
+  const { playFeedback } = useFeedbackSound();
 
   // Per-task threshold/bonus handled centrally by TaskContainer via taskMeta
 
@@ -310,7 +313,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
   const evaluate = useCallback(() => {
     setEvaluated(true);
 
-    // Compute stage score
+    // Compute stage score and play sound feedback
     const difficulty = stages[stageIndex];
     const total = tasks.length;
     const correct = tasks.filter(t => {
@@ -318,6 +321,7 @@ const NumberSystemComponent: React.FC<SubTaskComponentProps> = ({
       return a && a.value === t.expectedValue && a.base === t.toBase;
     }).length;
     const points = correct; // 1 point per correct pair
+    playFeedback(correct === total);
     setStageScores(prev => {
       const next = [...prev];
       // Overwrite or append current stage score

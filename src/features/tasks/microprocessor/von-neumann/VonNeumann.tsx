@@ -10,7 +10,7 @@ import VonNeumannBusAssignment from './VonNeumannBusAssignment';
 import {generateRounds, DEFAULT_ROUNDS} from './vonNeumann.utils';
 import { GameStartScreen } from '../../shared/components';
 import { Difficulty } from '@shared/enums/difficulty.enum';
-import { useGameStartScreen, useFooterControls, useHudState } from '@shared/hooks';
+import { useGameStartScreen, useFooterControls, useHudState, useFeedbackSound } from '@shared/hooks';
 import { SubTaskComponentProps, TaskStageScore } from '../../number-representation';
 import { shuffle } from '../shared';
 import { TaskContext } from '@/shared/interfaces/tasking.interfaces';
@@ -36,6 +36,8 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
     onHudChange,
     totalTasks: rounds.length,
   });
+
+  const { playFeedback } = useFeedbackSound();
 
   const [currentRoundScore, setCurrentRoundScore] = useState<TaskStageScore | null>(null);
 
@@ -202,6 +204,8 @@ const VonNeumann: React.FC<SubTaskComponentProps> = ({
       total = currentRoundScore.total;
       points = currentRoundScore.points;
     }
+
+    playFeedback(correct === total);
 
     const difficulty = Difficulty.Easy;
 

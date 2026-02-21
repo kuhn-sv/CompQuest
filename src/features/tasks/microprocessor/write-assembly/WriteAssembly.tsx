@@ -16,6 +16,7 @@ import {
   useFooterControls,
   useHudState,
   useGameStartScreen,
+  useFeedbackSound,
 } from '@shared/hooks';
 import { GameStartScreen } from '../../shared/components';
 import {Difficulty} from '@shared/enums/difficulty.enum';
@@ -47,6 +48,8 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     totalTasks: rounds.length,
     subtitle: 'Sortiere die Befehle in die richtige Reihenfolge',
   });
+
+  const { playFeedback } = useFeedbackSound();
 
   // State for placed commands (slots in the program)
   const [placedCommands, setPlacedCommands] = useState<
@@ -167,6 +170,7 @@ const WriteAssembly: React.FC<SubTaskComponentProps> = ({
     const total = current.commands.length;
     const wrong = total - correct;
     const points = calculateScore(correct, wrong);
+    playFeedback(correct === total);
 
     const difficulty = DIFFICULTY_MAP[current.difficulty] || Difficulty.Easy;
 

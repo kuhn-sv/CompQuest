@@ -7,6 +7,18 @@ import { BADGE_CONFIG } from '../../../interfaces';
 const BadgeCelebrationPopup: React.FC = () => {
   const {currentNotification, dismissNotification} = useBadgeNotification();
 
+  // Play celebration sound when a badge notification appears
+  const audioRef = React.useRef<HTMLAudioElement | null>(null);
+  React.useEffect(() => {
+    if (!currentNotification) return;
+    if (!audioRef.current) {
+      audioRef.current = new Audio('/sounds/badge_feedback_sound.mpeg');
+      audioRef.current.load();
+    }
+    audioRef.current.currentTime = 0;
+    audioRef.current.play().catch(() => {});
+  }, [currentNotification]);
+
   if (!currentNotification) return null;
 
   const {newLevel, accuracy, category} = currentNotification;
