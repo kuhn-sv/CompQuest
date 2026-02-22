@@ -85,3 +85,37 @@ create policy "profiles_delete_admin" on public.profiles
 for delete
 to authenticated
 using (public.is_admin());
+
+-- 6. Trigger: auto-create profile on registration
+create or replace function public.handle_new_user()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  insert into public.profiles (
+    id, email, display_name, matrikelnummer, gamertag,
+    leaderboard_opt_in, preferences, progress,
+    created_at, last_login_at, updated_at
+  ) values (
+    NEW.id,
+    coalesce(NEW.email, ''),
+    coalesce(NEW.raw_user_meta_data->>'displayName', ''),
+    coalesce(NEW.raw_user_meta_data->>'matrikelnummer', ''),
+    coalesce(NEW.raw_user_meta_data->>'gamertag', 'user_' || substr(NEW.id::text, 1, 8)),
+    coalesce((NEW.raw_user_meta_data->>'leaderboardOptIn')::boolean, true),
+    '{"theme":"auto","language":"de","notifications":{"email":true,"achievements":true,"reminders":false}}'::jsonb,
+    '{"completedTasks":[],"totalPoints":0,"level":1,"achievements":[],"statistics":{"tasksCompleted":0,"timeSpent":0,"avgTaskTime":0,"lastActivity":""}}'::jsonb,
+    now(), now(), now()
+  )
+  on conflict (id) do nothing;
+  return NEW;
+end;
+$$;
+
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+  after insert on auth.users
+  for each row
+  execute function public.handle_new_user();

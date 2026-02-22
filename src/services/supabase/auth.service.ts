@@ -91,7 +91,7 @@ export const authService = {
       err.code = error.code || 'auth/signup-failed';
       throw err;
     }
-    // Profile row will be created on first successful sign-in after verification
+    // Profile row is created automatically by DB trigger (handle_new_user) on auth.users INSERT
   },
 
   // Sign in existing user
